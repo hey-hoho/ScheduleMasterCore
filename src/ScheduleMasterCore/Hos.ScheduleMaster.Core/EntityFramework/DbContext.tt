@@ -21,6 +21,7 @@
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
@@ -37,7 +38,7 @@ namespace Hos.ScheduleMaster.Core.Models
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-		
+            base.OnModelCreating(modelBuilder);		
 		}
 		<#
 	    foreach (var entitySet in files)
