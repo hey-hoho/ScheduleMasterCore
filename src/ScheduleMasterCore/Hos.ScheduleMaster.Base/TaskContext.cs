@@ -50,7 +50,7 @@ namespace Hos.ScheduleMaster.Base
         {
             if (string.IsNullOrEmpty(CustomParamsJson))
             {
-                return default(T);
+                return default;
             }
             try
             {
@@ -61,7 +61,7 @@ namespace Hos.ScheduleMaster.Base
             }
             catch (Exception)
             {
-                return default(T);
+                return default;
             }
         }
 

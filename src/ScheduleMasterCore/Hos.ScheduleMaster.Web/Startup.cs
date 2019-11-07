@@ -30,6 +30,11 @@ namespace Hos.ScheduleMaster.Web
         {
             services.AddControllersWithViews();
 
+            services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
+            services.AddTransient<Core.Interface.IAccountService, Core.Services.AccountService>();
+            services.AddTransient<Core.Interface.ITaskService, Core.Services.TaskService>();
+            services.AddTransient<Core.Interface.ISystemService, Core.Services.SystemService>();
+
             //EF数据库上下文
             services.AddDbContext<TaskDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
         }
