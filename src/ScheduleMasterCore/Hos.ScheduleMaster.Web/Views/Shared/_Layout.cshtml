@@ -1,0 +1,65 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewBag.Title</title>
+    <meta name="description" content="Dashboard" />
+    <link rel="shortcut icon" href="~/images/icon.png" type="image/x-icon">
+
+    <!--Basic Styles-->
+    <link href="~/css/bootstrap.min.css" rel="stylesheet" />
+    <link id="bootstrap-rtl-link" href="" rel="stylesheet" />
+    <link href="~/css/font-awesome.min.css" rel="stylesheet" />
+
+    <!--Beyond styles-->
+    <link id="beyond-link" href="~/css/beyond.min.css" rel="stylesheet" type="text/css" />
+    <link href="~/css/typicons.min.css" rel="stylesheet" />
+    <link href="~/css/toastr.css" rel="stylesheet" />
+    <link id="skin-link" href="" rel="stylesheet" type="text/css" />
+
+    <!--Skin Script: Place this script in head to load scripts for skins and rtl support-->
+    <script src="~/js/skins.min.js"></script>
+    <style type="text/css">
+        body {
+            font-family: 'microsoft yahei';
+        }
+
+        .form-control-error {
+            display: block;
+            color: #e46f61;
+            margin-top: 5px;
+        }
+
+            .form-control-error:before {
+                content: '\f056';
+                font-family: 'FontAwesome';
+            }
+
+        .bootstrap-table .bs-bars {
+            width: 100%;
+        }
+    </style>
+    @RenderSection("styles", required: false)
+</head>
+<body>
+
+    <div class="main-container">
+        @RenderBody()
+    </div>
+
+    <!--Basic Scripts-->
+    <script src="~/js/jquery-2.0.3.min.js"></script>
+    <script src="~/js/bootstrap.min.js"></script>
+
+    <!--Beyond Scripts-->
+    <script src="~/js/beyond.min.js"></script>
+    <!--Toast Scripts-->
+    <script src="~/js/toastr/toastr.js"></script>
+    <!--common Scripts-->
+    <script src="~/js/common.js" asp-append-version="true"></script>
+    @RenderSection("scripts", required: false)
+
+</body>
+</html>

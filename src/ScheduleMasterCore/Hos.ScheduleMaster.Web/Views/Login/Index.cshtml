@@ -1,0 +1,54 @@
+﻿
+@{
+    ViewBag.Title = "Login Page";
+}
+<style type="text/css">
+    body:before {
+        background: url(/images/login-bg.jpg) no-repeat;
+        filter: alpha(Opacity=50);
+        -moz-opacity: 0.5;
+        opacity: 0.5;
+    }
+</style>
+
+<form data-ajax="true" data-ajax-method="post" data-ajax-begin="$('#btnLogin').val('Signing in ...').attr({'disabled':'disabled'});" data-ajax-complete="$('#btnLogin').val('Login').removeAttr('disabled');" asp-action="In" id="form1">
+    <div class="login-container" style="background:url()">
+        <div class="loginbox bg-white">
+            <div class="loginbox-social">
+                <div class="social-buttons" style="height:60px">
+                    @*<img src="~/assets/img/logo-black.png" height="50" />*@
+                </div>
+            </div>
+            <div class="loginbox-title">SIGN IN</div>
+            <div class="loginbox-or">
+            </div>
+            <div class="loginbox-textbox">
+                <input type="text" class="form-control" name="username" placeholder="Username" required="required" value="admin" />
+            </div>
+            <div class="loginbox-textbox">
+                <input type="password" class="form-control" name="password" placeholder="Password" required="required" value="111111" />
+            </div>
+            <div class="loginbox-forgot">
+                <a href="">Forgot Password?</a>
+            </div>
+            <div class="loginbox-submit">
+                <input type="submit" class="btn btn-primary btn-block" value="Login" id="btnLogin">
+            </div>
+            <div class="loginbox-textbox">
+                <div class="alert alert-danger fade out" style="border:none;text-align:center;background:none !important;color:#df5138 !important" id="errorbox">
+                    @*<i class="fa-fw fa fa-times"></i>*@
+                    <span>sadasdasds</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+@section scripts{
+    <script src="~/js/jquery.unobtrusive-ajax.js"></script>
+    <script type="text/javascript">
+        if (window.parent.length > 0) {
+            window.parent.location = '@Url.Action("Index")';
+        }
+        function showTips(msg) { $('#errorbox').removeClass('fade out').find('span').text(msg); }
+    </script>
+}

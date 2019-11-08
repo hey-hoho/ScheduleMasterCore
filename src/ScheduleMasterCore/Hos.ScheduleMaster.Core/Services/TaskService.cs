@@ -163,19 +163,20 @@ namespace Hos.ScheduleMaster.Core.Services
                                select new { t.Id, t.Title }
                              ).ToDictionary(x => x.Id, x => x.Title);
             //启动任务
-            bool success = QuartzManager.StartWithRetry(view, (nextRunTime) =>
-            {
-                //每次运行成功后更新任务的运行情况
-                var t = QueryById(task.Id);
-                _repositoryFactory.Tasks.ModifyBy(m => m.Id == task.Id, m => new TaskEntity
-                {
-                    LastRunTime = DateTime.Now,
-                    NextRunTime = nextRunTime,
-                    TotalRunCount = t.TotalRunCount + 1
-                });
-                _unitOfWork.Commit();
-                LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
-            });
+            bool success = false;
+            //QuartzManager.StartWithRetry(view, (nextRunTime) =>
+            //{
+            //    //每次运行成功后更新任务的运行情况
+            //    var t = QueryById(task.Id);
+            //    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+            //    {
+            //        LastRunTime = DateTime.Now,
+            //        NextRunTime = nextRunTime,
+            //        TotalRunCount = t.TotalRunCount + 1
+            //    });
+            //    _unitOfWork.Commit();
+            //    LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
+            //});
             if (success)
             {
                 //启动成功后更新任务状态为运行中
@@ -206,7 +207,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(id);
             if (task != null && task.Status == (int)TaskStatus.Running)
             {
-                bool success = QuartzManager.Pause(task);
+                bool success = false;//QuartzManager.Pause(task);
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -234,7 +235,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(id);
             if (task != null && task.Status == (int)TaskStatus.Paused)
             {
-                bool success = QuartzManager.Resume(task);
+                bool success = false;//QuartzManager.Resume(task);
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -261,7 +262,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(id);
             if (task != null && task.Status == (int)TaskStatus.Running)
             {
-                bool success = QuartzManager.RunOnce(id);
+                bool success = false;//QuartzManager.RunOnce(id);
                 if (success)
                 {
                     //运行成功后更新信息
@@ -288,15 +289,16 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(id);
             if (task != null && task.Status > (int)TaskStatus.Stop)
             {
-                bool success = QuartzManager.Stop(task, () =>
-                {
-                    _repositoryFactory.Tasks.ModifyBy(m => m.Id == task.Id, m => new TaskEntity
-                    {
-                        Status = (int)TaskStatus.Stop,
-                        NextRunTime = null
-                    });
-                    _unitOfWork.Commit();
-                });
+                bool success = false;
+                //QuartzManager.Stop(task, () =>
+                //{
+                //    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                //    {
+                //        Status = (int)TaskStatus.Stop,
+                //        NextRunTime = null
+                //    });
+                //    _unitOfWork.Commit();
+                //});
                 if (success)
                 {
                     return ServiceResult(ResultStatus.Success, "任务已停止运行!");

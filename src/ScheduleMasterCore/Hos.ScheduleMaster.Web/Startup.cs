@@ -28,7 +28,13 @@ namespace Hos.ScheduleMaster.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+            services.AddOptions();
+
             services.AddControllersWithViews();
+            services.AddMvc(options =>
+            {
+            });
 
             services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
             services.AddTransient<Core.Interface.IAccountService, Core.Services.AccountService>();
@@ -46,8 +52,9 @@ namespace Hos.ScheduleMaster.Web
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCookiePolicy();
             app.UseHttpsRedirection();
+            app.UseStaticFiles();
 
             app.UseRouting();
 
@@ -55,7 +62,10 @@ namespace Hos.ScheduleMaster.Web
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                //endpoints.MapControllers();
+                endpoints.MapControllerRoute(
+                     name: "default",
+                     pattern: "{controller=Login}/{action=Index}/{id?}");
             });
         }
     }
