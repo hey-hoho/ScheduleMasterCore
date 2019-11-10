@@ -1,0 +1,149 @@
+﻿
+
+@{
+    ViewBag.Title = "Log";
+}
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+
+
+<div class="page-body">
+    <div id="toolbar" class="form-inline">
+        <a href="@Url.Action("ClearLog")" class="btn btn-danger">清理日志</a>
+        <div class="pull-right">
+            <div class="form-group">
+                <span class="input-icon icon-right">
+                    <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="开始时间">
+                    <i class="fa fa-calendar"></i>
+                </span>
+            </div>
+            -
+            <div class="form-group">
+                <span class="input-icon icon-right">
+                    <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="结束时间">
+                    <i class="fa fa-calendar"></i>
+                </span>
+            </div>
+            <div class="form-group">
+                <select class="form-control" id="Category">
+                    <option value="0">全部类型</option>
+                    <option value="1">信息</option>
+                    <option value="2">警告</option>
+                    <option value="3">异常</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="任务id" id="Task" value="@_httpContextAccessor.HttpContext.Request.Query["task"]">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btn_table_search"><i class="fa fa-search blue"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <table id="table" class="mychar1-table"></table>
+</div>
+
+
+@section scripts{
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script src="~/assets/js/bootbox/bootbox.js"></script>
+
+    <script>
+        var startTime = laydate.render({
+            elem: '#StartDate', type: 'date', done: function (value, date, endDate) {
+                date.month = date.month - 1;
+                endTime.config.min = date;
+                $(endTime.config.elem).focus();
+            }
+        });
+        var endTime = laydate.render({
+            elem: '#EndDate', type: 'date', done: function (value, date, endDate) {
+                date.month = date.month - 1;
+                startTime.config.max = date;
+            }
+        });
+        var $table = $('#table');
+        $table.bootstrapTable({
+            url: '/api/Task/QueryLogPager',
+            dataType: "json",
+            toolbar: '#toolbar',                //工具按钮用哪个容器
+            striped: true,                      //是否显示行间隔色
+            singleSelect: false,
+            pagination: true, //分页
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 15,                       //每页的记录行数（*）
+            pageList: [10, 10, 50],        //可供选择的每页的行数（*）
+            search: false, //显示搜索框
+            queryParams: function (params) {
+                $("#toolbar .form-control")
+                    .each(function (index, item) {
+                        params[item.id] = item.value;
+                    });
+                return params;
+            },
+            sidePagination: "server", //服务端处理分页
+            columns: [{
+                field: 'TaskId',
+                title: '任务id',
+                align: 'center',
+                width: '8%'
+            }, {
+                field: 'Category',
+                title: '类型',
+                align: 'center',
+                width: '10%',
+                formatter: function (value, row, index) {
+                    var text = '';
+                    switch (value) {
+                        case 1:
+                            text = '<label style="color:#38b03f">信息</label>';
+                            break;
+                        case 2:
+                            text = '<label style="color:#f1a325">警告</label>';
+                            break;
+                        case 3:
+                            text = '<label style="color:red">异常</label>';
+                            break;
+                    }
+                    return text;
+                }
+            }, {
+                field: 'CreateTime',
+                title: '生成时间',
+                align: 'center',
+                width: '13%'
+            }, {
+                field: 'Message',
+                title: '内容',
+                formatter: function (value, row, index) {
+                    var text = value;
+                    if (row.Category == 3) {
+                        text += '     <a class="label label-danger graded" onclick="showStackTrace(' + index + ')">查看堆栈</a>';
+                    }
+                    return text;
+                }
+            }
+            ]
+        });
+        $('#btn_table_search').on("click", function () {
+            $table.bootstrapTable('refresh');
+        });
+        $('#btn_clear').on("click", function () {
+            var params = {
+                task: $("#Task").val(),
+                category: $("#Task").val(),
+            };
+            $tools.postJson("@Url.Action("ClearLog")", params)
+        })
+
+        function showStackTrace(index) {
+            bootbox.dialog({
+                message: $table.bootstrapTable('getData')[index].StackTrace,
+                title: "堆栈信息",
+                className: "",
+            });
+        }
+    </script>
+}
+

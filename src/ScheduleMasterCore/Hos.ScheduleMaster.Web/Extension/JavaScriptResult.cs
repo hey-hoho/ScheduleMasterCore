@@ -11,6 +11,10 @@ namespace Hos.ScheduleMaster.Web.Extension
     {
         public string Scripts;
 
+        public JavaScriptResult()
+        {
+
+        }
         public JavaScriptResult(string scrpits)
         {
             this.Scripts = scrpits;

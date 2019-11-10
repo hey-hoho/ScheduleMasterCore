@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Hos.ScheduleMaster.Web.Extension;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
@@ -23,14 +24,8 @@ namespace Hos.ScheduleMaster.Web.Filters
         /// <param name="filterContext">筛选器上下文。</param>
         public override void OnActionExecuting(ActionExecutingContext filterContext)
         {
-            var requst = filterContext.HttpContext.Request;
-            bool isAjax = false;
-            var xreq = requst.Headers.ContainsKey("x-requested-with");
-            if (xreq)
-            {
-                isAjax = requst.Headers["x-requested-with"] == "XMLHttpRequest";
-            }
-            if (!isAjax)
+            var request = filterContext.HttpContext.Request;
+            if (!request.IsAjaxRequest())
             {
                 filterContext.Result = new RedirectResult("~/Static/Page404");
             }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
@@ -22,19 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Views\Account\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="wwwroot\css\toastr.css" />
-    <None Include="wwwroot\images\avatar1.jpg" />
-    <None Include="wwwroot\images\avatar2.jpg" />
-    <None Include="wwwroot\images\login-bg.jpg" />
-    <None Include="wwwroot\js\common.js" />
-    <None Include="wwwroot\js\jquery.form.js" />
-    <None Include="wwwroot\js\jquery.unobtrusive-ajax.js" />
-    <None Include="wwwroot\js\jquery.validate.min.js" />
-    <None Include="wwwroot\js\template-web.js" />
+    <Folder Include="wwwroot\css\" />
   </ItemGroup>
 
 </Project>

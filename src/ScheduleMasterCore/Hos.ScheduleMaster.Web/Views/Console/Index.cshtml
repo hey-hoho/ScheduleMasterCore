@@ -1,0 +1,357 @@
+﻿@using Hos.ScheduleMaster.Core.Models;
+
+@{
+    SystemUserEntity admin = ViewBag.CurrentAdmin as SystemUserEntity;
+}
+
+@section styles{
+    <style type="text/css">
+        .spinner {
+            margin: 50px auto;
+            top: 50px;
+            left: 50%;
+            width: 70px;
+            height: 50px;
+            text-align: center;
+            font-size: 30px;
+            position: absolute;
+        }
+
+            .spinner > div {
+                background-color: #67CF22;
+                height: 100%;
+                width: 6px;
+                display: inline-block;
+                -webkit-animation: stretchdelay 1.2s infinite ease-in-out;
+                animation: stretchdelay 1.2s infinite ease-in-out;
+            }
+
+            .spinner .rect2 {
+                -webkit-animation-delay: -1.1s;
+                animation-delay: -1.1s;
+            }
+
+            .spinner .rect3 {
+                -webkit-animation-delay: -1.0s;
+                animation-delay: -1.0s;
+            }
+
+            .spinner .rect4 {
+                -webkit-animation-delay: -0.9s;
+                animation-delay: -0.9s;
+            }
+
+            .spinner .rect5 {
+                -webkit-animation-delay: -0.8s;
+                animation-delay: -0.8s;
+            }
+
+        @@-webkit-keyframes stretchdelay {
+            0%, 40%, 100% {
+                -webkit-transform: scaleY(0.4);
+            }
+
+            20% {
+                -webkit-transform: scaleY(1.0);
+            }
+        }
+
+        @@keyframes stretchdelay {
+            0%, 40%, 100% {
+                transform: scaleY(0.4);
+                -webkit-transform: scaleY(0.4);
+            }
+
+            20% {
+                transform: scaleY(1.0);
+                -webkit-transform: scaleY(1.0);
+            }
+        }
+        #menu_box a{cursor:pointer;}
+        .copyright {
+            color: #aaaaa0;
+            text-align: center;
+            border: none;
+            position: absolute;
+            bottom: 0px;
+            width: 100%;
+            z-index: 9999;
+        }
+    </style>
+}
+
+<!-- Navbar -->
+<div class="navbar" id="navbar">
+    <div class="navbar-inner">
+        <div class="navbar-container">
+            <!-- Navbar Barnd -->
+            <div class="navbar-header pull-left">
+                <a href="#" class="navbar-brand">
+                    <small>
+                        <img src="/images/logo-white.png" alt="" />
+                    </small>
+                </a>
+            </div>
+            <!-- /Navbar Barnd -->
+            <!-- Sidebar Collapse -->
+            <div class="sidebar-collapse" id="sidebar-collapse">
+                <i class="collapse-icon fa fa-bars"></i>
+            </div>
+            <!-- /Sidebar Collapse -->
+            <!-- Account Area and Settings --->
+            <div class="navbar-header pull-right">
+                <div class="navbar-account">
+                    <ul class="account-area">
+                        <li>
+                            <a class="login-area dropdown-toggle" data-toggle="dropdown">
+                                <div class="avatar" title="View your public profile">
+                                    <img src="~/images/avatar2.jpg">
+                                </div>
+                                <section>
+                                    <h2><span class="profile"><span>@($"{admin.UserName} / {admin.RealName}")</span></span></h2>
+                                </section>
+                            </a>
+                            <!--Login Area Dropdown-->
+                            <ul class="pull-right dropdown-menu dropdown-arrow dropdown-login-area">
+                                <li class="email"><a>@admin.Phone</a></li>
+                                <li class="email"><a>@admin.Email</a></li>
+                                <!--Avatar Area-->
+                                <li>
+                                    <div class="avatar-area">
+                                        <img src="~/images/avatar1.jpg" class="avatar">
+                                    </div>
+                                </li>
+                                <!--Avatar Area-->
+                                @*<li class="edit">
+                                        <a href="profile.html" class="pull-left">Profile</a>
+                                    </li>*@
+                                <!--Theme Selector Area-->
+                                <li class="theme-area">
+                                    <ul class="colorpicker" id="skin-changer">
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#5DB2FF;" rel="/assets/css/skins/blue.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#2dc3e8;" rel="/assets/css/skins/azure.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#03B3B2;" rel="/assets/css/skins/teal.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#53a93f;" rel="/assets/css/skins/green.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#FF8F32;" rel="/assets/css/skins/orange.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#cc324b;" rel="/assets/css/skins/pink.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#AC193D;" rel="/assets/css/skins/darkred.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#8C0095;" rel="/assets/css/skins/purple.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#0072C6;" rel="/assets/css/skins/darkblue.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#585858;" rel="/assets/css/skins/gray.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#474544;" rel="/assets/css/skins/black.min.css"></a></li>
+                                        <li><a class="colorpick-btn" href="javascript:" style="background-color:#001940;" rel="/assets/css/skins/deepblue.min.css"></a></li>
+                                    </ul>
+                                </li>
+                                <!--/Theme Selector Area-->
+                                <li class="dropdown-footer">
+                                    <a href="@Url.Action("Out", "Login")">
+                                        Sign out
+                                    </a>
+                                </li>
+                            </ul>
+                            <!--/Login Area Dropdown-->
+                        </li>
+                        <!-- /Account Area -->
+                    </ul>
+                </div>
+            </div>
+            <!-- /Sidebar Menu -->
+        </div>
+    </div>
+</div>
+<div class="main-container container-fluid">
+    <div class="page-container">
+        <div class="page-sidebar" id="sidebar" style="overflow:hidden; box-sizing:border-box;">
+            @*<div class="sidebar-header-wrapper">
+                    <input type="text" class="searchinput" />
+                    <i class="searchicon fa fa-search"></i>
+                    <div class="searchhelper">Search Reports, Charts, Emails or Notifications</div>
+                </div>*@
+            <ul class="nav sidebar-menu" id="menu_box" style="height:100%;overflow-y: scroll;width:241px;margin-left:0">
+                <!--Dashboard-->
+                <li class="active">
+                    <a class="menu-link" data-href="@Url.Action("Home", "Console")">
+                        <i class="menu-icon glyphicon glyphicon-home"></i>
+                        <span class="menu-text"> Dashboard </span>
+                    </a>
+                </li>
+                <!--Databoxes-->
+                <li>
+                    <a class="menu-link" data-href="@Url.Action("Index","Task")">
+                        <i class="menu-icon glyphicon glyphicon-tasks"></i>
+                        <span class="menu-text"> 任务列表 </span>
+                    </a>
+                </li>
+                <!--Widgets-->
+                <li>
+                    <a  class="menu-link" data-href="@Url.Action("Log","Task")">
+                        <i class="menu-icon fa fa-th"></i>
+                        <span class="menu-text"> 运行日志 </span>
+                    </a>
+                </li>
+                <li>
+                    <a class="menu-link" data-href="@Url.Action("Index","Account")">
+                        <i class="menu-icon fa fa-user"></i>
+                        <span class="menu-text"> 账号管理 </span>
+                    </a>
+                </li>
+                <li>
+                    <a class="menu-dropdown">
+                        <i class="menu-icon fa fa-desktop"></i>
+                        <span class="menu-text"> 系统设置 </span>
+                        <i class="menu-expand"></i>
+                    </a>
+                    <ul class="submenu">
+                        <li>
+                            <a  class="menu-link" data-href="@Url.Action("Config","System")">
+                                <span class="menu-text">参数配置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">开关配置</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="elements.html">
+                                <span class="menu-text">Basic Elements</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li style="height:20px;border-bottom:none"></li>
+            </ul>
+            <div class="copyright">
+                ©@DateTime.Now.Year  Power By
+                <span style="cursor:pointer;color:#6db6e5" onclick="window.open('http://wpa.qq.com/msgrd?v=3&uin=591310381&site=qq&menu=yes')" title="联系作者">HOHO</span>
+            </div>
+        </div>
+        <!-- /Page Sidebar -->
+        <!-- Page Content -->
+        <div class="page-content">
+            <!-- Page Header -->
+            <div id="page_header" class="page-header position-relative" style="padding-left:0">
+                <div class="page-breadcrumbs">
+                    <ul class="breadcrumb">
+                        <li>
+                            <i class="fa fa-home"></i>
+                            <a href="#">Home</a>
+                        </li>
+                        <li class="active">Dashboard</li>
+                    </ul>
+                </div>
+                <!--Header Buttons-->
+                <div class="header-buttons">
+                    <a class="sidebar-toggler" href="javascript:" title="收缩">
+                        <i class="fa fa-arrows-h"></i>
+                    </a>
+                    <a class="refresh" id="refresh-toggler" href="javascript:" title="刷新">
+                        <i class="glyphicon glyphicon-refresh"></i>
+                    </a>
+                    <a class="fullscreen" id="fullscreen-toggler" href="javascript:" title="全屏">
+                        <i class="glyphicon glyphicon-fullscreen"></i>
+                    </a>
+                </div>
+                <!--Header Buttons End-->
+            </div>
+            <!-- /Page Header -->
+            <!-- Page Body -->
+            <div id="page_body">
+                <div class="spinner" id="frame_loading">
+                    <div class="rect1"></div>
+                    <div class="rect2"></div>
+                    <div class="rect3"></div>
+                    <div class="rect4"></div>
+                    <div class="rect5"></div>
+                </div>
+                <iframe id="target_frame" src="@Url.Action("Home", "Console")" style="border: none; width: 100%;display:none;height:100%"></iframe>
+            </div>
+            <!-- /Page Body -->
+        </div>
+        <!-- /Page Content -->
+    </div>
+    <!-- /Page Container -->
+    <!-- Main Container -->
+
+</div>
+
+@section scripts{
+    <script type="text/javascript">
+        $(function () {
+            var h = $(document).height() - $("#navbar").height();
+            $("#page_body").height(h - $("#page_header").height() - 4);
+            $("#sidebar").height(h);
+            $("#menu_box .menu-link").bind("click", function () {
+                $(this).parents('li').addClass("active").siblings().removeClass("active");
+                $('#frame_loading').show();
+                $("#target_frame").attr("src", $(this).attr("data-href"));
+            })
+            document.getElementById("target_frame").onload = function () {
+                this.style.display = "block";
+                $('#frame_loading').hide();
+            }
+        })
+
+    </script>
+}
+

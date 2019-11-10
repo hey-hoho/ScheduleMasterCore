@@ -1,0 +1,381 @@
+﻿@model Hos.ScheduleMaster.Core.Dto.TaskInfo
+@{
+    var taskList = ViewBag.TaskList as Dictionary<int, string>;
+}
+
+@section styles{
+    <style type="text/css">
+        .dd-empty {
+            height: 400px !important;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">创建任务</span>
+        </div>
+        <div class="widget-body">
+            <div id="horizontal-form">
+                <form class="form-horizontal" action="@(Model==null?"/Task/CreateTask":"/Task/EditTask")" data-ajax="true" data-ajax-method="post" id="form1" novalidate="novalidate">
+                    <div class="form-group">
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-primary">保  存</button>
+                            <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                        </div>
+                    </div>
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs" id="myTab">
+                            <li class="active">
+                                <a data-toggle="tab" href="#group_base">基础信息配置</a>
+                            </li>
+                            <li class="">
+                                <a data-toggle="tab" href="#group_params">自定义参数</a>
+                            </li>
+                            <li class="">
+                                <a data-toggle="tab" href="#group_exception">异常报警通知</a>
+                            </li>
+                            <li class="">
+                                <a data-toggle="tab" href="#group_next">后置任务</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="group_base" class="tab-pane active">
+                                @if (Model != null)
+                                {
+                                    @Html.HiddenFor(x => x.Id)
+                                }
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">任务名称</label>
+                                    <div class="col-sm-6">
+                                        @Html.TextBoxFor(x => x.Title, new { @class = "form-control", required = "", placeholder = "" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">按周期运行</label>
+                                    <div class="col-sm-6">
+                                        <label>
+                                            <input class="checkbox-slider toggle colored-blue yesno" @(Model != null && Model.RunMoreTimes ? "checked=''" : "") name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
+                                            @*@Html.CheckBoxFor(x => x.RunMoreTimes, new { @class = "checkbox-slider toggle colored-blue yesno" })*@
+                                            <span class="text" style="margin-top: 5px;"></span>
+                                        </label>
+                                        <p class="help-block">如果关闭按钮表示在任务开始时只执行一次</p>
+                                    </div>
+                                </div>
+                                <div class="form-group  @(Model == null || !Model.RunMoreTimes ? "hide" : "")" id="ctn_CronExpression">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">Cron表达式</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" name="CronExpression" id="CronExpression" placeholder="">
+                                        <p class="help-block"><a target="_blank" href="http://cron.qqe2.com/">生成工具</a></p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">开始时间</label>
+                                    <div class="col-sm-6">
+                                        <span class="input-icon icon-right">
+                                            @Html.TextBoxFor(x => x.StartDate, "{0:yyyy-MM-dd HH:mm:ss}", new { @class = "form-control date-picker", required = "", placeholder = "" })
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <p class="help-block">为空表示不限制开始时间</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">停止时间</label>
+                                    <div class="col-sm-6">
+                                        <span class="input-icon icon-right">
+                                            @Html.TextBoxFor(x => x.EndDate, "{0:yyyy-MM-dd HH:mm:ss}", new { @class = "form-control date-picker", placeholder = "" })
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <p class="help-block">为空表示不限制停止时间</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">程序集名称</label>
+                                    <div class="col-sm-6">
+                                        @Html.TextBoxFor(x => x.AssemblyName, new { @class = "form-control", required = "", placeholder = "" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">执行类名称</label>
+                                    <div class="col-sm-6">
+                                        @Html.TextBoxFor(x => x.ClassName, new { @class = "form-control", required = "", placeholder = "" })
+                                        <p class="help-block">包含命名空间的完整类名</p>
+                                    </div>
+                                </div>
+                                <div class="form-group hide">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">自定义参数</label>
+                                    <div class="col-sm-6">
+                                        @Html.TextBoxFor(x => x.CustomParamsJson, new { @class = "form-control", placeholder = "" })
+                                        <p class="help-block">多个参数建议使用Json格式的字符串</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">备注</label>
+                                    <div class="col-sm-6">
+                                        @Html.TextAreaFor(x => x.Remark, new { @class = "form-control", placeholder = "" })
+                                    </div>
+                                </div>
+                                <div class="form-group @(Model == null ? "" : "hide")">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">创建成功后启动</label>
+                                    <div class="col-sm-6">
+                                        <label>
+                                            <input class="checkbox-slider toggle colored-blue yesno" name="RunNow" id="RunNow" type="checkbox" value="true">
+                                            @*@Html.CheckBoxFor(x => x.RunNow, new { @class = "checkbox-slider toggle colored-blue yesno" })*@
+                                            <span class="text" style="margin-top: 5px;"></span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div id="group_params" class="tab-pane">
+                                <div class="form-group">
+                                    <div class="col-sm-1">
+                                        <a class="btn btn-default purple" id="btn_param_add"><i class="fa fa-plus"></i> 新增</a>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-xs-2">
+                                        <span class="widget-caption">参数名：</span>
+                                    </div>
+                                    <div class="col-xs-3">
+                                        <span class="widget-caption">参数值：</span>
+                                    </div>
+                                    <div class="col-xs-4">
+                                        <span class="widget-caption">参数说明：</span>
+                                    </div>
+                                </div>
+                                <div id="params-list">
+                                    @if (Model != null && Model.Params.Count > 0)
+                                    {
+                                        foreach (var item in Model.Params)
+                                        {
+                                            <div class="form-group">
+                                                <div class="col-xs-2">
+                                                    <input type="text" class="form-control" name="ParamKey" value="@item.ParamKey" placeholder="" required="" maxlength="50">
+                                                </div>
+                                                <div class="col-xs-3">
+                                                    <input type="text" class="form-control" name="ParamValue" value="@item.ParamValue" placeholder="" required="" maxlength="100">
+                                                </div>
+                                                <div class="col-xs-4">
+                                                    <input type="text" class="form-control" name="ParamValue" value="@item.ParamValue" placeholder="" required="" maxlength="200">
+                                                </div>
+                                                <div class="buttons-preview">
+                                                    <a class="btn btn-danger icon-only white" onclick="$(this).parents('.form-group').remove();"><i class="fa fa-times "></i></a>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                            <div id="group_exception" class="tab-pane">
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">通知人</label>
+                                    <div class="col-sm-6">
+                                        <select id="e2" name="Guardians" multiple="multiple" style="width: 100%;">
+                                            @{
+                                                var userList = ViewBag.UserList as List<Hos.ScheduleMaster.Core.Models.SystemUserEntity>;
+                                                foreach (var item in userList)
+                                                {
+                                                    if (Model != null && Model.Guardians.Any(x => x == item.Id))
+                                                    {
+                                                        <option value="@item.Id" selected="selected" /> @item.RealName
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@item.Id" /> @item.RealName
+                                                    }
+                                                }
+                                            }
+                                        </select>
+                                        <p class="help-block">请确保通知人已设置了正确的邮箱</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="group_next" class="tab-pane">
+                                <div class="row">
+                                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                                        <h5 class="row-title"><i class="typcn typcn-input-checked"></i>已选择列表</h5>
+                                        <span class="input-icon">
+                                            <input type="text" class="ignore form-control input-sm task-search">
+                                            <i class="glyphicon glyphicon-search blue circular"></i>
+                                        </span>
+                                        <div class="dd shadowed" style="max-height:500px;overflow:auto" id="nexts-list">
+                                            @if (Model == null || Model.Nexts.Count == 0)
+                                            {
+                                                <div class="dd-empty">拖拽到此区域...</div>
+                                            }
+                                            else
+                                            {
+                                                <ol class="dd-list">
+                                                    @foreach (var n in Model.Nexts)
+                                                    {
+                                                        <li class="dd-item bordered-blue" data-id="@n"> <div class="dd-handle">@taskList[n]</div> </li>
+                                                    }
+                                                </ol>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6 col-sm-6 col-xs-12">
+                                        <h5 class="row-title"><i class="typcn typcn-lightbulb"></i>待选择列表 </h5>
+                                        <span class="input-icon">
+                                            <input type="text" class="ignore form-control input-sm task-search">
+                                            <i class="glyphicon glyphicon-search blue circular"></i>
+                                        </span>
+                                        <div class="dd" style="max-height:500px;overflow:auto">
+                                            @{
+                                                if (Model != null)
+                                                {
+                                                    taskList = taskList.Where(x => !Model.Nexts.Contains(x.Key)).ToDictionary(x => x.Key, x => x.Value);
+                                                }
+                                                if (taskList.Count == 0)
+                                                {
+                                                    <div class="dd-empty">拖拽到此区域...</div>
+                                                }
+                                                else
+                                                {
+                                                    <ol class="dd-list">
+                                                        @foreach (var n in taskList)
+                                                        {
+                                                            <li class="dd-item" data-id="@n.Key"> <div class="dd-handle">@n.Value</div> </li>
+                                                        }
+                                                    </ol>
+                                                }
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                <hr />
+                <section>
+                    <p>注意事项：</p>
+                    <ul>
+                        <li>任务启动前请确认运行所需要的程序集文件和配置文件都已上传到指定目录，否则将无法启动。</li>
+                        <li>每个任务的专属目录在任务调度平台中的路径【/TaskAssembly/程序集名称/】下，例如：/TaskAssembly/MyTestDemo/。</li>
+                        <li>任务程序集尽可能少的依赖于其他程序集。</li>
+                        <li>任务的配置信息可以使用单独的.config配置文件存储，不要修改调度平台的web.config。</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/template" id="param_templ">
+    <div class="form-group">
+        <div class="col-xs-2">
+            <input type="text" class="form-control" name="ParamKey" placeholder="" required="" maxlength="50">
+        </div>
+        <div class="col-xs-3">
+            <input type="text" class="form-control" name="ParamValue" placeholder="" required="" maxlength="100">
+        </div>
+        <div class="col-xs-4">
+            <input type="text" class="form-control" name="ParamRemark" placeholder="" required="" maxlength="200">
+        </div>
+        <div class="buttons-preview">
+            <a class="btn btn-danger icon-only white" onclick="$(this).parents('.form-group').remove();"><i class="fa fa-times "></i></a>
+        </div>
+    </div>
+</script>
+
+@section scripts{
+    @*https://www.cnblogs.com/landeanfen/p/5035608.html*@
+    @*http://blog.csdn.net/u013938465/article/details/53507109*@
+    <script src="~/js/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/js/jquery.validate.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script src="~/assets/js/select2/select2.js"></script>
+    <script src="~/js/template-web.js"></script>
+    <script src="~/assets/js/nestable/jquery.nestable.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $tools.formValidate("form1");
+            $("#e2").select2({ allowClear: true });
+            $('.dd').nestable({ maxDepth: 1 });
+            $('.dd-handle a').on('mousedown', function (e) {
+                e.stopPropagation();
+            });
+            $(".task-search").on('keyup', function (e) {
+                var text = this.value;
+                $.each($(this).parent().next().find(".dd-item"), function (index, item) {
+                    if (text.length == 0) {
+                        $(item).removeClass("hide");
+                    }
+                    else {
+                        if ($(item).children("div").text().indexOf(text) > -1) {
+                            $(item).removeClass("hide");
+                        }
+                        else { $(item).addClass("hide"); }
+                    }
+                })
+            })
+
+            var startTime = laydate.render({
+                elem: '#StartDate', type: 'datetime', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    endTime.config.min = date;
+                    $(endTime.config.elem).focus();
+                }
+            });
+            var endTime = laydate.render({
+                elem: '#EndDate', type: 'datetime', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    startTime.config.max = date;
+                }
+            });
+            $("#RunMoreTimes").click(function () {
+                if (this.checked) {
+                    $("#ctn_CronExpression").removeClass("hide");
+                    $("#CronExpression").rules("add", { required: true });
+                } else {
+                    $("#ctn_CronExpression").addClass("hide");
+                    $("#CronExpression").rules("remove", "required");
+                }
+            });
+            $("#btn_param_add").click(function () {
+                if ($("#params-list .form-group").length >= 8) {
+                    $tools.infoTip("最多只能添加8个参数~");
+                    return;
+                }
+                var html = template('param_templ');
+                $("#params-list").append(html);
+            })
+            $("#form1").submit(function () {
+                var params = [];
+                $("#params-list .form-group").each(function (index, item) {
+                    var ctrl = $(item);
+                    params.push({
+                        ParamKey: ctrl.find("input[name='ParamKey']").val(),
+                        ParamValue: ctrl.find("input[name='ParamValue']").val(),
+                        ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
+                    });
+                })
+                $("#CustomParamsJson").val(JSON.stringify(params));
+                $("#nexts-list .dd-item").each(function (index, item) {
+                    var ctrl = $(item);
+                    ctrl.append("<input type='hidden' name='Nexts' value='" + ctrl.attr("data-id") + "'>");
+                })
+                return true;
+            })
+        });
+
+        var handlers = {
+            beforeSubmit: function () {
+                //$tools.showLoading();
+            },
+            onComplete: function (xhr, state) {
+                //$tools.hideLoading();
+                var data = xhr.responseJSON;
+                if (data.Status === 1) {
+                    $tools.infoTip(data.Message, "/task/index");
+                } else {
+                    $tools.errorTip(data.Message);
+                }
+            }
+        }
+    </script>
+}

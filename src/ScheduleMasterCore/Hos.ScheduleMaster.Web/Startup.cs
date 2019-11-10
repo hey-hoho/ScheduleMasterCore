@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,10 +32,39 @@ namespace Hos.ScheduleMaster.Web
         {
             services.AddMemoryCache();
             services.AddOptions();
-
+            services.AddHttpContextAccessor();
             services.AddControllersWithViews();
             services.AddMvc(options =>
             {
+                //options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
+                //    new System.Text.Json.JsonSerializerOptions
+                //    {
+
+                //    }
+                //    ));
+            }).AddJsonOptions(option=> {
+                ////忽略循环引用
+                //option.JsonSerializerOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                ////不使用驼峰样式的key
+                //option.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                ////设置时间格式
+                //option.SerializerSettings.DateFormatString = "yyyy-MM-dd";
+            });
+
+            //配置authorrize
+            services.AddAuthentication(b =>
+            {
+                b.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                b.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                b.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+            }).AddCookie(b =>
+            {
+                b.LoginPath = "/login";
+                b.Cookie.Name = "msc_auth_name";
+                b.Cookie.Path = "/";
+                b.Cookie.HttpOnly = true;
+                //b.Cookie.Expiration = new TimeSpan(2, 0, 0);
+                b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
 
             services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
@@ -59,6 +90,7 @@ namespace Hos.ScheduleMaster.Web
             app.UseRouting();
 
             app.UseAuthorization();
+            app.UseAuthentication();
 
             app.UseEndpoints(endpoints =>
             {

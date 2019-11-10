@@ -30,7 +30,6 @@ namespace Hos.ScheduleMaster.Core.Services
             user.LastLoginTime = DateTime.Now;
             _repositoryFactory.SystemUsers.Update(user, "LastLoginTime");
             _unitOfWork.Commit();
-            //System.Web.Security.FormsAuthentication.SetAuthCookie(userName, false);
             return user;
         }
 

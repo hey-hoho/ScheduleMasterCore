@@ -1,0 +1,76 @@
+﻿
+@model Hos.ScheduleMaster.Core.Models.SystemUserEntity
+
+<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">@(Model != null ? "编辑" : "创建")用户</span>
+        </div>
+        <div class="widget-body">
+            <form class="form-horizontal" action="@Url.Action("Edit")" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="" data-ajax-begin="" novalidate="novalidate">
+
+                @if (Model == null)
+                {
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">用户名</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", required = "", maxlength = "20" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">密码</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.Password, new { @class = "form-control", type = "password", required = "", maxlength = "20" })
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @Html.HiddenFor(x => x.Id)
+                    @Html.HiddenFor(x => x.Password)
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">用户名</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.UserName, new { @class = "form-control", required = "", maxlength = "20", @readonly = "readonly" })
+                        </div>
+                    </div>
+                }
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">姓名</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.RealName, new { @class = "form-control", required = "", maxlength = "20" })
+                    </div>
+                </div>
+                <div class="form-group" id="ctn_CronExpression">
+                    <label for="" class="col-sm-2 control-label no-padding-right">联系电话</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.Phone, new { @class = "form-control", maxlength = "20" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">邮箱</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.Email, new { @class = "form-control", maxlength = "200" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary">保  存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $tools.formValidate("form1");
+        });
+    </script>
+}

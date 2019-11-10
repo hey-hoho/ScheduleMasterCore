@@ -1,0 +1,192 @@
+﻿<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">修改任务</span>
+        </div>
+        <div class="widget-body">
+            <div id="horizontal-form">
+                <form class="form-horizontal" action="/api/Task/EditTask" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="handlers.onComplete" data-ajax-begin="handlers.beforeSubmit" novalidate="novalidate">
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs" id="myTab">
+                            <li class="active">
+                                <a data-toggle="tab" href="#group_base">基础信息配置</a>
+                            </li>
+                            <li class="">
+                                <a data-toggle="tab" href="#group_params">自定义参数</a>
+                            </li>
+                            <li class="">
+                                <a data-toggle="tab" href="#group_exception">异常报警通知</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="group_base" class="tab-pane active">
+                                <input type="hidden" value="" id="id" name="id" />
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">任务名称</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" name="Title" class="form-control" id="Title" required="" placeholder="">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">开始时间</label>
+                                    <div class="col-sm-6">
+                                        <span class="input-icon icon-right">
+                                            <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <p class="help-block">为空表示不限制开始时间</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">按周期运行</label>
+                                    <div class="col-sm-6">
+                                        <label>
+                                            <input class="checkbox-slider toggle colored-blue yesno" checked="" name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
+                                            <span class="text" style="margin-top: 5px;"></span>
+                                        </label>
+                                        <p class="help-block">如果关闭按钮表示在任务开始时只执行一次</p>
+                                    </div>
+                                </div>
+                                <div class="form-group" id="ctn_CronExpression">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">Cron表达式</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" name="CronExpression" id="CronExpression" placeholder="">
+                                        <p class="help-block"><a target="_blank" href="http://cron.qqe2.com/">生成工具</a></p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">停止时间</label>
+                                    <div class="col-sm-6">
+                                        <span class="input-icon icon-right">
+                                            <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <p class="help-block">为空表示不限制停止时间</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">程序集名称</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" name="AssemblyName" id="AssemblyName" placeholder="" required="">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">执行类名称</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" class="form-control" name="ClassName" id="ClassName" placeholder="" required="">
+                                        <p class="help-block">包含命名空间的完整类名</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">自定义参数</label>
+                                    <div class="col-sm-6">
+                                        <textarea class="form-control" name="CustomParamsJson" id="CustomParamsJson" placeholder=""></textarea>
+                                        <p class="help-block">多个参数建议使用Json格式的字符串</p>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">备注</label>
+                                    <div class="col-sm-6">
+                                        <textarea class="form-control" name="Remark" id="Remark" placeholder=""></textarea>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-2 col-sm-10">
+                                        <button type="submit" class="btn btn-primary">保  存</button>
+                                        <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="group_params" class="tab-pane"></div>
+                            <div id="group_exception" class="tab-pane"></div>
+                        </div>
+                    </div>
+                </form>
+                <hr />
+                <section>
+                    <p>注意事项：</p>
+                    <ul>
+                        <li>任务启动前请确认运行所需要的程序集文件和配置文件都已上传到指定目录，否则将无法启动。</li>
+                        <li>每个任务的专属目录在任务调度平台中的路径【/TaskAssembly/程序集名称/】下，例如：/TaskAssembly/MyTestDemo/。</li>
+                        <li>任务程序集尽可能少的依赖于其他程序集。</li>
+                        <li>任务的配置信息可以使用单独的.config配置文件存储，不要修改调度平台的web.config。</li>
+                    </ul>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $tools.formValidate("form1");
+            var startTime = laydate.render({
+                elem: '#StartDate', type: 'datetime', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    endTime.config.min = date;
+                    $(endTime.config.elem).focus();
+                }
+            });
+            var endTime = laydate.render({
+                elem: '#EndDate', type: 'datetime', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    startTime.config.max = date;
+                }
+            });
+            $("#RunMoreTimes").click(function () {
+                if (this.checked) {
+                    $("#ctn_CronExpression").removeClass("hide");
+                    $("#CronExpression").rules("add", { required: true });
+                } else {
+                    $("#ctn_CronExpression").addClass("hide");
+                    $("#CronExpression").rules("remove", "required");
+                }
+            });
+            if (handlers.taskId) {
+                handlers.loadTaskDetail();
+            }
+        });
+
+        var handlers = {
+            taskId: '@_httpContextAccessor.HttpContext.Request.Query["id"]',
+            loadTaskDetail: function () {
+                $.getJSON("/api/Task/QueryTaskDetail?id=" + handlers.taskId, {}, function (result) {
+                    if (result && result.Status === 1) {
+                        $("#id").val(handlers.taskId);
+                        $("#Title").val(result.Data.Title);
+                        $("#CronExpression").val(result.Data.CronExpression);
+                        if (result.Data.RunMoreTimes) {
+                            $("#CronExpression").rules("add", { required: true });
+                        } else {
+                            $("#ctn_CronExpression").addClass("hide");
+                            $("#RunMoreTimes").removeAttr("checked");
+                            $("#CronExpression").rules("remove", "required");
+                        }
+                        $("#AssemblyName").val(result.Data.AssemblyName);
+                        $("#ClassName").val(result.Data.ClassName);
+                        $("#CustomParamsJson").val(result.Data.CustomParamsJson);
+                        $("#StartDate").val(result.Data.StartDate);
+                        $("#EndDate").val(result.Data.EndDate);
+                        $("#Remark").val(result.Data.Remark);
+                    }
+                });
+            },
+            beforeSubmit: function () {
+                //$tools.showLoading();
+            },
+            onComplete: function (xhr, state) {
+                //$tools.hideLoading();
+                var data = xhr.responseJSON;
+                if (data.Status === 1) {
+                    $tools.infoTip(data.Message, "/task/index");
+                } else {
+                    $tools.errorTip(data.Message);
+                }
+            }
+        }
+    </script>
+}

@@ -1,0 +1,154 @@
+﻿
+@{
+    ViewBag.Title = "任务列表";
+}
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+
+
+<div class="page-body">
+    <div id="toolbar" class="form-inline">
+        <a href="@Url.Action("Create","Task")" class="btn btn-primary">创建任务</a>
+        <div class="pull-right">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="任务名称" id="name">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btn_table_search"><i class="fa fa-search blue"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <table id="table" class="mychar1-table"></table>
+</div>
+
+
+@section scripts{
+    <!--Page Related Scripts-->
+
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script>
+        var $table = $('#table');
+        $table.bootstrapTable({
+            url: '/api/Task/QueryList',
+            dataType: "json",
+            toolbar: '#toolbar',                //工具按钮用哪个容器
+            striped: true,                      //是否显示行间隔色
+            singleSelect: false,
+            pagination: true, //分页
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 15,                       //每页的记录行数（*）
+            pageList: [10, 20, 50],        //可供选择的每页的行数（*）
+            search: false, //显示搜索框
+            queryParams: function (params) {
+                $("#toolbar .form-control")
+                    .each(function (index, item) {
+                        params[item.id] = item.value;
+                    });
+                return params;
+            },
+            sidePagination: "server", //服务端处理分页
+            columns: [{
+                field: 'Title',
+                title: '名称'
+            }, {
+                field: 'RunMode',
+                title: '运行模式'
+            }, {
+                field: 'StartTime',
+                title: '开始运行'
+            }, {
+                field: 'LastRunTime',
+                title: '上次运行时间'
+            }, {
+                field: 'NextRunTime',
+                title: '下次运行时间'
+            }, {
+                field: 'TotalRunCount',
+                title: '运行次数'
+            }, {
+                field: 'Status',
+                title: '状态',
+                formatter: function (value, row, index) {
+                    var str = '';
+                    switch (value) {
+                        case -1:
+                            str = '已删除';
+                            break;
+                        case 0:
+                            str = '<label style="color:red">已停止</label>';
+                            break;
+                        case 1:
+                            str = '<label style="color:#38b03f">运行中</label>';
+                            break;
+                        case 2:
+                            str = '<label style="color:#f1a325">已暂停</label>';
+                            break;
+                    }
+                    return str;
+                }
+            }, {
+                field: 'CreateTime',
+                title: '创建时间'
+            }, {
+                title: '操作',
+                field: 'id',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var l = '<a href="/Task/Log?task=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Task/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
+                    if (row.Status == 0) {
+                        l += '<button class="btn btn-xs btn-primary" onclick="handlers.taskStart(' + row.Id + ',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(' + row.Id + ',\'' + row.Title + '\')">删除</button>';
+                    }
+                    if (row.Status == 1) {
+                        l += '<button class="btn btn-xs btn-warning" onclick="handlers.taskPause(' + row.Id + ',\'' + row.Title + '\')">暂停</button>  <button class="btn btn-xs btn-primary" onclick="handlers.taskRun(' + row.Id + ',\'' + row.Title + '\')">运行</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(' + row.Id + ',\'' + row.Title + '\')">停止</button>';
+                    }
+                    if (row.Status == 2) {
+                        l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(' + row.Id + ',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(' + row.Id + ',\'' + row.Title + '\')">停止</button>';
+                    }
+                    return l ;
+                }
+            }
+            ]
+        });
+        $('#btn_table_search').on("click", function () {
+            $table.bootstrapTable('refresh');
+        });
+        var handlers = {
+            taskStart: function (value, title) {
+                this.request(title, '/Task/StartTask?id=' + value, "启动");
+            },
+            taskDelete: function (value, title) {
+                this.request(title, '/Task/DeleteTask?id=' + value, "删除");
+            },
+            taskPause: function (value, title) {
+                this.request(title, '/Task/PauseTask?id=' + value, "暂停");
+            },
+            taskRun: function (value, title) {
+                this.request(title, '/Task/RunOnceTask?id=' + value, "立即运行");
+            },
+            taskResume: function (value, title) {
+                this.request(title, '/Task/ResumeTask?id=' + value, "恢复");
+            },
+            taskStop: function (value, title) {
+                this.request(title, '/Task/StopTask?id=' + value, "停止");
+            },
+            request: function (title, url, action) {
+                $tools.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                    function () {
+                        $.post("/api" + url, null)
+                            .then(function (res) {
+                                if (res.Status === 1) {
+                                    $tools.successTip(res.Message);
+                                    $('#table').bootstrapTable('refresh');
+                                } else {
+                                    $tools.errorTip(res.Message);
+                                }
+                            })
+                            .fail(function (err) {
+                                $tools.errorTip(err);
+                            });
+                    });
+            }
+        }
+    </script>
+}
+

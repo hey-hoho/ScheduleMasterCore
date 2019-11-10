@@ -1,0 +1,127 @@
+﻿
+<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">清理日志</span>
+        </div>
+        <div class="widget-body">
+            <form class="form-horizontal" action="@Url.Action("ClearLog")" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="" data-ajax-begin="" novalidate="novalidate">
+
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">日志类型</label>
+                    <div class="col-sm-6">
+                        <select class="form-control" id="Category">
+                            <option value="0">全部类型</option>
+                            <option value="1">信息</option>
+                            <option value="2">警告</option>
+                            <option value="3">异常</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">任务名称</label>
+                    <div class="col-sm-6">
+                        @Html.DropDownList("Task", ViewBag.TaskList as List<SelectListItem>, "全部任务", new { @class = "form-control" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">时间区间</label>
+                    <div class="col-sm-6">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddDays(-7).ToString("yyyy-MM-dd")">
+                                一周前
+                            </button>
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddMonths(-1).ToString("yyyy-MM-dd")">
+                                一月前
+                            </button>
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddMonths(-3).ToString("yyyy-MM-dd")">
+                                三月前
+                            </button>
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddMonths(-6).ToString("yyyy-MM-dd")">
+                                半年前
+                            </button>
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddYears(-1).ToString("yyyy-MM-dd")">
+                                一年前
+                            </button>
+                            <button type="button" class="btn btn-default quickselect" data-date="@DateTime.Today.AddMonths(-2).ToString("yyyy-MM-dd")">
+                                两年前
+                            </button>
+                        </div>
+                        <div class="checkbox" style="display: inline-block;">
+                            <label>
+                                <input type="checkbox" id="ckb_daterange">
+                                <span class="text">自定义</span>
+                            </label>
+                        </div>
+                        <div class="help-block hide" id="div_daterange">
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    <span class="input-icon icon-right">
+                                        <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="开始日期">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    <span class="input-icon icon-right">
+                                        <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="结束日期">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary" onclick="return confirm('确认要按所选条件清理日志吗？此操作不可恢复~');">提  交</button>
+                        <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            var startTime = laydate.render({
+                elem: '#StartDate', type: 'date', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    endTime.config.min = date;
+                    $(endTime.config.elem).focus();
+                    $(".quickselect").removeClass("btn-primary");
+                }
+            });
+            var endTime = laydate.render({
+                elem: '#EndDate', type: 'date', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    startTime.config.max = date;
+                    $(".quickselect").removeClass("btn-primary");
+                }
+            });
+            $("#ckb_daterange").click(function () {
+                if (this.checked) {
+                    $("#div_daterange").removeClass("hide");
+                    $(".quickselect").removeClass("btn-primary");
+                } else {
+                    $("#div_daterange").addClass("hide");
+                }
+            });
+            $(".quickselect").bind("click", function () {
+                if (!$(this).hasClass("btn-primary")) {
+                    $(this).addClass("btn-primary").siblings().removeClass("btn-primary");
+                    $("#StartDate").val('');
+                    $("#EndDate").val($(this).attr("data-date"));
+                }
+            })
+        })
+    </script>
+}

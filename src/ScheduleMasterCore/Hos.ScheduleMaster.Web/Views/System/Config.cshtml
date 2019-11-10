@@ -1,0 +1,63 @@
+﻿@using Hos.ScheduleMaster.Core.Models
+@model List<SystemConfigEntity>
+
+@{
+    var groupList = Model.Select(x => x.Group).Distinct().ToArray();
+}
+
+<div class="page-body">
+    <div class="widget">
+
+        <div class="widget-body">
+            <form class="form-horizontal" action="@Url.Action("SaveConfig","System")" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="" data-ajax-begin="" novalidate="novalidate">
+                <div class="form-group">
+                    <div class="col-sm-1">
+                        <button type="submit" class="btn btn-primary" onclick="return true;">保  存</button>
+                    </div>
+                </div>
+                <div class="tabbable">
+                    <ul class="nav nav-tabs" id="myTab">
+                        @for (int i = 0; i < groupList.Length; i++)
+                        {
+                            <li class="@(i==0?"active":"")">
+                                <a data-toggle="tab" href="#group_@i">@groupList[i]</a>
+                            </li>
+                        }
+                    </ul>
+                    <div class="tab-content">
+                        @for (int i = 0; i < groupList.Length; i++)
+                        {
+                            <div id="group_@i" class="tab-pane @(i==0?"active":"")">
+                                @{
+                                    var items = Model.Where(x => x.Group == groupList[i]).OrderBy(x => x.Sort).ToList();
+                                    foreach (var item in items)
+                                    {
+                                        <div class="form-group">
+                                            <label for="" class="col-sm-2 control-label no-padding-right">@item.Name</label>
+                                            <div class="col-sm-6">
+                                                <input type="text" class="form-control" name="@item.Key" placeholder="" value="@item.Value" @(item.IsReuired ? "required=''" : "")>
+                                                <p class="help-block">@item.Remark</p>
+                                            </div>                                            
+                                        </div>
+                                    }
+                                }
+                            </div>
+                                    }
+                    </div>
+                </div>
+                <br />
+                <br />
+            </form>
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        $(function () {
+            $tools.formValidate("form1");
+        })
+    </script>
+}

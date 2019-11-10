@@ -1,0 +1,122 @@
+﻿
+@{
+    ViewBag.Title = "用户列表";
+}
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+
+
+<div class="page-body">
+    <div id="toolbar" class="form-inline">
+        <a href="@Url.Action("Edit","Account")" class="btn btn-primary">创建用户</a>
+        <div class="pull-right">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="用户名、姓名" id="name">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btn_table_search"><i class="fa fa-search blue"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <table id="table" class="mychar1-table"></table>
+</div>
+
+
+@section scripts{
+    <!--Page Related Scripts-->
+
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script>
+        var $table = $('#table');
+        $table.bootstrapTable({
+            url: '/Account/LoadUserPager',
+            dataType: "json",
+            toolbar: '#toolbar',                //工具按钮用哪个容器
+            striped: true,                      //是否显示行间隔色
+            singleSelect: false,
+            pagination: true, //分页
+            pageNumber: 1,                       //初始化加载第一页，默认第一页
+            pageSize: 10,                       //每页的记录行数（*）
+            pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
+            search: false, //显示搜索框
+            queryParams: function (params) {
+                $("#toolbar .form-control")
+                    .each(function (index, item) {
+                        params[item.id] = item.value;
+                    });
+                return params;
+            },
+            sidePagination: "server", //服务端处理分页
+            columns: [{
+                field: 'UserName',
+                title: '用户名'
+            }, {
+                field: 'RealName',
+                title: '姓名'
+            }, {
+                field: 'Phone',
+                title: '联系电话'
+            }, {
+                field: 'LastLoginTime',
+                title: '上次登录时间'
+            }, {
+                field: 'CreateTime',
+                title: '创建时间'
+            },{
+                field: 'Status',
+                title: '状态'
+            }, {
+                title: '操作',
+                field: 'id',
+                align: 'center',
+                formatter: function (value, row, index) {
+                    var l = '<a href="/Account/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
+                    if (row.StatusCode == 0) {
+                        l += '<button class="btn btn-xs btn-primary" onclick="handlers.accountEnable(' + row.Id + ',\'' + row.UserName + '\')">启用</button>  ';
+                    }
+                    if (row.StatusCode == 1) {
+                        l += '<button class="btn btn-xs btn-warning" onclick="handlers.accountDisable(' + row.Id + ',\'' + row.UserName + '\')">禁用</button>  ';
+                    }
+                    l += '<button class="btn btn-xs btn-success" onclick="handlers.pwdRest(' + row.Id + ',\'' + row.UserName + '\')">重置密码</button>  <button class="btn btn-xs btn-danger" onclick="handlers.accountDelete(' + row.Id + ',\'' + row.UserName + '\')">删除</button>';
+                    return l ;
+                }
+            }
+            ]
+        });
+        $('#btn_table_search').on("click", function () {
+            $table.bootstrapTable('refresh');
+        });
+        var handlers = {
+            accountEnable: function (value, title) {
+                this.request(title, '/Account/UserEnable?id=' + value, "启用");
+            },
+            accountDisable: function (value, title) {
+                this.request(title, '/Account/UserDisable?id=' + value, "禁用");
+            },
+            pwdRest: function (value, title) {
+                this.request(title, '/Account/UserResetPwd?id=' + value, "重置密码");
+            },
+            accountDelete: function (value, title) {
+                this.request(title, '/Account/UserDelete?id=' + value, "删除");
+            },
+            request: function (title, url, action) {
+                $tools.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                    function () {
+                        $.post(url, null)
+                            .then(function (res) {
+                                if (res.Status === 1) {
+                                    $tools.successTip(res.Message);
+                                    $('#table').bootstrapTable('refresh');
+                                } else {
+                                    $tools.errorTip(res.Message);
+                                }
+                            })
+                            .fail(function (err) {
+                                $tools.errorTip(err);
+                            });
+                    });
+            }
+        }
+    </script>
+}
+
