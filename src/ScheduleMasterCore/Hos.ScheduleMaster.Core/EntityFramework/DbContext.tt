@@ -25,6 +25,7 @@ using System.Linq;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
+	//[ServiceMapTo(typeof(IUnitOfWork))]
     public class TaskDbContext : DbContext, IUnitOfWork
     {
 		public TaskDbContext(DbContextOptions<TaskDbContext> option) : base(option)

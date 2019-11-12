@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
+using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -42,7 +44,8 @@ namespace Hos.ScheduleMaster.Web
 
                 //    }
                 //    ));
-            }).AddJsonOptions(option=> {
+            }).AddJsonOptions(option =>
+            {
                 ////忽略循环引用
                 //option.JsonSerializerOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 ////不使用驼峰样式的key
@@ -66,14 +69,13 @@ namespace Hos.ScheduleMaster.Web
                 //b.Cookie.Expiration = new TimeSpan(2, 0, 0);
                 b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
-
             services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
-            services.AddTransient<Core.Interface.IAccountService, Core.Services.AccountService>();
-            services.AddTransient<Core.Interface.ITaskService, Core.Services.TaskService>();
-            services.AddTransient<Core.Interface.ISystemService, Core.Services.SystemService>();
-
             //EF数据库上下文
             services.AddDbContext<TaskDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+
+
+            services.AddAppServices();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -99,6 +101,44 @@ namespace Hos.ScheduleMaster.Web
                      name: "default",
                      pattern: "{controller=Login}/{action=Index}/{id?}");
             });
+
+            AutowiredServiceProvider.serviceProvider = app.ApplicationServices;
         }
     }
+
+    public static class AppServiceExtensions
+    {
+        /// <summary>
+        /// 注册应用中的业务service
+        /// </summary>
+        /// <param name="services"></param>
+        public static void AddAppServices(this IServiceCollection services)
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Hos.ScheduleMaster.Core"));
+            if (assembly == null) return;
+            foreach (var type in assembly.GetTypes())
+            {
+                var serviceAttribute = type.GetCustomAttribute<ServiceMapToAttribute>();
+
+                if (serviceAttribute != null)
+                {
+                    switch (serviceAttribute.Lifetime)
+                    {
+                        case ServiceLifetime.Singleton:
+                            services.AddSingleton(serviceAttribute.ServiceType, type);
+                            break;
+                        case ServiceLifetime.Scoped:
+                            services.AddScoped(serviceAttribute.ServiceType, type);
+                            break;
+                        case ServiceLifetime.Transient:
+                            services.AddTransient(serviceAttribute.ServiceType, type);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+    }
+
 }

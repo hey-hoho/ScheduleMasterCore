@@ -9,9 +9,15 @@ namespace Hos.ScheduleMaster.Core.Services
 {
     public abstract class BaseService
     {
+        [Autowired]
         public IUnitOfWork _unitOfWork;
 
         protected RepositoryFactory _repositoryFactory => new RepositoryFactory(_unitOfWork);
+
+        public BaseService()
+        {
+            AutowiredServiceProvider.Autowired(this);
+        }
 
         public BaseService(IUnitOfWork unitOfWork)
         {
@@ -23,4 +29,5 @@ namespace Hos.ScheduleMaster.Core.Services
             return new ApiResponseMessage(status, msg, data);
         }
     }
+
 }
