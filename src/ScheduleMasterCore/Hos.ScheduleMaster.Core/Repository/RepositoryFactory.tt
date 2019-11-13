@@ -23,13 +23,14 @@ using Hos.ScheduleMaster.Core.Models;
 
 namespace Hos.ScheduleMaster.Core.Repository
 {
+	[ServiceMapTo(typeof(RepositoryFactory))]
     public class RepositoryFactory
     {
-        private IUnitOfWork _unitOfWork;
+        private TaskDbContext _context;
 
-        public RepositoryFactory(IUnitOfWork unitOfWork)
+        public RepositoryFactory(TaskDbContext context)
         {
-            _unitOfWork = unitOfWork;
+            _context = context;
         }
 
 		<#
@@ -38,7 +39,7 @@ namespace Hos.ScheduleMaster.Core.Repository
 		string filename = entitySet.Name.Replace(entitySet.Extension, "");
 	#>
 	 
-	public BaseRepository<<#=filename#>> <#=filename.Substring(0,entitySet.Name.IndexOf("Entity"))#>s => new BaseRepository<<#=filename#>>(_unitOfWork);
+	public BaseRepository<<#=filename#>> <#=filename.Substring(0,entitySet.Name.IndexOf("Entity"))#>s => new BaseRepository<<#=filename#>>(_context);
 
 	<#
 	    }

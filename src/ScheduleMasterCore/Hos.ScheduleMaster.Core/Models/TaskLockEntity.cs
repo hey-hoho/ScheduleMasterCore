@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskLockEntity
+    public class TaskLockEntity : IEntity
     {
         [Key]
         public Guid TaskId { get; set; }

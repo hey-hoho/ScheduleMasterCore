@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskReferenceEntity
+    public class TaskReferenceEntity : IEntity
     {
         [Key]
         public int Id { get; set; }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskRunTraceEntity
+    public class TaskRunTraceEntity : IEntity
     {
         [Key]
         public Guid TraceId { get; set; }

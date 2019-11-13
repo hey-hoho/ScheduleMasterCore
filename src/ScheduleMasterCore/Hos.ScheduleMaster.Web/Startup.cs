@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.Core.Repository;
 using Hos.ScheduleMaster.Web.Extension;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -73,7 +74,8 @@ namespace Hos.ScheduleMaster.Web
             //EF数据库上下文
             services.AddDbContext<TaskDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
 
-            //services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
+            //注入Uow依赖
+            services.AddScoped<IUnitOfWork, UnitOfWork<TaskDbContext>>();
             //自动注册所有业务service
             services.AddAppServices();
 

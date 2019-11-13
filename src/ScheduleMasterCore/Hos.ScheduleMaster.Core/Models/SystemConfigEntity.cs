@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class SystemConfigEntity
+    public class SystemConfigEntity : IEntity
     {
         [Key, MaxLength(50)]
         public string Key { get; set; }

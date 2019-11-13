@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core.Common;
+using Hos.ScheduleMaster.Core.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -11,15 +12,15 @@ using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Repository
 {
-    public class BaseRepository<TModel> where TModel : class
+    public class BaseRepository<TModel> where TModel : class, IEntity
     {
         private readonly DbContext _db;
 
         private DbSet<TModel> DbSet => _db.Set<TModel>();
 
-        public BaseRepository(IUnitOfWork unitOfWork)
+        public BaseRepository(TaskDbContext context)
         {
-            _db = unitOfWork as DbContext;
+            _db = context as DbContext;
         }
 
         public IQueryable<TModel> Table => this.DbSet;

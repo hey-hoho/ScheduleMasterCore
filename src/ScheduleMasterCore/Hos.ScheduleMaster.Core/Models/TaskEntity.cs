@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskEntity
+    public class TaskEntity : IEntity
     {
         /// <summary>
         /// 任务id

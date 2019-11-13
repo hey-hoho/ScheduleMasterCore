@@ -26,8 +26,7 @@ using Hos.ScheduleMaster.Core.EntityFramework;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-	[ServiceMapTo(typeof(IUnitOfWork))]
-    public class TaskDbContext : DbContext, IUnitOfWork
+    public class TaskDbContext : DbContext
     {
 		public TaskDbContext(DbContextOptions<TaskDbContext> option) : base(option)
         {
@@ -48,21 +47,12 @@ namespace Hos.ScheduleMaster.Core.Models
 	    foreach (var entitySet in files)
 	    {
 		string filename = entitySet.Name.Replace(entitySet.Extension, "");
+		if(filename.EndsWith("IEntity")) continue;
 	#>
 	public virtual DbSet<<#=filename#>> <#=filename.Substring(0,entitySet.Name.IndexOf("Entity"))#>s { get; set; }
 
 	<#
 	    }
 	#>
-
-		public int Commit()
-        {
-            return base.SaveChanges();
-        }
-
-        public async System.Threading.Tasks.Task<int> CommitAsync()
-        {
-            return await base.SaveChangesAsync();
-        }
     }
 }

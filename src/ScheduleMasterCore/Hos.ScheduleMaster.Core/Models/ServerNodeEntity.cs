@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class ServerNodeEntity
+    public class ServerNodeEntity : IEntity
     {
         /// <summary>
         /// 节点标识

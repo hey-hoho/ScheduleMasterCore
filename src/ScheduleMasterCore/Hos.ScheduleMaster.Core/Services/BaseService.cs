@@ -12,7 +12,8 @@ namespace Hos.ScheduleMaster.Core.Services
         [Autowired]
         public IUnitOfWork _unitOfWork;
 
-        protected RepositoryFactory _repositoryFactory => new RepositoryFactory(_unitOfWork);
+        [Autowired]
+        protected RepositoryFactory _repositoryFactory;//=> new RepositoryFactory(_unitOfWork);
 
         public BaseService()
         {
