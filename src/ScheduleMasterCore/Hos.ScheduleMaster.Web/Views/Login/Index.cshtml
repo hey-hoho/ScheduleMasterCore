@@ -47,6 +47,7 @@
     <script src="~/js/jquery.unobtrusive-ajax.js"></script>
     <script type="text/javascript">
         if (window.parent.length > 0) {
+            alert(window.parent.length);
             window.parent.location = '@Url.Action("Index")';
         }
         function showTips(msg) { $('#errorbox').removeClass('fade out').find('span').text(msg); }

@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.Web.Extension;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -69,11 +70,11 @@ namespace Hos.ScheduleMaster.Web
                 //b.Cookie.Expiration = new TimeSpan(2, 0, 0);
                 b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
-            services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
             //EF数据库上下文
             services.AddDbContext<TaskDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
 
-
+            //services.AddTransient<Core.Repository.IUnitOfWork, TaskDbContext>();
+            //自动注册所有业务service
             services.AddAppServices();
 
         }
@@ -102,43 +103,16 @@ namespace Hos.ScheduleMaster.Web
                      pattern: "{controller=Login}/{action=Index}/{id?}");
             });
 
-            AutowiredServiceProvider.serviceProvider = app.ApplicationServices;
+            //加载全局缓存
+            ConfigurationCache.ServiceProvider = app.ApplicationServices;
+            ConfigurationCache.Refresh();
+            //using (var serviceScope = app.ApplicationServices.CreateScope())
+            //{
+            //    var context = serviceScope.ServiceProvider.GetService<Core.Repository.IUnitOfWork>();
+
+            //    // Seed the database.
+            //}
+            //var sd = app.ApplicationServices.GetRequiredService<Core.Models.TaskDbContext>();
         }
     }
-
-    public static class AppServiceExtensions
-    {
-        /// <summary>
-        /// 注册应用中的业务service
-        /// </summary>
-        /// <param name="services"></param>
-        public static void AddAppServices(this IServiceCollection services)
-        {
-            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Hos.ScheduleMaster.Core"));
-            if (assembly == null) return;
-            foreach (var type in assembly.GetTypes())
-            {
-                var serviceAttribute = type.GetCustomAttribute<ServiceMapToAttribute>();
-
-                if (serviceAttribute != null)
-                {
-                    switch (serviceAttribute.Lifetime)
-                    {
-                        case ServiceLifetime.Singleton:
-                            services.AddSingleton(serviceAttribute.ServiceType, type);
-                            break;
-                        case ServiceLifetime.Scoped:
-                            services.AddScoped(serviceAttribute.ServiceType, type);
-                            break;
-                        case ServiceLifetime.Transient:
-                            services.AddTransient(serviceAttribute.ServiceType, type);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
-        }
-    }
-
 }

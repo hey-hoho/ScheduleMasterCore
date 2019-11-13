@@ -1,5 +1,6 @@
 ﻿using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace Hos.ScheduleMaster.Core
 {
     public static class ConfigurationCache
     {
+        public static IServiceProvider ServiceProvider { get; set; }
+
         private static Dictionary<string, string> _cacheInstance;
 
         static ConfigurationCache()
@@ -19,11 +22,15 @@ namespace Hos.ScheduleMaster.Core
 
         public static void Refresh()
         {
-            //var configList = new Services.SystemService().GetConfigList();
-            //foreach (var item in configList)
-            //{
-            //    _cacheInstance[item.Key] = item.Value;
-            //}
+            using (var serviceScope = ServiceProvider.CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetRequiredService<TaskDbContext>();
+                var configList = context.SystemConfigs.ToList();
+                foreach (var item in configList)
+                {
+                    _cacheInstance[item.Key] = item.Value;
+                }
+            }
         }
 
         public static T GetField<T>(string key)

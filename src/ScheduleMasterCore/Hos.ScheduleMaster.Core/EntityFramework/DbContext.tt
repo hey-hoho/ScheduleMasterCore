@@ -22,10 +22,11 @@ using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Hos.ScheduleMaster.Core.EntityFramework;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-	//[ServiceMapTo(typeof(IUnitOfWork))]
+	[ServiceMapTo(typeof(IUnitOfWork))]
     public class TaskDbContext : DbContext, IUnitOfWork
     {
 		public TaskDbContext(DbContextOptions<TaskDbContext> option) : base(option)
@@ -34,12 +35,14 @@ namespace Hos.ScheduleMaster.Core.Models
 
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-		
+			base.OnConfiguring(optionsBuilder);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
             base.OnModelCreating(modelBuilder);		
+			//初始化数据
+            modelBuilder.SeedData();
 		}
 		<#
 	    foreach (var entitySet in files)

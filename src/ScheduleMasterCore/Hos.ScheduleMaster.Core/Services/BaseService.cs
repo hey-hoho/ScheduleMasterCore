@@ -19,10 +19,10 @@ namespace Hos.ScheduleMaster.Core.Services
             AutowiredServiceProvider.Autowired(this);
         }
 
-        public BaseService(IUnitOfWork unitOfWork)
-        {
-            this._unitOfWork = unitOfWork;
-        }
+        //public BaseService(IUnitOfWork unitOfWork)
+        //{
+        //    this._unitOfWork = unitOfWork;
+        //}
 
         protected ApiResponseMessage ServiceResult(ResultStatus status, string msg = "", object data = null)
         {

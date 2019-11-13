@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Hos.ScheduleMaster.Web.Extension;
 
 namespace Hos.ScheduleMaster.Web
 {
@@ -13,7 +14,7 @@ namespace Hos.ScheduleMaster.Web
     {
         public static void Main(string[] args)
         {
-            CreateHostBuilder(args).Build().Run();
+            CreateHostBuilder(args).Build().Migrate().Run();
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -21,6 +22,12 @@ namespace Hos.ScheduleMaster.Web
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+                .UseDefaultServiceProvider(options =>
+                {
+                    options.ValidateScopes = false;
                 });
+
+
     }
 }

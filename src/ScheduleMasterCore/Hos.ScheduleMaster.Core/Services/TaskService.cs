@@ -10,9 +10,10 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
+    [ServiceMapTo(typeof(ITaskService))]
     public class TaskService : BaseService, ITaskService
     {
-        public TaskService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
+        //public TaskService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
         public List<TaskEntity> QueryAll()
         {
             return _repositoryFactory.Tasks.Where(m => m.Status != (int)TaskStatus.Deleted).ToList();

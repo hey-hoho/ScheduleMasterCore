@@ -7,9 +7,10 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
+    [ServiceMapTo(typeof(ISystemService))]
     public class SystemService : BaseService, ISystemService
     {
-        public SystemService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
+        //public SystemService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
 
         public List<SystemConfigEntity> GetConfigList()
         {

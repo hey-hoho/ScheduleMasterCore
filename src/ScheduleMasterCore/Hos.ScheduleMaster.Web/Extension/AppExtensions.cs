@@ -1,0 +1,87 @@
+﻿using Hos.ScheduleMaster.Core;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+
+namespace Hos.ScheduleMaster.Web.Extension
+{
+    public static class AppExtensions
+    {
+        /// <summary>
+        /// 迁移数据库
+        /// </summary>
+        /// <param name="webhost"></param>
+        /// <returns></returns>
+        public static IHost Migrate(this IHost webhost)
+        {
+            using (var scope = webhost.Services.GetService<IServiceScopeFactory>().CreateScope())
+            {
+                using (var dbContext = scope.ServiceProvider.GetRequiredService<Core.Models.TaskDbContext>())
+                {
+                    //不需要先执行Add-migration迁移命令，如果数据库不存在，则自动创建并返回true
+                    dbContext.Database.EnsureCreated();
+                    //检测是否有待迁移内容，有的话，自动应用迁移
+                    if (dbContext.Database.GetPendingMigrations().Any())
+                    {
+                        dbContext.Database.Migrate();
+                    }
+                }
+            }
+            return webhost;
+        }
+
+        /// <summary>
+        /// 注册应用中的业务service
+        /// </summary>
+        /// <param name="services"></param>
+        public static void AddAppServices(this IServiceCollection services)
+        {
+            var assembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(x => x.FullName.Contains("Hos.ScheduleMaster.Core"));
+            if (assembly == null) return;
+            foreach (var type in assembly.GetTypes())
+            {
+                var serviceAttribute = type.GetCustomAttribute<ServiceMapToAttribute>();
+
+                if (serviceAttribute != null)
+                {
+                    switch (serviceAttribute.Lifetime)
+                    {
+                        case ServiceLifetime.Singleton:
+                            services.AddSingleton(serviceAttribute.ServiceType, type);
+                            break;
+                        case ServiceLifetime.Scoped:
+                            services.AddScoped(serviceAttribute.ServiceType, type);
+                            break;
+                        case ServiceLifetime.Transient:
+                            services.AddTransient(serviceAttribute.ServiceType, type);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 判断是否异步请求
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public static bool IsAjaxRequest(this Microsoft.AspNetCore.Http.HttpRequest request)
+        {
+            bool isAjax = false;
+            var xreq = request.Headers.ContainsKey("x-requested-with");
+            if (xreq)
+            {
+                isAjax = request.Headers["x-requested-with"] == "XMLHttpRequest";
+            }
+            return isAjax;
+        }
+    }
+}
