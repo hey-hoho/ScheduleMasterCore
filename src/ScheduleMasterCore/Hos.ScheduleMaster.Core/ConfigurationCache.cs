@@ -2,6 +2,7 @@
 using Hos.ScheduleMaster.Core.Repository;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,11 +14,13 @@ namespace Hos.ScheduleMaster.Core
     {
         public static IServiceProvider ServiceProvider { get; set; }
 
-        private static Dictionary<string, string> _cacheInstance;
+        private static ConcurrentDictionary<string, string> _cacheInstance;
 
         static ConfigurationCache()
         {
-            _cacheInstance = new Dictionary<string, string>();
+            //初始分配1000个容量，避免配置项多了以后频繁扩容，1000基本够用了
+            //并发级别为1，表示仅允许1个线程同时更新
+            _cacheInstance = new ConcurrentDictionary<string, string>(1, 1000);
         }
 
         public static void Refresh()
