@@ -12,7 +12,7 @@ namespace Hos.ScheduleMaster.Core
 {
     public static class ConfigurationCache
     {
-        public static IServiceProvider ServiceProvider { get; set; }
+        public static IServiceProvider RootServiceProvider { get; set; }
 
         private static ConcurrentDictionary<string, string> _cacheInstance;
 
@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.Core
 
         public static void Refresh()
         {
-            using (var serviceScope = ServiceProvider.CreateScope())
+            using (var serviceScope = RootServiceProvider.CreateScope())
             {
                 var context = serviceScope.ServiceProvider.GetRequiredService<TaskDbContext>();
                 var configList = context.SystemConfigs.ToList();

@@ -10,14 +10,14 @@ namespace Hos.ScheduleMaster.Core.Services
     public abstract class BaseService
     {
         [Autowired]
-        public IUnitOfWork _unitOfWork;
+        public IUnitOfWork _unitOfWork { get; set; }
 
         [Autowired]
-        protected RepositoryFactory _repositoryFactory;//=> new RepositoryFactory(_unitOfWork);
+        public RepositoryFactory _repositoryFactory { get; set; }//=> new RepositoryFactory(_unitOfWork);
 
         public BaseService()
         {
-            AutowiredServiceProvider.Autowired(this);
+            //AutowiredServiceProvider.Autowired(this);
         }
 
         //public BaseService(IUnitOfWork unitOfWork)

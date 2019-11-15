@@ -1,7 +1,10 @@
 ﻿using Hos.ScheduleMaster.Core;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
@@ -34,6 +37,26 @@ namespace Hos.ScheduleMaster.Web.Extension
                 }
             }
             return webhost;
+        }
+
+        /// <summary>
+        /// 自定义控制器激活，并手动注册所有控制器
+        /// </summary>
+        /// <param name="services"></param>
+        /// <param name="obj"></param>
+        public static void AddHosControllers(this IServiceCollection services, object obj)
+        {
+            services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
+            var assembly = obj.GetType().GetTypeInfo().Assembly;
+            var manager = new ApplicationPartManager();
+            manager.ApplicationParts.Add(new AssemblyPart(assembly));
+            manager.FeatureProviders.Add(new ControllerFeatureProvider());
+            var feature = new ControllerFeature();
+            manager.PopulateFeature(feature);
+            feature.Controllers.Select(ti => ti.AsType()).ToList().ForEach(t =>
+            {
+                services.AddTransient(t);
+            });
         }
 
         /// <summary>

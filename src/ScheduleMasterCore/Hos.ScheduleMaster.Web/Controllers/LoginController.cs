@@ -17,11 +17,16 @@ namespace Hos.ScheduleMaster.Web.Controllers
     {
         private const string CookieKey = "smc_cookie";
 
-        public IAccountService _accountService;
+        [Core.AutowiredAttribute]
+        public IAccountService _accountService { get; set; }
 
-        public LoginController(IAccountService accountService)
+        public LoginController(IHttpContextAccessor accountService)
         {
-            _accountService = accountService;
+            var s = Request;
+            //var pro = new Core.AutowiredServiceProvider();
+            //pro.ServiceProvider = accountService.HttpContext.RequestServices;
+            //pro.Autowired(this, accountService.HttpContext.RequestServices);
+            //_accountService = accountService;
         }
 
 

@@ -37,6 +37,7 @@ namespace Hos.ScheduleMaster.Core.Repository
 	    foreach (var entitySet in files)
 	    {
 		string filename = entitySet.Name.Replace(entitySet.Extension, "");
+		if(filename.EndsWith("IEntity")) continue;
 	#>
 	 
 	public BaseRepository<<#=filename#>> <#=filename.Substring(0,entitySet.Name.IndexOf("Entity"))#>s => new BaseRepository<<#=filename#>>(_context);

@@ -12,10 +12,13 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationParts;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Pomelo.EntityFrameworkCore.MySql;
@@ -37,7 +40,9 @@ namespace Hos.ScheduleMaster.Web
             services.AddMemoryCache();
             services.AddOptions();
             services.AddHttpContextAccessor();
-            services.AddControllersWithViews();
+            //services.AddControllersWithViews();
+            //services.AddControllers();
+            services.AddHosControllers(this);
             services.AddMvc(options =>
             {
                 //options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
@@ -106,7 +111,7 @@ namespace Hos.ScheduleMaster.Web
             });
 
             //º”‘ÿ»´æ÷ª∫¥Ê
-            ConfigurationCache.ServiceProvider = app.ApplicationServices;
+            ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             ConfigurationCache.Refresh();
             //using (var serviceScope = app.ApplicationServices.CreateScope())
             //{
@@ -115,6 +120,38 @@ namespace Hos.ScheduleMaster.Web
             //    // Seed the database.
             //}
             //var sd = app.ApplicationServices.GetRequiredService<Core.Models.TaskDbContext>();
+        }
+    }
+
+    public class ServiceBasedControllerActivator : IControllerActivator
+    {
+        public object Create(ControllerContext actionContext)
+        {
+            var controllerType = actionContext.ActionDescriptor.ControllerTypeInfo.AsType();
+            var instance = actionContext.HttpContext.RequestServices.GetRequiredService(controllerType);
+            PropertyActivate(instance, actionContext.HttpContext.RequestServices);
+            return instance;
+        }
+
+        public virtual void Release(ControllerContext context, object controller)
+        {
+
+        }
+
+        private void PropertyActivate(object service, IServiceProvider provider)
+        {
+            var serviceType = service.GetType();
+            var properties = serviceType.GetProperties().AsEnumerable().Where(x => x.Name.StartsWith("_"));
+            foreach (PropertyInfo property in properties)
+            {
+                var autowiredAttr = property.GetCustomAttribute<AutowiredAttribute>();
+                if (autowiredAttr != null)
+                {
+                    var innerService = provider.GetService(property.PropertyType);
+                    PropertyActivate(innerService, provider);
+                    property.SetValue(service, innerService);
+                }
+            }
         }
     }
 }
