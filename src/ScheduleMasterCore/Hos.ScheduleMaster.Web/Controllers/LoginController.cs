@@ -10,6 +10,7 @@ using Hos.ScheduleMaster.Web.Extension;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Hos.ScheduleMaster.Core;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
@@ -17,15 +18,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
     {
         private const string CookieKey = "smc_cookie";
 
-        [Core.AutowiredAttribute]
+        [Autowired]
         public IAccountService _accountService { get; set; }
 
-        public LoginController(IHttpContextAccessor accountService)
+        public LoginController(IHttpContextAccessor httpContextAccessor)
         {
-            var s = Request;
-            //var pro = new Core.AutowiredServiceProvider();
-            //pro.ServiceProvider = accountService.HttpContext.RequestServices;
-            //pro.Autowired(this, accountService.HttpContext.RequestServices);
+            var pro = new AutowiredServiceProvider();
+            pro.PropertyActivate(this, httpContextAccessor.HttpContext.RequestServices);
             //_accountService = accountService;
         }
 

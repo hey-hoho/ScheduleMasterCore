@@ -22,7 +22,7 @@ namespace Hos.ScheduleMaster.Core
 
         //public IServiceProvider ServiceProvider;
 
-        public void Autowired(object service, IServiceProvider provider)
+        public void PropertyActivate(object service, IServiceProvider provider)
         {
             //var serviceProvider = ServiceProvider;// ConfigurationCache.ServiceProvider;
             var serviceType = service.GetType();
@@ -44,7 +44,7 @@ namespace Hos.ScheduleMaster.Core
                 if (autowiredAttr != null)
                 {
                     var innerService = provider.GetService(property.PropertyType);
-                    Autowired(innerService, provider);
+                    PropertyActivate(innerService, provider);
                     property.SetValue(service, innerService);
                 }
             }

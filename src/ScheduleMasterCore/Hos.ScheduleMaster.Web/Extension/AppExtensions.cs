@@ -46,7 +46,7 @@ namespace Hos.ScheduleMaster.Web.Extension
         /// <param name="obj"></param>
         public static void AddHosControllers(this IServiceCollection services, object obj)
         {
-            services.Replace(ServiceDescriptor.Transient<IControllerActivator, ServiceBasedControllerActivator>());
+            services.Replace(ServiceDescriptor.Transient<IControllerActivator, HosControllerActivator>());
             var assembly = obj.GetType().GetTypeInfo().Assembly;
             var manager = new ApplicationPartManager();
             manager.ApplicationParts.Add(new AssemblyPart(assembly));

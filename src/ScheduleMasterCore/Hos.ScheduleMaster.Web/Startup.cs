@@ -123,7 +123,7 @@ namespace Hos.ScheduleMaster.Web
         }
     }
 
-    public class ServiceBasedControllerActivator : IControllerActivator
+    public class HosControllerActivator : IControllerActivator
     {
         public object Create(ControllerContext actionContext)
         {
@@ -135,7 +135,18 @@ namespace Hos.ScheduleMaster.Web
 
         public virtual void Release(ControllerContext context, object controller)
         {
-
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+            if (controller == null)
+            {
+                throw new ArgumentNullException(nameof(controller));
+            }
+            if (controller is IDisposable disposable)
+            {
+                disposable.Dispose();
+            }
         }
 
         private void PropertyActivate(object service, IServiceProvider provider)
@@ -147,9 +158,15 @@ namespace Hos.ScheduleMaster.Web
                 var autowiredAttr = property.GetCustomAttribute<AutowiredAttribute>();
                 if (autowiredAttr != null)
                 {
+                    //从DI容器获取实例
                     var innerService = provider.GetService(property.PropertyType);
-                    PropertyActivate(innerService, provider);
-                    property.SetValue(service, innerService);
+                    if (innerService != null)
+                    {
+                        //递归解决服务嵌套问题
+                        PropertyActivate(innerService, provider);
+                        //属性赋值
+                        property.SetValue(service, innerService);
+                    }
                 }
             }
         }
