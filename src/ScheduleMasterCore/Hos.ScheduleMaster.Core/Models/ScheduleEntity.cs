@@ -6,13 +6,18 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskEntity : IEntity
+    public class ScheduleEntity : IEntity
     {
+        public ScheduleEntity()
+        {
+            this.Id = Guid.NewGuid();
+        }
+
         /// <summary>
         /// 任务id
         /// </summary>
-        [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
+        [Key]
+        public Guid Id { get; set; }
 
         /// <summary>
         /// 任务名称
@@ -105,19 +110,19 @@ namespace Hos.ScheduleMaster.Core.Models
 
     }
 
-    public class TaskView
+    public class ScheduleView
     {
-        public TaskEntity Task { get; set; }
+        public ScheduleEntity Schedule { get; set; }
 
-        public Dictionary<string, string> Guardians { get; set; }
+        public List<KeyValuePair<string, string>> Keepers { get; set; }
 
-        public Dictionary<int, string> ChildTasks { get; set; }
+        public Dictionary<Guid, string> Children { get; set; }
     }
 
     /// <summary>
     /// 任务状态
     /// </summary>
-    public enum TaskStatus
+    public enum ScheduleStatus
     {
         /// <summary>
         /// 已删除

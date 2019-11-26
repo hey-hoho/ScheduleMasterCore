@@ -10,11 +10,11 @@ namespace Hos.ScheduleMaster.Core.Dto
         public TaskInfo()
         {
             this.Guardians = new List<int>();
-            this.Nexts = new List<int>();
-            this.Params = new List<TaskParam>();
+            this.Nexts = new List<Guid>();
+            this.Params = new List<ScheduleParam>();
         }
 
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [Required, MaxLength(50)]
         public string Title { get; set; }
@@ -50,16 +50,16 @@ namespace Hos.ScheduleMaster.Core.Dto
         /// <summary>
         /// 后置任务id
         /// </summary>
-        public List<int> Nexts { get; set; }
+        public List<Guid> Nexts { get; set; }
 
         /// <summary>
         /// 自定义参数
         /// </summary>
-        public List<TaskParam> Params
+        public List<ScheduleParam> Params
         {
             get
             {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<TaskParam>>(CustomParamsJson);
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(CustomParamsJson);
             }
             set
             {
@@ -68,7 +68,7 @@ namespace Hos.ScheduleMaster.Core.Dto
         }
     }
 
-    public class TaskParam
+    public class ScheduleParam
     {
         public string ParamKey { get; set; }
         public string ParamValue { get; set; }

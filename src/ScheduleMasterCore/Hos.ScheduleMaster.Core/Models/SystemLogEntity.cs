@@ -9,7 +9,7 @@ namespace Hos.ScheduleMaster.Core.Models
     {
         public SystemLogEntity()
         {
-            this.TaskId = 0;//0表示系统运行日志
+            this.ScheduleId = Guid.NewGuid();//0表示系统运行日志
         }
 
         [Key]
@@ -23,7 +23,7 @@ namespace Hos.ScheduleMaster.Core.Models
 
         public string StackTrace { get; set; }
 
-        public int TaskId { get; set; }
+        public Guid ScheduleId { get; set; }
 
         public Guid? TraceId { get; set; }
 

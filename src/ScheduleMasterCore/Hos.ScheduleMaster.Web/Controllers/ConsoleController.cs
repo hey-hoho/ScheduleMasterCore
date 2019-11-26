@@ -8,7 +8,6 @@ namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class ConsoleController : AdminController
     {
-        public ConsoleController(Core.Interface.IAccountService accountService) : base(accountService) { }
 
         public IActionResult Index()
         {

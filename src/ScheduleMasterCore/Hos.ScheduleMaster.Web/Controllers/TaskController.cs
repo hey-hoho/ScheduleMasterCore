@@ -15,12 +15,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class TaskController : AdminController
     {
-        public ITaskService _taskService;
+        [Autowired]
+        public IScheduleService _taskService { get; set; }
 
-        public TaskController(IAccountService accountService, ITaskService taskService) : base(accountService)
-        {
-            _taskService = taskService;
-        }
+        //public TaskController(IAccountService accountService, IScheduleService taskService)
+        //{
+        //    _taskService = taskService;
+        //}
 
 
         /// <summary>
@@ -50,7 +51,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 return DangerTip("数据验证失败！");
             }
-            TaskEntity model = new TaskEntity
+            ScheduleEntity model = new ScheduleEntity
             {
                 AssemblyName = task.AssemblyName,
                 ClassName = task.ClassName,
@@ -60,7 +61,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 Remark = task.Remark,
                 StartDate = task.StartDate,
                 Title = task.Title,
-                Status = (int)Core.Models.TaskStatus.Stop,
+                Status = (int)Core.Models.ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
                 RunMoreTimes = task.RunMoreTimes,
                 TotalRunCount = 0
@@ -83,7 +84,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public ActionResult Edit(int id = 0)
+        public ActionResult Edit(Guid id)
         {
             var model = _taskService.QueryById(id);
             if (model == null)
@@ -92,9 +93,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _taskService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
-            TaskInfo viewer = ObjectMapper<TaskEntity, TaskInfo>.Convert(model);
+            TaskInfo viewer = ObjectMapper<ScheduleEntity, TaskInfo>.Convert(model);
             viewer.Guardians = _taskService.QueryTaskGuardians(id).Select(x => x.UserId).ToList();
-            viewer.Nexts = _taskService.QueryTaskReferences(id).Select(x => x.ChildTaskId).ToList();
+            viewer.Nexts = _taskService.QueryTaskReferences(id).Select(x => x.ChildId).ToList();
             return View("Create", viewer);
         }
 
@@ -151,9 +152,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="enddate"></param>
         /// <returns></returns>
         [HttpPost, AjaxRequestOnly]
-        public ActionResult ClearLog(int? task, int? category, DateTime? startdate, DateTime? enddate)
+        public ActionResult ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
-            var result = _taskService.DeleteLog(task, category, startdate, enddate);
+            var result = _taskService.DeleteLog(sid, category, startdate, enddate);
             if (result > 0)
             {
                 return SuccessTip($"清理成功！本次清理【{result}】条");

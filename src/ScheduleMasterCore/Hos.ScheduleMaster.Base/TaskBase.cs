@@ -10,7 +10,7 @@ namespace Hos.ScheduleMaster.Base
     /// </summary>
     public abstract class TaskBase : MarshalByRefObject, IDisposable
     {
-        internal Queue<TaskLog> logger = new Queue<TaskLog>();
+        internal Queue<ScheduleLog> logger = new Queue<ScheduleLog>();
 
         private bool _isRunning = false;
 
@@ -54,9 +54,9 @@ namespace Hos.ScheduleMaster.Base
             }
         }
 
-        public TaskLog ReadLog()
+        public ScheduleLog ReadLog()
         {
-            TaskLog q = null;
+            ScheduleLog q = null;
             if (logger.Count > 0)
             {
                 q = logger.Dequeue();

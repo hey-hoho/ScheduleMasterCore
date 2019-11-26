@@ -1,4 +1,5 @@
-﻿using Hos.ScheduleMaster.Core.Interface;
+﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -10,12 +11,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class SystemController : AdminController
     {
-        public ISystemService _systemService;
+        [Autowired]
+        public ISystemService _systemService { get; set; }
 
-        public SystemController(IAccountService accountService, ISystemService systemService) : base(accountService)
-        {
-            _systemService = systemService;
-        }
+        //public SystemController(ISystemService systemService)
+        //{
+        //    _systemService = systemService;
+        //}
 
         // GET: System
         public ActionResult Index()

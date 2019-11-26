@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Interface;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Web.Extension;
@@ -16,13 +17,14 @@ namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class AdminController : Controller
     {
-        public IAccountService _accountService;
+        [Autowired]
+        public IAccountService _accountService { get; set; }
 
 
-        public AdminController(IAccountService accountService)
-        {
-            _accountService = accountService;
-        }
+        //public AdminController(IAccountService accountService)
+        //{
+        //    _accountService = accountService;
+        //}
 
         /// <summary>
         /// 返回数据表格的json数据

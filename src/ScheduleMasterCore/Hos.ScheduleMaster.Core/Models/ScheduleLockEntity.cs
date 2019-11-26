@@ -5,13 +5,13 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskGuardianEntity : IEntity
+    public class ScheduleLockEntity : IEntity
     {
         [Key]
-        public int Id { get; set; }
+        public Guid ScheduleId { get; set; }
 
-        public int TaskId { get; set; }
-
-        public int UserId { get; set; }
+        [Required]
+        public int Status { get; set; }
     }
+
 }

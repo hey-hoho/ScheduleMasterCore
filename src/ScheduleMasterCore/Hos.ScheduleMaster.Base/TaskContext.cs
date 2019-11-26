@@ -18,10 +18,12 @@ namespace Hos.ScheduleMaster.Base
             _instance = instance;
         }
 
+        public string Node { get; set; }
+
         /// <summary>
         /// 任务id，每次运行前都会重新赋值，方便写log或其他操作时跟踪
         /// </summary>
-        public int TaskId { protected get; set; }
+        public Guid TaskId { protected get; set; }
 
         public Guid TraceId { private get; set; }
 
@@ -72,12 +74,12 @@ namespace Hos.ScheduleMaster.Base
         /// <param name="type"></param>
         public void WriteLog(string message, LogCategory type = LogCategory.Info)
         {
-            _instance.logger.Enqueue(new TaskLog
+            _instance.logger.Enqueue(new ScheduleLog
             {
                 Category = (int)type,
                 Message = message,
                 CreateTime = DateTime.Now,
-                TaskId = TaskId,
+                ScheduleId = TaskId,
                 TraceId = TraceId
             });
         }
@@ -88,13 +90,13 @@ namespace Hos.ScheduleMaster.Base
         /// <param name="ex"></param>
         public void WriteError(Exception ex)
         {
-            _instance.logger.Enqueue(new TaskLog
+            _instance.logger.Enqueue(new ScheduleLog
             {
                 Category = (int)LogCategory.Error,
                 Message = ex.Message,
                 StackTrace = ex.StackTrace,
                 CreateTime = DateTime.Now,
-                TaskId = TaskId,
+                ScheduleId = TaskId,
                 TraceId = TraceId
             });
         }

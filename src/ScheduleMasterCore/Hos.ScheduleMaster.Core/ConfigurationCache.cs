@@ -27,7 +27,7 @@ namespace Hos.ScheduleMaster.Core
         {
             using (var serviceScope = RootServiceProvider.CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<TaskDbContext>();
+                var context = serviceScope.ServiceProvider.GetRequiredService<SmDbContext>();
                 var configList = context.SystemConfigs.ToList();
                 foreach (var item in configList)
                 {

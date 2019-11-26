@@ -11,8 +11,6 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(IAccountService))]
     public class AccountService : BaseService, IAccountService
     {
-        //public AccountService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
-
         /// <summary>
         /// 用户名和密码登录判断
         /// </summary>

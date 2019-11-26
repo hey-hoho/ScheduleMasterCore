@@ -5,12 +5,12 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskRunTraceEntity : IEntity
+    public class ScheduleTraceEntity : IEntity
     {
         [Key]
         public Guid TraceId { get; set; }
 
-        public int TaskId { get; set; }
+        public Guid ScheduleId { get; set; }
 
         public DateTime StartTime { get; set; }
 
@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.Core.Models
     /// <summary>
     /// 任务运行结果
     /// </summary>
-    public enum TaskRunResult
+    public enum ScheduleRunResult
     {
 
         /// <summary>

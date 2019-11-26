@@ -10,8 +10,6 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(ISystemService))]
     public class SystemService : BaseService, ISystemService
     {
-        //public SystemService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
-
         public List<SystemConfigEntity> GetConfigList()
         {
             return _repositoryFactory.SystemConfigs.Table.ToList();

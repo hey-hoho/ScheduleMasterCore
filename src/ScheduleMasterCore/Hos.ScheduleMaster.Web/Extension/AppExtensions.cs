@@ -25,12 +25,13 @@ namespace Hos.ScheduleMaster.Web.Extension
         {
             using (var scope = webhost.Services.GetService<IServiceScopeFactory>().CreateScope())
             {
-                using (var dbContext = scope.ServiceProvider.GetRequiredService<Core.Models.TaskDbContext>())
+                using (var dbContext = scope.ServiceProvider.GetRequiredService<Core.Models.SmDbContext>())
                 {
                     //不需要先执行Add-migration迁移命令，如果数据库不存在，则自动创建并返回true
-                    dbContext.Database.EnsureCreated();
+                    //dbContext.Database.EnsureCreated();
                     //检测是否有待迁移内容，有的话，自动应用迁移
-                    if (dbContext.Database.GetPendingMigrations().Any())
+                    IEnumerable<string> migrations = dbContext.Database.GetPendingMigrations();
+                    if (migrations.Any())
                     {
                         dbContext.Database.Migrate();
                     }

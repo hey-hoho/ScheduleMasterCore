@@ -1,0 +1,471 @@
+﻿
+using Hos.ScheduleMaster.Core.EntityFramework;
+using Hos.ScheduleMaster.Core.Log;
+using Quartz;
+using Quartz.Impl;
+using Quartz.Impl.Matchers;
+using Quartz.Impl.Triggers;
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Linq;
+using System.Web;
+using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.Base;
+using System.Threading.Tasks;
+using System.Threading;
+using Hos.ScheduleMaster.Core.Common;
+
+namespace Hos.ScheduleMaster.QuartzHost.Common
+{
+    public class QuartzManager
+    {
+        private QuartzManager()
+        {
+        }
+
+        private static IScheduler _scheduler = null;
+
+        /// <summary>
+        /// 初始化调度系统
+        /// </summary>
+        public static async Task InitScheduler()
+        {
+            try
+            {
+                if (_scheduler == null)
+                {
+                    NameValueCollection properties = new NameValueCollection();
+                    properties["quartz.scheduler.instanceName"] = "Hos.SchefuleMaster";
+                    properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
+                    properties["quartz.threadPool.threadCount"] = "50";
+                    properties["quartz.threadPool.threadPriority"] = "Normal";
+
+                    ISchedulerFactory factory = new StdSchedulerFactory(properties);
+
+                    _scheduler = await factory.GetScheduler();
+                    await _scheduler.Clear();
+                    await _scheduler.Start();
+                    //SQLHelper.ExecuteNonQuery($"UPDATE ServerNodes SET Status=1 WHERE NodeName='{ConfigurationManager.AppSettings.Get("HostIdentity")}' ");
+                    LogHelper.Info("任务调度平台初始化成功！");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error("任务调度平台初始化失败！", ex);
+            }
+        }
+
+        /// <summary>
+        /// 关闭调度系统
+        /// </summary>
+        public static async Task Shutdown()
+        {
+            try
+            {
+                //判断调度是否已经关闭
+                if (!_scheduler.IsShutdown)
+                {
+                    //等待任务运行完成再关闭调度
+                    await _scheduler.Shutdown(true);
+                    LogHelper.Info("任务调度平台已经停止！");
+                    //SQLHelper.ExecuteNonQuery($"UPDATE ServerNodes SET Status=0 WHERE NodeName='{ConfigurationManager.AppSettings.Get("HostIdentity")}' ");
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error("任务调度平台停止失败！", ex);
+            }
+        }
+
+        /// <summary>
+        /// 启动一个任务，带重试机制
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="callBack"></param>
+        /// <returns></returns>
+        public static bool StartWithRetry(ScheduleView view, Action<DateTime?> callBack)
+        {
+            PluginLoadContext lc = null;
+            try
+            {
+                //这里用AppDomain解决程序集引用依赖的问题
+                lc = AssemblyHelper.LoadAppDomain(view.Schedule.AssemblyName);
+                for (int i = 0; i < 3; i++)
+                {
+                    try
+                    {
+                        Start(view, lc, callBack);
+                        return true;
+                    }
+                    catch (SchedulerException sexp)
+                    {
+                        LogHelper.Error($"任务启动失败！开始第{i + 1}次重试...", sexp, view.Schedule.Id);
+                    }
+                }
+                //最后一次尝试
+                Start(view, lc, callBack);
+                return true;
+            }
+            catch (SchedulerException sexp)
+            {
+                AssemblyHelper.UnLoadAssemblyLoadContext(lc);
+                LogHelper.Error($"任务所有重试都失败了，已放弃启动！", sexp, view.Schedule.Id);
+                return false;
+            }
+            catch (Exception exp)
+            {
+                AssemblyHelper.UnLoadAssemblyLoadContext(lc);
+                LogHelper.Error($"任务启动失败！", exp, view.Schedule.Id);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 暂停一个任务
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        public static async Task<bool> Pause(Guid taskId)
+        {
+            try
+            {
+                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                if (await _scheduler.CheckExists(jk))
+                {
+                    //任务已经存在则暂停任务
+                    await _scheduler.PauseJob(jk);
+                    var jobDetail = await _scheduler.GetJobDetail(jk);
+                    if (jobDetail.JobType.GetInterface("IInterruptableJob") != null)
+                    {
+                        await _scheduler.Interrupt(jk);
+                    }
+                    LogHelper.Warn($"任务已经暂停运行！", taskId);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception exp)
+            {
+                LogHelper.Error($"任务暂停运行失败！", exp, taskId);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 恢复运行
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <returns></returns>
+        public static async Task<bool> Resume(Guid taskId)
+        {
+            try
+            {
+                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                if (await _scheduler.CheckExists(jk))
+                {
+                    //恢复任务继续执行
+                    await _scheduler.ResumeJob(jk);
+                    LogHelper.Info($"任务已经恢复运行！", taskId);
+                    return true;
+                }
+                return false;
+            }
+            catch (Exception exp)
+            {
+                LogHelper.Error($"任务恢复运行失败！", exp, taskId);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 停止一个任务
+        /// </summary>
+        /// <param name="taskId"></param>
+        /// <param name="callBack"></param>
+        /// <returns></returns>
+        public static async Task<bool> Stop(Guid taskId)
+        {
+            try
+            {
+                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                var job = await _scheduler.GetJobDetail(jk);
+                if (job != null)
+                {
+                    var instance = job.JobDataMap["instance"] as TaskBase;
+                    //释放资源
+                    if (instance != null)
+                    {
+                        instance.Dispose();
+                    }
+                    //卸载应用程序域
+                    var domain = job.JobDataMap["domain"] as PluginLoadContext;
+                    AssemblyHelper.UnLoadAssemblyLoadContext(domain);
+                    //删除quartz有关设置
+                    var trigger = new TriggerKey(taskId.ToString());
+                    await _scheduler.PauseTrigger(trigger);
+                    await _scheduler.UnscheduleJob(trigger);
+                    await _scheduler.DeleteJob(jk);
+                    _scheduler.ListenerManager.RemoveJobListener(taskId.ToString());
+                }
+                LogHelper.Info($"任务已经停止运行！", taskId);
+                return true;
+            }
+            catch (Exception exp)
+            {
+                LogHelper.Error($"任务停止失败！", exp, taskId);
+                return false;
+            }
+        }
+
+        /// <summary>
+        ///立即运行一次任务
+        /// </summary>
+        /// <param name="JobKey">任务key</param>
+        public static async Task<bool> RunOnce(Guid taskId)
+        {
+            JobKey jk = new JobKey(taskId.ToString().ToLower());
+            if (await _scheduler.CheckExists(jk))
+            {
+                await _scheduler.TriggerJob(jk);
+                return true;
+                //var jobDetail = await _scheduler.GetJobDetail(jk);
+                //var instance = jobDetail.JobDataMap["instance"] as TaskBase;
+                //try
+                //{
+                //    if (instance != null)
+                //    {
+                //        instance.TaskId = taskId;
+
+                //        var param = jobDetail.JobDataMap["params"];
+                //        if (param != null)
+                //        {
+                //            instance.CustomParamsJson = param.ToString();
+                //        }
+                //        instance.InnerRun();
+                //        LogHelper.Info(string.Format("任务[{0}]立即运行成功！", jobDetail.JobDataMap["name"]), taskId);
+                //        return true;
+                //    }
+                //    else
+                //    {
+                //        LogHelper.Error($"instance=null", taskId);
+                //    }
+                //}
+                //catch (Exception exp)
+                //{
+                //    LogHelper.Error($"任务[{jobDetail.JobDataMap["name"]}]运行失败！", exp, taskId);
+                //}
+                //var triggers = _scheduler.GetTriggersOfJob(jk);
+                //string taskName = JobKey;
+                //if (triggers != null && triggers.Count > 0)
+                //{
+                //    taskName = triggers[0].Description;
+                //}
+                //var type = jobDetail.JobType;
+                //var instance = type.FastNew();
+                //var method = type.GetMethod("Execute");
+                //method.Invoke(instance, new object[] { null });
+            }
+            else
+            {
+                LogHelper.Error($"_scheduler.CheckExists=false", taskId);
+            }
+            return false;
+        }
+
+        #region 私有方法
+
+        private static void Start(ScheduleView view, PluginLoadContext lc, Action<DateTime?> callBack)
+        {
+            //throw new SchedulerException("SchedulerException");
+
+            //在应用程序域中创建实例返回并保存在job中，这是最终调用任务执行的实例
+            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.AssemblyName, view.Schedule.ClassName) as TaskBase;
+            if (instance == null)
+            {
+                throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
+            }
+            // instance.logger = new LogWriter(); ;
+            JobDataMap map = new JobDataMap
+            {
+                new KeyValuePair<string, object> ("domain",lc),
+                new KeyValuePair<string, object> ("instance",instance),
+                new KeyValuePair<string, object> ("name",view.Schedule.Title),
+                new KeyValuePair<string, object> ("params",view.Schedule.CustomParamsJson),
+                new KeyValuePair<string, object> ("keepers",view.Keepers),
+                new KeyValuePair<string, object> ("children",view.Children)
+            };
+            IJobDetail job = JobBuilder.Create(typeof(RootJob))
+                .WithIdentity(view.Schedule.Id.ToString())
+                .SetJobData(map)
+                //.UsingJobData("assembly", task.AssemblyName)
+                //.UsingJobData("class", task.ClassName)
+                .Build();
+
+            //添加触发器
+            _scheduler.ListenerManager.AddJobListener(new JobRunListener(view.Schedule.Id.ToString(), callBack),
+                KeyMatcher<JobKey>.KeyEquals(new JobKey(view.Schedule.Id.ToString())));
+
+            if (view.Schedule.RunMoreTimes)
+            {
+                if (!CronExpression.IsValidExpression(view.Schedule.CronExpression))
+                {
+                    throw new Exception("cron表达式验证失败");
+                }
+                CronTriggerImpl trigger = new CronTriggerImpl
+                {
+                    CronExpressionString = view.Schedule.CronExpression,
+                    Name = view.Schedule.Title,
+                    Key = new TriggerKey(view.Schedule.Id.ToString()),
+                    Description = view.Schedule.Remark
+                };
+                if (view.Schedule.StartDate.HasValue)
+                {
+                    trigger.StartTimeUtc = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.StartDate.Value);
+                }
+                if (view.Schedule.EndDate.HasValue)
+                {
+                    trigger.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.EndDate.Value);
+                }
+
+                _scheduler.ScheduleJob(job, trigger);
+            }
+            else
+            {
+                DateTimeOffset start = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now);
+                if (view.Schedule.StartDate.HasValue)
+                {
+                    start = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.StartDate.Value);
+                }
+                DateTimeOffset end = start.AddMinutes(1);
+                if (view.Schedule.EndDate.HasValue)
+                {
+                    end = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.EndDate.Value);
+                }
+                ITrigger trigger = TriggerBuilder.Create()
+                    .WithIdentity(view.Schedule.Id.ToString())
+                    .StartAt(start)
+                    .WithSimpleSchedule(x => x
+                    .WithRepeatCount(1).WithIntervalInMinutes(1))
+                    .EndAt(end)
+                    .Build();
+                _scheduler.ScheduleJob(job, trigger);
+            }
+
+            LogHelper.Info($"任务[{view.Schedule.Title}]启动成功！", view.Schedule.Id);
+
+            Task.Run(() =>
+            {
+                while (true)
+                {
+                    var log = instance.ReadLog();
+                    if (log != null)
+                    {
+                        LogManager.Queue.Write(new SystemLogEntity
+                        {
+                            Category = log.Category,
+                            Message = log.Message,
+                            CreateTime = log.CreateTime,
+                            ScheduleId = log.ScheduleId,
+                            TraceId = log.TraceId
+                        });
+                    }
+                    else
+                    {
+                        Thread.Sleep(3000);
+                    }
+                }
+            });
+        }
+        #endregion
+
+        #region 邮件模板
+
+        public static string GetErrorEmailContent(string sname, Exception ex)
+        {
+            string EmailTemplate = "<div style=\"background-color:#d0d0d0;text-align:center;padding:40px;font-family:'微软雅黑','黑体', 'Lucida Grande', Verdana, sans-serif;\"><div style=\"width:700px;margin:0 auto;padding:10px;color:#333;background-color:#fff;border:0px solid #aaa;border-radius:5px;-webkit-box-shadow:3px 3px 10px #999;-moz-box-shadow:3px 3px 10px #999;box-shadow:3px 3px 10px #999;font-family:Verdana, sans-serif; \"><style> .mmsgLetterContent p { margin:20px 0; padding:0; } 	.mmsgLetterContent 	{background: url(https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/src/ScheduleMasterCore/Hos.ScheduleMaster.Web/wwwroot/images/logo-black_xs.png) no-repeat top right; }</style><div class=\"mmsgLetterContent\" style=\"text-align:left;padding:30px;font-size:14px;line-height:1.5;\"><p>你好!</p><p>感谢你使用ScheduleMaster平台。 <br />你参与的任务<strong>$NAME$</strong>在[$TIME$] 运行发生异常，请及时查看处理。</p><p><span style = \"border-radius: 2px;background: linear-gradient(to right,#57b5e3,#c4e6f6) ;padding: 4px 6px 4px 6px;display: inline-block;line-height: 1;color: #fff;text-align: center;white-space: nowrap;vertical-align: baseline;\" > 错误信息 </span ><br /> <strong> $MESSAGE$ </strong></p><p><span style= \"border-radius: 2px ;background: linear-gradient(to right,#d73d32,#f7b5b0) ;padding: 4px 6px 4px 6px;display: inline-block;line-height: 1;color: #fff;text-align: center;white-space: nowrap;vertical-align: baseline;\" > 程序堆栈 </span><br /><span style= \"font-family: Consolas,'Courier New',Courier,FreeMono,monospace;\" >$STACKREACE$</span></p></div></div></div> ";
+            return EmailTemplate.Replace("$NAME$", sname).Replace("$TIME$", DateTime.Now.ToString()).Replace("$MESSAGE$", ex.Message).Replace("$STACKREACE$", ex.StackTrace);
+        }
+
+        #endregion
+    }
+
+    /// <summary>
+    /// 任务运行状态监听器
+    /// </summary>
+    internal class JobRunListener : IJobListener
+    {
+        public string Name { get; set; }
+        private Action<DateTime?> _callBack;
+
+        public JobRunListener()
+        {
+        }
+
+        public JobRunListener(string name, Action<DateTime?> callback)
+        {
+            _callBack = callback;
+            Name = name;
+        }
+
+        public Task JobExecutionVetoed(IJobExecutionContext context, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
+        public Task JobToBeExecuted(IJobExecutionContext context, CancellationToken cancellationToken)
+        {
+            return Task.FromResult(0);
+        }
+
+        public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken)
+        {
+            IJobDetail job = context.JobDetail;
+
+            if (jobException == null)
+            {
+                var utcDate = context.Trigger.GetNextFireTimeUtc();
+                _callBack(utcDate.HasValue ? TimeZoneInfo.ConvertTimeFromUtc(utcDate.Value.DateTime, TimeZoneInfo.Local) : new DateTime?());
+
+                //子任务触发
+                Task.Run(async () =>
+                 {
+                     var children = job.JobDataMap["children"] as Dictionary<int, string>;
+                     foreach (var item in children)
+                     {
+                         var jobkey = new JobKey(item.Key.ToString());
+                         if (await context.Scheduler.CheckExists(jobkey))
+                         {
+                             var jDetail = await context.Scheduler.GetJobDetail(jobkey);
+                             jDetail.JobDataMap["PreviousResult"] = context.Result;
+                             await context.Scheduler.TriggerJob(jobkey);
+                         }
+                     }
+                 });
+            }
+            else if (jobException is BusinessRunException)
+            {
+                Task.Run(() =>
+                 {
+                     var name = job.JobDataMap["name"] as string;
+                     var users = job.JobDataMap["keepers"] as List<KeyValuePair<string, string>>;
+                     if (users != null && users.Any())
+                     {
+                         MailKitHelper.SendMail(users, $"任务运行异常 — {name}", QuartzManager.GetErrorEmailContent(name, (jobException as BusinessRunException).Detail));
+                     }
+                 });
+            }
+            return Task.FromResult(0);
+        }
+    }
+
+    public class BusinessRunException : JobExecutionException
+    {
+        public Exception Detail;
+        public BusinessRunException(Exception exp)
+        {
+            Detail = exp;
+        }
+    }
+}

@@ -18,7 +18,7 @@ namespace Hos.ScheduleMaster.Core.Repository
 
         private DbSet<TModel> DbSet => _db.Set<TModel>();
 
-        public BaseRepository(TaskDbContext context)
+        public BaseRepository(SmDbContext context)
         {
             _db = context as DbContext;
         }
@@ -231,22 +231,22 @@ namespace Hos.ScheduleMaster.Core.Repository
 
         public int ExecuteSql(string sql)
         {
-            return _db.Database.ExecuteSqlCommand(sql);
+            return _db.Database.ExecuteSqlRaw(sql);
         }
 
         public async Task<int> ExecuteSqlAsync(string sql)
         {
-            return await _db.Database.ExecuteSqlCommandAsync(sql);
+            return await _db.Database.ExecuteSqlRawAsync(sql);
         }
 
         public int ExecuteSql(string sql, List<DbParameter> spList)
         {
-            return _db.Database.ExecuteSqlCommand(sql, spList.ToArray());
+            return _db.Database.ExecuteSqlRaw(sql, spList.ToArray());
         }
 
         public async Task<int> ExecuteSqlAsync(string sql, List<DbParameter> spList)
         {
-            return await _db.Database.ExecuteSqlCommandAsync(sql, spList.ToArray());
+            return await _db.Database.ExecuteSqlRawAsync(sql, spList.ToArray());
         }
 
     }

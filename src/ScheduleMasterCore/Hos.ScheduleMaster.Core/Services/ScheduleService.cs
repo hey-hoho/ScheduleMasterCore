@@ -10,18 +10,18 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
-    [ServiceMapTo(typeof(ITaskService))]
-    public class TaskService : BaseService, ITaskService
+    [ServiceMapTo(typeof(IScheduleService))]
+    public class ScheduleService : BaseService, IScheduleService
     {
-        //public TaskService(Repository.IUnitOfWork unitOfWork) : base(unitOfWork) { }
-        public List<TaskEntity> QueryAll()
+
+        public List<ScheduleEntity> QueryAll()
         {
-            return _repositoryFactory.Tasks.Where(m => m.Status != (int)TaskStatus.Deleted).ToList();
+            return _repositoryFactory.Schedules.Where(m => m.Status != (int)ScheduleStatus.Deleted).ToList();
         }
 
-        public ListPager<TaskEntity> QueryPager(ListPager<TaskEntity> pager)
+        public ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager)
         {
-            return _repositoryFactory.Tasks.WherePager(pager, m => m.Status != (int)TaskStatus.Deleted, m => m.CreateTime, false);
+            return _repositoryFactory.Schedules.WherePager(pager, m => m.Status != (int)ScheduleStatus.Deleted, m => m.CreateTime, false);
         }
 
         public ListPager<SystemLogEntity> QueryLogPager(ListPager<SystemLogEntity> pager)
@@ -29,12 +29,12 @@ namespace Hos.ScheduleMaster.Core.Services
             return _repositoryFactory.SystemLogs.WherePager(pager, m => true, m => m.Id, false);
         }
 
-        public int DeleteLog(int? task, int? category, DateTime? startdate, DateTime? enddate)
+        public int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
             Expression<Func<SystemLogEntity, bool>> where = m => true;
-            if (task.HasValue)
+            if (sid.HasValue)
             {
-                where = where.And(x => x.TaskId == task.Value);
+                where = where.And(x => x.ScheduleId == sid.Value);
             }
             if (category.HasValue)
             {
@@ -52,54 +52,54 @@ namespace Hos.ScheduleMaster.Core.Services
             return _unitOfWork.Commit();
         }
 
-        public TaskEntity QueryById(int id)
+        public ScheduleEntity QueryById(Guid sid)
         {
-            return _repositoryFactory.Tasks.FirstOrDefault(m => m.Id == id);
+            return _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == sid);
         }
 
-        public List<TaskGuardianEntity> QueryTaskGuardians(int taskId)
+        public List<ScheduleKeeperEntity> QueryTaskGuardians(Guid sid)
         {
-            return _repositoryFactory.TaskGuardians.Where(x => x.TaskId == taskId).ToList();
+            return _repositoryFactory.ScheduleKeepers.Where(x => x.ScheduleId == sid).ToList();
         }
 
-        public List<TaskReferenceEntity> QueryTaskReferences(int taskId)
+        public List<ScheduleReferenceEntity> QueryTaskReferences(Guid sid)
         {
-            return _repositoryFactory.TaskReferences.Where(x => x.ParentTaskId == taskId).ToList();
+            return _repositoryFactory.ScheduleReferences.Where(x => x.ScheduleId == sid).ToList();
         }
 
-        public ApiResponseMessage AddTask(TaskEntity model, List<int> guardians, List<int> nexts)
+        public ApiResponseMessage AddTask(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
         {
             model.CreateTime = DateTime.Now;
-            _repositoryFactory.Tasks.Add(model);
+            _repositoryFactory.Schedules.Add(model);
 
             if (_unitOfWork.Commit() > 0)
             {
                 bool extended = false;
-                if (guardians != null && guardians.Count > 0)
+                if (keepers != null && keepers.Count > 0)
                 {
                     extended = true;
-                    _repositoryFactory.TaskGuardians.AddRange(guardians.Select(x => new TaskGuardianEntity
+                    _repositoryFactory.ScheduleKeepers.AddRange(keepers.Select(x => new ScheduleKeeperEntity
                     {
-                        TaskId = model.Id,
+                        ScheduleId = model.Id,
                         UserId = x
                     }));
                 }
                 if (nexts != null && nexts.Count > 0)
                 {
                     extended = true;
-                    _repositoryFactory.TaskReferences.AddRange(nexts.Select(x => new TaskReferenceEntity
+                    _repositoryFactory.ScheduleReferences.AddRange(nexts.Select(x => new ScheduleReferenceEntity
                     {
-                        ParentTaskId = model.Id,
-                        ChildTaskId = x
+                        ScheduleId = model.Id,
+                        ChildId = x
                     }));
                 }
                 if (extended) _unitOfWork.Commit();
                 //创建专属目录
-                string path = $"{AppDomain.CurrentDomain.BaseDirectory}/TaskAssembly/{model.AssemblyName}";
-                if (!System.IO.Directory.Exists(path))
-                {
-                    System.IO.Directory.CreateDirectory(path);
-                }
+                //string path = $"{AppDomain.CurrentDomain.BaseDirectory}/TaskAssembly/{model.AssemblyName}";
+                //if (!System.IO.Directory.Exists(path))
+                //{
+                //    System.IO.Directory.CreateDirectory(path);
+                //}
                 return ServiceResult(ResultStatus.Success, "任务创建成功!");
             }
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
@@ -107,16 +107,16 @@ namespace Hos.ScheduleMaster.Core.Services
 
         public ApiResponseMessage EditTask(TaskInfo model)
         {
-            var task = _repositoryFactory.Tasks.FirstOrDefault(m => m.Id == model.Id);
+            var task = _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == model.Id);
             if (task == null)
             {
                 return ServiceResult(ResultStatus.Failed, "任务不存在!");
             }
-            if (task.Status != (int)TaskStatus.Stop)
+            if (task.Status != (int)ScheduleStatus.Stop)
             {
                 return ServiceResult(ResultStatus.Failed, "在停止状态下才能编辑任务信息!");
             }
-            _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+            _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
             {
                 AssemblyName = model.AssemblyName,
                 ClassName = model.ClassName,
@@ -128,17 +128,17 @@ namespace Hos.ScheduleMaster.Core.Services
                 StartDate = model.StartDate,
                 Title = model.Title
             });
-            _repositoryFactory.TaskGuardians.DeleteBy(x => x.TaskId == model.Id);
-            _repositoryFactory.TaskGuardians.AddRange(model.Guardians.Select(x => new TaskGuardianEntity
+            _repositoryFactory.ScheduleKeepers.DeleteBy(x => x.ScheduleId == model.Id);
+            _repositoryFactory.ScheduleKeepers.AddRange(model.Guardians.Select(x => new ScheduleKeeperEntity
             {
-                TaskId = model.Id,
+                ScheduleId = model.Id,
                 UserId = x
             }));
-            _repositoryFactory.TaskReferences.DeleteBy(x => x.ParentTaskId == model.Id);
-            _repositoryFactory.TaskReferences.AddRange(model.Nexts.Select(x => new TaskReferenceEntity
+            _repositoryFactory.ScheduleReferences.DeleteBy(x => x.ScheduleId == model.Id);
+            _repositoryFactory.ScheduleReferences.AddRange(model.Nexts.Select(x => new ScheduleReferenceEntity
             {
-                ParentTaskId = model.Id,
-                ChildTaskId = x
+                ScheduleId = model.Id,
+                ChildId = x
             }));
             if (_unitOfWork.Commit() > 0)
             {
@@ -147,21 +147,21 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
         }
 
-        public ApiResponseMessage TaskStart(TaskEntity task)
+        public ApiResponseMessage TaskStart(ScheduleEntity task)
         {
             if (task == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
-            TaskView view = new TaskView() { Task = task };
+            ScheduleView view = new ScheduleView() { Schedule = task };
             var users = _repositoryFactory.SystemUsers.Table;
-            var guardians = _repositoryFactory.TaskGuardians.Table;
-            view.Guardians = (from t in guardians
-                              join u in users on t.UserId equals u.Id
-                              where t.TaskId == task.Id && !string.IsNullOrEmpty(u.Email)
-                              select new { u.Email, u.RealName }
-                    ).ToDictionary(x => x.Email, x => x.RealName);
-            var children = _repositoryFactory.TaskReferences.Table;
-            view.ChildTasks = (from c in children
-                               join t in _repositoryFactory.Tasks.Table on c.ParentTaskId equals t.Id
-                               select new { t.Id, t.Title }
+            var guardians = _repositoryFactory.ScheduleKeepers.Table;
+            view.Keepers = (from t in guardians
+                            join u in users on t.UserId equals u.Id
+                            where t.ScheduleId == task.Id && !string.IsNullOrEmpty(u.Email)
+                            select new KeyValuePair<string, string>(u.RealName, u.Email)
+                    ).ToList();
+            var children = _repositoryFactory.ScheduleKeepers.Table;
+            view.Children = (from c in children
+                             join t in _repositoryFactory.Schedules.Table on c.ScheduleId equals t.Id
+                             select new { t.Id, t.Title }
                              ).ToDictionary(x => x.Id, x => x.Title);
             //启动任务
             bool success = false;
@@ -181,9 +181,9 @@ namespace Hos.ScheduleMaster.Core.Services
             if (success)
             {
                 //启动成功后更新任务状态为运行中
-                _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                 {
-                    Status = (int)TaskStatus.Running
+                    Status = (int)ScheduleStatus.Running
                 });
                 if (_unitOfWork.Commit() > 0)
                 {
@@ -193,9 +193,9 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                 {
-                    Status = (int)TaskStatus.Stop,
+                    Status = (int)ScheduleStatus.Stop,
                     NextRunTime = null
                 });
                 _unitOfWork.Commit();
@@ -203,18 +203,18 @@ namespace Hos.ScheduleMaster.Core.Services
             }
         }
 
-        public ApiResponseMessage PauseTask(int id)
+        public ApiResponseMessage PauseTask(Guid sid)
         {
-            var task = QueryById(id);
-            if (task != null && task.Status == (int)TaskStatus.Running)
+            var task = QueryById(sid);
+            if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
                 bool success = false;//QuartzManager.Pause(task);
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
-                    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                     {
-                        Status = (int)TaskStatus.Paused,
+                        Status = (int)ScheduleStatus.Paused,
                         NextRunTime = null
                     });
                     if (_unitOfWork.Commit() > 0)
@@ -231,18 +231,18 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能暂停!");
         }
 
-        public ApiResponseMessage ResumeTask(int id)
+        public ApiResponseMessage ResumeTask(Guid sid)
         {
-            var task = QueryById(id);
-            if (task != null && task.Status == (int)TaskStatus.Paused)
+            var task = QueryById(sid);
+            if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
                 bool success = false;//QuartzManager.Resume(task);
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
-                    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                     {
-                        Status = (int)TaskStatus.Running
+                        Status = (int)ScheduleStatus.Running
                     });
                     if (_unitOfWork.Commit() > 0)
                     {
@@ -258,16 +258,16 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能恢复运行!");
         }
 
-        public ApiResponseMessage RunOnceTask(int id)
+        public ApiResponseMessage RunOnceTask(Guid sid)
         {
-            var task = QueryById(id);
-            if (task != null && task.Status == (int)TaskStatus.Running)
+            var task = QueryById(sid);
+            if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
                 bool success = false;//QuartzManager.RunOnce(id);
                 if (success)
                 {
                     //运行成功后更新信息
-                    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                     {
                         LastRunTime = DateTime.Now,
                         TotalRunCount = task.TotalRunCount + 1
@@ -285,10 +285,10 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             return ServiceResult(ResultStatus.Failed, "任务不在运行状态下!");
         }
-        public ApiResponseMessage StopTask(int id)
+        public ApiResponseMessage StopTask(Guid sid)
         {
-            var task = QueryById(id);
-            if (task != null && task.Status > (int)TaskStatus.Stop)
+            var task = QueryById(sid);
+            if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
                 bool success = false;
                 //QuartzManager.Stop(task, () =>
@@ -309,17 +309,17 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能停止!");
         }
 
-        public ApiResponseMessage DeleteTask(int id)
+        public ApiResponseMessage DeleteTask(Guid sid)
         {
-            var task = QueryById(id);
-            if (task != null && task.Status != (int)TaskStatus.Deleted)
+            var task = QueryById(sid);
+            if (task != null && task.Status != (int)ScheduleStatus.Deleted)
             {
-                if (task.Status == (int)TaskStatus.Stop)
+                if (task.Status == (int)ScheduleStatus.Stop)
                 {
                     //停止状态下的才能删除
-                    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
+                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
                     {
-                        Status = (int)TaskStatus.Deleted,
+                        Status = (int)ScheduleStatus.Deleted,
                         NextRunTime = null
                     });
                     if (_unitOfWork.Commit() > 0)
@@ -335,16 +335,16 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <summary>
         /// 添加一条运行记录
         /// </summary>
-        /// <param name="taskId"></param>
+        /// <param name="sid"></param>
         /// <returns></returns>
-        public Guid AddRunTrace(int taskId)
+        public Guid AddRunTrace(Guid sid)
         {
-            TaskRunTraceEntity entity = new TaskRunTraceEntity();
+            ScheduleTraceEntity entity = new ScheduleTraceEntity();
             entity.TraceId = Guid.NewGuid();
-            entity.TaskId = taskId;
+            entity.ScheduleId = sid;
             entity.StartTime = DateTime.Now;
-            entity.Result = (int)TaskRunResult.Null;
-            _repositoryFactory.TaskRunTraces.Add(entity);
+            entity.Result = (int)ScheduleRunResult.Null;
+            _repositoryFactory.ScheduleTraces.Add(entity);
             if (_unitOfWork.Commit() > 0)
             {
                 return entity.TraceId;
@@ -352,13 +352,13 @@ namespace Hos.ScheduleMaster.Core.Services
             return Guid.Empty;
         }
 
-        public bool UpdateRunTrace(Guid traceId, double timeSpan, TaskRunResult result)
+        public bool UpdateRunTrace(Guid traceId, double timeSpan, ScheduleRunResult result)
         {
             if (traceId == Guid.Empty)
             {
                 return false;
             }
-            _repositoryFactory.TaskRunTraces.UpdateBy(x => x.TraceId == traceId, x => new TaskRunTraceEntity
+            _repositoryFactory.ScheduleTraces.UpdateBy(x => x.TraceId == traceId, x => new ScheduleTraceEntity
             {
                 EndTime = DateTime.Now,
                 Result = (int)result,

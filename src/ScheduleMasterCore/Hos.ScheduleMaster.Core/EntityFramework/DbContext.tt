@@ -26,9 +26,9 @@ using Hos.ScheduleMaster.Core.EntityFramework;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class TaskDbContext : DbContext
+    public class SmDbContext : DbContext
     {
-		public TaskDbContext(DbContextOptions<TaskDbContext> option) : base(option)
+		public SmDbContext(DbContextOptions<SmDbContext> option) : base(option)
         {
         }
 

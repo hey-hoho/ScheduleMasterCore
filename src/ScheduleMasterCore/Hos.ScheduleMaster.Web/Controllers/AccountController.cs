@@ -15,12 +15,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class AccountController : AdminController
     {
-        private IConfiguration _config;
+        [Autowired]
+        public IConfiguration _config { get; set; }
 
-        public AccountController(IAccountService accountService, IConfiguration config) : base(accountService)
-        {
-            _config = config;
-        }
+        //public AccountController(IConfiguration config)
+        //{
+        //    _config = config;
+        //}
 
         /// <summary>
         /// 用户列表页 

@@ -77,10 +77,10 @@ namespace Hos.ScheduleMaster.Web
                 b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
             //EF数据库上下文
-            services.AddDbContext<TaskDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
 
             //注入Uow依赖
-            services.AddScoped<IUnitOfWork, UnitOfWork<TaskDbContext>>();
+            services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();
             //自动注册所有业务service
             services.AddAppServices();
 
@@ -113,13 +113,8 @@ namespace Hos.ScheduleMaster.Web
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             ConfigurationCache.Refresh();
-            //using (var serviceScope = app.ApplicationServices.CreateScope())
-            //{
-            //    var context = serviceScope.ServiceProvider.GetService<Core.Repository.IUnitOfWork>();
-
-            //    // Seed the database.
-            //}
-            //var sd = app.ApplicationServices.GetRequiredService<Core.Models.TaskDbContext>();
+            //初始化日志管理器
+            Core.Log.LogManager.Init();
         }
     }
 

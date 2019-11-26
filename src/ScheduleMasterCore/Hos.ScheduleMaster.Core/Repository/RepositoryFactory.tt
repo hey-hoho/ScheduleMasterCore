@@ -26,9 +26,9 @@ namespace Hos.ScheduleMaster.Core.Repository
 	[ServiceMapTo(typeof(RepositoryFactory))]
     public class RepositoryFactory
     {
-        private TaskDbContext _context;
+        private SmDbContext _context;
 
-        public RepositoryFactory(TaskDbContext context)
+        public RepositoryFactory(SmDbContext context)
         {
             _context = context;
         }
