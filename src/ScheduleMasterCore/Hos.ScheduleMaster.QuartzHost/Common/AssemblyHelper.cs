@@ -46,7 +46,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 string pluginLocation = GetTaskAssemblyPath(assemblyName);
                 var assembly = context.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(pluginLocation)));
                 Type type = assembly.GetType(className, true, true);
-                return CreateInstance<TaskBase>(type);
+                return Activator.CreateInstance(type) as TaskBase;
             }
             catch (Exception ex)
             {
@@ -56,7 +56,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         public static string GetTaskAssemblyPath(string assemblyName)
         {
-            return Path.Combine(AppDomain.CurrentDomain.BaseDirectory, $"\\Plugins\\{assemblyName}\\{assemblyName}.dll");
+            return $"{Directory.GetCurrentDirectory()}\\Plugins\\{assemblyName}\\{assemblyName}.dll".Replace('\\', Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// </summary>
         /// <param name="assemblyName"></param>
         /// <returns></returns>
-        public static PluginLoadContext LoadAppDomain(string assemblyName)
+        public static PluginLoadContext LoadAssemblyContext(string assemblyName)
         {
             try
             {

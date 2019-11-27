@@ -20,13 +20,13 @@ namespace Hos.ScheduleMaster.Core.Log
             });
         }
 
-        public static void Info(string message, Guid task)
+        public static void Info(string message, Guid sid)
         {
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Info,
                 Message = message,
-                ScheduleId = task,
+                ScheduleId = sid,
                 CreateTime = DateTime.Now
             });
         }

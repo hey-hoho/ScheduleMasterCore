@@ -2,10 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +29,8 @@ namespace Hos.ScheduleMaster.QuartzHost
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
+
+            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +51,13 @@ namespace Hos.ScheduleMaster.QuartzHost
             {
                 endpoints.MapControllers();
             });
+
+            //加载全局缓存
+            ConfigurationCache.RootServiceProvider = app.ApplicationServices;
+            ConfigurationCache.Refresh();
+            //初始化日志管理器
+            Core.Log.LogManager.Init();
+            Common.QuartzManager.InitScheduler().Wait();
         }
     }
 }

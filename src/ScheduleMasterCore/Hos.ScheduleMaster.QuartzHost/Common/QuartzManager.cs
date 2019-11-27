@@ -91,7 +91,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             try
             {
                 //这里用AppDomain解决程序集引用依赖的问题
-                lc = AssemblyHelper.LoadAppDomain(view.Schedule.AssemblyName);
+                lc = AssemblyHelper.LoadAssemblyContext(view.Schedule.AssemblyName);
                 for (int i = 0; i < 3; i++)
                 {
                     try
@@ -281,7 +281,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             //throw new SchedulerException("SchedulerException");
 
             //在应用程序域中创建实例返回并保存在job中，这是最终调用任务执行的实例
-            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.AssemblyName, view.Schedule.ClassName) as TaskBase;
+            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.AssemblyName, view.Schedule.ClassName);
             if (instance == null)
             {
                 throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
@@ -296,7 +296,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 new KeyValuePair<string, object> ("keepers",view.Keepers),
                 new KeyValuePair<string, object> ("children",view.Children)
             };
-            IJobDetail job = JobBuilder.Create(typeof(RootJob))
+            IJobDetail job = JobBuilder.Create<RootJob>()
                 .WithIdentity(view.Schedule.Id.ToString())
                 .SetJobData(map)
                 //.UsingJobData("assembly", task.AssemblyName)

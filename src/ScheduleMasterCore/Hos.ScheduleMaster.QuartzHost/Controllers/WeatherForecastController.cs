@@ -24,16 +24,25 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpGet]
-        public IEnumerable<WeatherForecast> Get()
+        public void Get()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            Common.QuartzManager.StartWithRetry(new Core.Models.ScheduleView
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+                Schedule = new Core.Models.ScheduleEntity
+                {
+                    AssemblyName = "Hos.ScheduleMaster.Demo",
+                    ClassName = "Hos.ScheduleMaster.Demo.Simple",
+                    CreateTime = DateTime.Now,
+                    CreateUserId = 1,
+                    CreateUserName = "hh",
+                    CronExpression = "0/1 * * * * ?",
+                    Id = Guid.NewGuid(),
+                    RunMoreTimes = true,
+                    StartDate = DateTime.Now.AddMinutes(-3),
+                    Status = 0,
+                    Title = "测试任务"
+                }
+            }, (time) => { });
         }
     }
 }

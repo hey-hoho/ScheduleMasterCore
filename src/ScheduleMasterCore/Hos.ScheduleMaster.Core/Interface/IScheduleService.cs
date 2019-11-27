@@ -38,5 +38,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         ApiResponseMessage StopTask(Guid sid);
 
         ApiResponseMessage DeleteTask(Guid sid);
+
+        Guid AddRunTrace(Guid sid);
+
+        bool UpdateRunTrace(Guid traceId, double timeSpan, ScheduleRunResult result);
     }
 }
