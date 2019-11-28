@@ -14,10 +14,20 @@ namespace Hos.ScheduleMaster.Core.Models
         public string NodeName { get; set; }
 
         /// <summary>
-        /// 节点主机
+        /// 访问协议，http/https
+        /// </summary>
+        public string AccessProtocol { get; set; }
+
+        /// <summary>
+        /// 节点主机(IP+端口)
         /// </summary>
         [Required]
         public string Host { get; set; }
+
+        /// <summary>
+        /// 访问秘钥，每次节点激活时会更新，用来验证访问权限
+        /// </summary>
+        public string AccessSecret { get; set; }
 
         /// <summary>
         /// 最后更新时间
@@ -25,7 +35,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public DateTime? LastUpdateTime { get; set; }
 
         /// <summary>
-        /// 节点状态，1-有效，0-停机
+        /// 节点状态，1-运行，0-停机
         /// </summary>
         public int Status { get; set; }
 

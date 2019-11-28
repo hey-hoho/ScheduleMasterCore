@@ -18,24 +18,30 @@ namespace Hos.ScheduleMaster.Base
             _instance = instance;
         }
 
-        public string Node { get; set; }
+        /// <summary>
+        /// 所在节点
+        /// </summary>
+        public string Node { private get; set; }
 
         /// <summary>
         /// 任务id，每次运行前都会重新赋值，方便写log或其他操作时跟踪
         /// </summary>
         public Guid TaskId { protected get; set; }
 
+        /// <summary>
+        /// 运行轨迹
+        /// </summary>
         public Guid TraceId { private get; set; }
 
         /// <summary>
         /// 自定义参数
         /// </summary>
-        public string CustomParamsJson { get; set; }
+        public string CustomParamsJson { protected get; set; }
 
         /// <summary>
         /// 前置任务的运行结果
         /// </summary>
-        public object PreviousResult { get; set; }
+        public object PreviousResult { protected get; set; }
 
         /// <summary>
         /// 本次运行的返回结果
@@ -80,6 +86,7 @@ namespace Hos.ScheduleMaster.Base
                 Message = message,
                 CreateTime = DateTime.Now,
                 ScheduleId = TaskId,
+                Node = Node,
                 TraceId = TraceId
             });
         }
@@ -97,6 +104,7 @@ namespace Hos.ScheduleMaster.Base
                 StackTrace = ex.StackTrace,
                 CreateTime = DateTime.Now,
                 ScheduleId = TaskId,
+                Node = Node,
                 TraceId = TraceId
             });
         }

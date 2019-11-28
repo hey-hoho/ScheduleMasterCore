@@ -114,7 +114,7 @@ namespace Hos.ScheduleMaster.Web
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             ConfigurationCache.Refresh();
             //初始化日志管理器
-            Core.Log.LogManager.Init();
+            Core.Log.LogManager.Init("master-node");
         }
     }
 

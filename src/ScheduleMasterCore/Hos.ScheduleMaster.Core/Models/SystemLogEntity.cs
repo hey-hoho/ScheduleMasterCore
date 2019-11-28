@@ -9,24 +9,47 @@ namespace Hos.ScheduleMaster.Core.Models
     {
         public SystemLogEntity()
         {
-            this.ScheduleId = Guid.NewGuid();//0表示系统运行日志
+            //this.ScheduleId = Guid.NewGuid();//0表示系统运行日志
         }
 
         [Key]
         public int Id { get; set; }
 
+        /// <summary>
+        /// 日志类型
+        /// </summary>
         [Required]
         public int Category { get; set; }
 
+        /// <summary>
+        /// 日志内容
+        /// </summary>
         [Required]
         public string Message { get; set; }
 
+        /// <summary>
+        /// 堆栈信息
+        /// </summary>
         public string StackTrace { get; set; }
 
-        public Guid ScheduleId { get; set; }
+        /// <summary>
+        /// 任务id
+        /// </summary>
+        public Guid? ScheduleId { get; set; }
 
+        /// <summary>
+        /// 产生节点
+        /// </summary>
+        public string Node { get; set; }
+
+        /// <summary>
+        /// 任务运行轨迹
+        /// </summary>
         public Guid? TraceId { get; set; }
 
+        /// <summary>
+        /// 创建时间
+        /// </summary>
         public DateTime CreateTime { get; set; }
     }
 

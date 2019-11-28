@@ -6,8 +6,6 @@ namespace Hos.ScheduleMaster.Base.Dto
 {
     public class ScheduleLog
     {
-        public int Id { get; set; }
-
         public int Category { get; set; }
 
         public string Message { get; set; }
@@ -15,6 +13,8 @@ namespace Hos.ScheduleMaster.Base.Dto
         public string StackTrace { get; set; }
 
         public Guid ScheduleId { get; set; }
+
+        public string Node { get; set; }
 
         public Guid TraceId { get; set; }
 

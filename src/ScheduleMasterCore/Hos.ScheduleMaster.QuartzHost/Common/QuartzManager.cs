@@ -16,11 +16,22 @@ using Hos.ScheduleMaster.Base;
 using System.Threading.Tasks;
 using System.Threading;
 using Hos.ScheduleMaster.Core.Common;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
     public class QuartzManager
     {
+        /// <summary>
+        /// 节点标识
+        /// </summary>
+        public static string NodeIdentity { get; private set; }
+
+        /// <summary>
+        /// 访问秘钥
+        /// </summary>
+        public static string AccessSecret { get; private set; }
+
         private QuartzManager()
         {
         }
@@ -32,6 +43,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// </summary>
         public static async Task InitScheduler()
         {
+            NodeIdentity = Environment.MachineName;
             try
             {
                 if (_scheduler == null)
@@ -47,13 +59,39 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     _scheduler = await factory.GetScheduler();
                     await _scheduler.Clear();
                     await _scheduler.Start();
-                    //SQLHelper.ExecuteNonQuery($"UPDATE ServerNodes SET Status=1 WHERE NodeName='{ConfigurationManager.AppSettings.Get("HostIdentity")}' ");
+                    MarkNode(true);
                     LogHelper.Info("任务调度平台初始化成功！");
                 }
             }
             catch (Exception ex)
             {
                 LogHelper.Error("任务调度平台初始化失败！", ex);
+            }
+        }
+
+        private static void MarkNode(bool isStarted)
+        {
+            using (var scope = new Core.ScopeDbContext())
+            {
+                var db = scope.GetDbContext();
+                var node = db.ServerNodes.FirstOrDefault(x => x.NodeName == NodeIdentity);
+                if (node != null)
+                {
+                    if (isStarted)
+                    {
+                        node.Status = isStarted ? 1 : 0;
+                        node.AccessSecret = Guid.NewGuid().ToString("n");
+                    }
+                    else
+                    {
+                        node.Status = 0;
+                        node.AccessSecret = null;
+                    }
+                    if (db.SaveChanges() > 0)
+                    {
+                        AccessSecret = node.AccessSecret;
+                    }
+                }
             }
         }
 
@@ -69,8 +107,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     //等待任务运行完成再关闭调度
                     await _scheduler.Shutdown(true);
+                    MarkNode(false);
                     LogHelper.Info("任务调度平台已经停止！");
-                    //SQLHelper.ExecuteNonQuery($"UPDATE ServerNodes SET Status=0 WHERE NodeName='{ConfigurationManager.AppSettings.Get("HostIdentity")}' ");
                 }
             }
             catch (Exception ex)
@@ -366,8 +404,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         {
                             Category = log.Category,
                             Message = log.Message,
-                            CreateTime = log.CreateTime,
                             ScheduleId = log.ScheduleId,
+                            Node = log.Node,
+                            StackTrace = log.StackTrace,
                             TraceId = log.TraceId
                         });
                     }

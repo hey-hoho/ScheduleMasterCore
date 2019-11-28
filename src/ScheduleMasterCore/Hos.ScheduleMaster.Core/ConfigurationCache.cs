@@ -14,39 +14,38 @@ namespace Hos.ScheduleMaster.Core
     {
         public static IServiceProvider RootServiceProvider { get; set; }
 
-        private static ConcurrentDictionary<string, string> _cacheInstance;
+        private static ConcurrentDictionary<string, string> _cacheContainer;
 
         static ConfigurationCache()
         {
-            //初始分配1000个容量，避免配置项多了以后频繁扩容，1000基本够用了
+            //初始分配100个容量，避免配置项多了以后频繁扩容，100基本够用了
             //并发级别为1，表示仅允许1个线程同时更新
-            _cacheInstance = new ConcurrentDictionary<string, string>(1, 1000);
+            _cacheContainer = new ConcurrentDictionary<string, string>(1, 100);
         }
 
         public static void Refresh()
         {
-            using (var serviceScope = RootServiceProvider.CreateScope())
+            using (var scope = new ScopeDbContext())
             {
-                var context = serviceScope.ServiceProvider.GetRequiredService<SmDbContext>();
-                var configList = context.SystemConfigs.ToList();
+                var configList = scope.GetDbContext().SystemConfigs.ToList();
                 foreach (var item in configList)
                 {
-                    _cacheInstance[item.Key] = item.Value;
+                    _cacheContainer[item.Key] = item.Value;
                 }
             }
         }
 
         public static T GetField<T>(string key)
         {
-            if (_cacheInstance == null)
+            if (_cacheContainer == null)
             {
                 Refresh();
             }
-            if (!_cacheInstance.ContainsKey(key))
+            if (!_cacheContainer.ContainsKey(key))
             {
                 return default(T);
             }
-            string value = _cacheInstance[key];
+            string value = _cacheContainer[key];
             return (T)Convert.ChangeType(value, typeof(T));
         }
 

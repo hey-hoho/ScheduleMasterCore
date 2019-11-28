@@ -23,8 +23,8 @@ namespace Hos.ScheduleMaster.Web.Controllers
 
         public LoginController(IHttpContextAccessor httpContextAccessor)
         {
-            var pro = new AutowiredServiceProvider();
-            pro.PropertyActivate(this, httpContextAccessor.HttpContext.RequestServices);
+            //var pro = new AutowiredServiceProvider();
+            //pro.PropertyActivate(this, httpContextAccessor.HttpContext.RequestServices);
             //_accountService = accountService;
         }
 

@@ -362,7 +362,7 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 EndTime = DateTime.Now,
                 Result = (int)result,
-                TimeSpan = timeSpan
+                ElapsedTime = timeSpan
             });
             return _unitOfWork.Commit() > 0;
         }

@@ -15,8 +15,7 @@ namespace Hos.ScheduleMaster.Core.Log
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Info,
-                Message = message,
-                CreateTime = DateTime.Now
+                Message = message
             });
         }
 
@@ -26,8 +25,7 @@ namespace Hos.ScheduleMaster.Core.Log
             {
                 Category = (int)LogCategory.Info,
                 Message = message,
-                ScheduleId = sid,
-                CreateTime = DateTime.Now
+                ScheduleId = sid
             });
         }
 
@@ -36,8 +34,7 @@ namespace Hos.ScheduleMaster.Core.Log
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Warn,
-                Message = message,
-                CreateTime = DateTime.Now
+                Message = message
             });
         }
 
@@ -47,8 +44,7 @@ namespace Hos.ScheduleMaster.Core.Log
             {
                 Category = (int)LogCategory.Warn,
                 Message = message,
-                ScheduleId = task,
-                CreateTime = DateTime.Now
+                ScheduleId = task
             });
         }
 
@@ -58,8 +54,7 @@ namespace Hos.ScheduleMaster.Core.Log
             {
                 Category = (int)LogCategory.Error,
                 Message = ex.Message,
-                StackTrace = ex.StackTrace,
-                CreateTime = DateTime.Now
+                StackTrace = ex.StackTrace
             });
         }
 
@@ -70,8 +65,7 @@ namespace Hos.ScheduleMaster.Core.Log
                 Category = (int)LogCategory.Error,
                 Message = ex.Message,
                 StackTrace = ex.StackTrace,
-                ScheduleId = task,
-                CreateTime = DateTime.Now
+                ScheduleId = task
             });
         }
 
@@ -81,8 +75,7 @@ namespace Hos.ScheduleMaster.Core.Log
             {
                 Category = (int)LogCategory.Error,
                 Message = $"{message}，ERROR：{exp.Message}",
-                StackTrace = exp.StackTrace,
-                CreateTime = DateTime.Now
+                StackTrace = exp.StackTrace
             });
         }
 
@@ -92,8 +85,7 @@ namespace Hos.ScheduleMaster.Core.Log
             {
                 Category = (int)LogCategory.Error,
                 Message = message,
-                ScheduleId = task,
-                CreateTime = DateTime.Now
+                ScheduleId = task
             });
         }
 
@@ -104,8 +96,7 @@ namespace Hos.ScheduleMaster.Core.Log
                 Category = (int)LogCategory.Error,
                 Message = $"{message}，ERROR：{exp.Message}",
                 StackTrace = exp.StackTrace,
-                ScheduleId = task,
-                CreateTime = DateTime.Now
+                ScheduleId = task
             });
         }
     }

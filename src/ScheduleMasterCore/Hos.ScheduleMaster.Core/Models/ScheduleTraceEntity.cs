@@ -12,12 +12,29 @@ namespace Hos.ScheduleMaster.Core.Models
 
         public Guid ScheduleId { get; set; }
 
+        /// <summary>
+        /// 所在节点
+        /// </summary>
+        public string Node { get; set; }
+
+        /// <summary>
+        /// 开始运行时间
+        /// </summary>
         public DateTime StartTime { get; set; }
 
+        /// <summary>
+        /// 结束运行时间
+        /// </summary>
         public DateTime EndTime { get; set; }
 
-        public double TimeSpan { get; set; }
+        /// <summary>
+        /// 执行耗时，单位是秒
+        /// </summary>
+        public double ElapsedTime { get; set; }
 
+        /// <summary>
+        /// 运行结果
+        /// </summary>
         public int Result { get; set; }
 
     }

@@ -14,18 +14,20 @@ namespace Hos.ScheduleMaster.Core.Log
     {
         public static BufferQueue<SystemLogEntity> Queue;
 
-        public static void Init()
+        public static void Init(string node)
         {
             Queue = new BufferQueue<SystemLogEntity>();
             var td = new System.Threading.Thread(() =>
             {
-                using (var serviceScope = ConfigurationCache.RootServiceProvider.CreateScope())
+                using (var scope = new ScopeDbContext())
                 {
-                    var db = serviceScope.ServiceProvider.GetRequiredService<SmDbContext>();
+                    var db = scope.GetDbContext();
                     while (true)
                     {
                         Queue.Read((item, index) =>
                         {
+                            item.Node = node;
+                            item.CreateTime = DateTime.Now;
                             db.SystemLogs.Add(item);
                         });
                         db.SaveChanges();
