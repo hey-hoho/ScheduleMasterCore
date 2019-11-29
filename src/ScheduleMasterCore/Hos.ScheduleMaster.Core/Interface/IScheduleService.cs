@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.Core.Interface
 
         ApiResponseMessage AddTask(ScheduleEntity model, List<int> guardians, List<Guid> nexts);
 
-        ApiResponseMessage EditTask(TaskInfo model);
+        ApiResponseMessage EditTask(ScheduleInfo model);
 
         ApiResponseMessage TaskStart(ScheduleEntity task);
 

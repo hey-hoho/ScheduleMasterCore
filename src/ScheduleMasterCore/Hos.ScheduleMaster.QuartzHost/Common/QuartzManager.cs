@@ -123,18 +123,17 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <param name="task"></param>
         /// <param name="callBack"></param>
         /// <returns></returns>
-        public static bool StartWithRetry(ScheduleView view, Action<DateTime?> callBack)
+        public static async Task<bool> StartWithRetry(ScheduleView view, Action<Guid, DateTime?> callBack)
         {
             PluginLoadContext lc = null;
             try
             {
-                //这里用AppDomain解决程序集引用依赖的问题
                 lc = AssemblyHelper.LoadAssemblyContext(view.Schedule.AssemblyName);
                 for (int i = 0; i < 3; i++)
                 {
                     try
                     {
-                        Start(view, lc, callBack);
+                        await Start(view, lc, callBack);
                         return true;
                     }
                     catch (SchedulerException sexp)
@@ -143,7 +142,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     }
                 }
                 //最后一次尝试
-                Start(view, lc, callBack);
+                await Start(view, lc, callBack);
                 return true;
             }
             catch (SchedulerException sexp)
@@ -163,13 +162,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         /// 暂停一个任务
         /// </summary>
-        /// <param name="taskId"></param>
+        /// <param name="sid"></param>
         /// <returns></returns>
-        public static async Task<bool> Pause(Guid taskId)
+        public static async Task<bool> Pause(Guid sid)
         {
             try
             {
-                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                JobKey jk = new JobKey(sid.ToString().ToLower());
                 if (await _scheduler.CheckExists(jk))
                 {
                     //任务已经存在则暂停任务
@@ -179,14 +178,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     {
                         await _scheduler.Interrupt(jk);
                     }
-                    LogHelper.Warn($"任务已经暂停运行！", taskId);
+                    LogHelper.Warn($"任务已经暂停运行！", sid);
                     return true;
                 }
                 return false;
             }
             catch (Exception exp)
             {
-                LogHelper.Error($"任务暂停运行失败！", exp, taskId);
+                LogHelper.Error($"任务暂停运行失败！", exp, sid);
                 return false;
             }
         }
@@ -194,25 +193,25 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         /// 恢复运行
         /// </summary>
-        /// <param name="taskId"></param>
+        /// <param name="sid"></param>
         /// <returns></returns>
-        public static async Task<bool> Resume(Guid taskId)
+        public static async Task<bool> Resume(Guid sid)
         {
             try
             {
-                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                JobKey jk = new JobKey(sid.ToString().ToLower());
                 if (await _scheduler.CheckExists(jk))
                 {
                     //恢复任务继续执行
                     await _scheduler.ResumeJob(jk);
-                    LogHelper.Info($"任务已经恢复运行！", taskId);
+                    LogHelper.Info($"任务已经恢复运行！", sid);
                     return true;
                 }
                 return false;
             }
             catch (Exception exp)
             {
-                LogHelper.Error($"任务恢复运行失败！", exp, taskId);
+                LogHelper.Error($"任务恢复运行失败！", exp, sid);
                 return false;
             }
         }
@@ -220,14 +219,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         /// 停止一个任务
         /// </summary>
-        /// <param name="taskId"></param>
-        /// <param name="callBack"></param>
+        /// <param name="sid"></param>
         /// <returns></returns>
-        public static async Task<bool> Stop(Guid taskId)
+        public static async Task<bool> Stop(Guid sid)
         {
             try
             {
-                JobKey jk = new JobKey(taskId.ToString().ToLower());
+                JobKey jk = new JobKey(sid.ToString().ToLower());
                 var job = await _scheduler.GetJobDetail(jk);
                 if (job != null)
                 {
@@ -241,18 +239,18 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     var domain = job.JobDataMap["domain"] as PluginLoadContext;
                     AssemblyHelper.UnLoadAssemblyLoadContext(domain);
                     //删除quartz有关设置
-                    var trigger = new TriggerKey(taskId.ToString());
+                    var trigger = new TriggerKey(sid.ToString());
                     await _scheduler.PauseTrigger(trigger);
                     await _scheduler.UnscheduleJob(trigger);
                     await _scheduler.DeleteJob(jk);
-                    _scheduler.ListenerManager.RemoveJobListener(taskId.ToString());
+                    _scheduler.ListenerManager.RemoveJobListener(sid.ToString());
                 }
-                LogHelper.Info($"任务已经停止运行！", taskId);
+                LogHelper.Info($"任务已经停止运行！", sid);
                 return true;
             }
             catch (Exception exp)
             {
-                LogHelper.Error($"任务停止失败！", exp, taskId);
+                LogHelper.Error($"任务停止失败！", exp, sid);
                 return false;
             }
         }
@@ -260,10 +258,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         ///立即运行一次任务
         /// </summary>
-        /// <param name="JobKey">任务key</param>
-        public static async Task<bool> RunOnce(Guid taskId)
+        /// <param name="sid"></param>
+        public static async Task<bool> RunOnce(Guid sid)
         {
-            JobKey jk = new JobKey(taskId.ToString().ToLower());
+            JobKey jk = new JobKey(sid.ToString().ToLower());
             if (await _scheduler.CheckExists(jk))
             {
                 await _scheduler.TriggerJob(jk);
@@ -307,14 +305,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
             else
             {
-                LogHelper.Error($"_scheduler.CheckExists=false", taskId);
+                LogHelper.Error($"_scheduler.CheckExists=false", sid);
             }
             return false;
         }
 
         #region 私有方法
 
-        private static void Start(ScheduleView view, PluginLoadContext lc, Action<DateTime?> callBack)
+        private static async Task Start(ScheduleView view, PluginLoadContext lc, Action<Guid, DateTime?> callBack)
         {
             //throw new SchedulerException("SchedulerException");
 
@@ -366,8 +364,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     trigger.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.EndDate.Value);
                 }
-
-                _scheduler.ScheduleJob(job, trigger);
+                await _scheduler.ScheduleJob(job, trigger);
             }
             else
             {
@@ -388,34 +385,34 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     .WithRepeatCount(1).WithIntervalInMinutes(1))
                     .EndAt(end)
                     .Build();
-                _scheduler.ScheduleJob(job, trigger);
+                await _scheduler.ScheduleJob(job, trigger);
             }
 
             LogHelper.Info($"任务[{view.Schedule.Title}]启动成功！", view.Schedule.Id);
 
-            Task.Run(() =>
-            {
-                while (true)
-                {
-                    var log = instance.ReadLog();
-                    if (log != null)
-                    {
-                        LogManager.Queue.Write(new SystemLogEntity
-                        {
-                            Category = log.Category,
-                            Message = log.Message,
-                            ScheduleId = log.ScheduleId,
-                            Node = log.Node,
-                            StackTrace = log.StackTrace,
-                            TraceId = log.TraceId
-                        });
-                    }
-                    else
-                    {
-                        Thread.Sleep(3000);
-                    }
-                }
-            });
+            _ = Task.Run(() =>
+              {
+                  while (true)
+                  {
+                      var log = instance.ReadLog();
+                      if (log != null)
+                      {
+                          LogManager.Queue.Write(new SystemLogEntity
+                          {
+                              Category = log.Category,
+                              Message = log.Message,
+                              ScheduleId = log.ScheduleId,
+                              Node = log.Node,
+                              StackTrace = log.StackTrace,
+                              TraceId = log.TraceId
+                          });
+                      }
+                      else
+                      {
+                          Thread.Sleep(3000);
+                      }
+                  }
+              });
         }
         #endregion
 
@@ -436,13 +433,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
     internal class JobRunListener : IJobListener
     {
         public string Name { get; set; }
-        private Action<DateTime?> _callBack;
+        private Action<Guid, DateTime?> _callBack;
 
         public JobRunListener()
         {
         }
 
-        public JobRunListener(string name, Action<DateTime?> callback)
+        public JobRunListener(string name, Action<Guid, DateTime?> callback)
         {
             _callBack = callback;
             Name = name;
@@ -465,7 +462,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             if (jobException == null)
             {
                 var utcDate = context.Trigger.GetNextFireTimeUtc();
-                _callBack(utcDate.HasValue ? TimeZoneInfo.ConvertTimeFromUtc(utcDate.Value.DateTime, TimeZoneInfo.Local) : new DateTime?());
+                DateTime? nextTime = utcDate.HasValue ? TimeZoneInfo.ConvertTimeFromUtc(utcDate.Value.DateTime, TimeZoneInfo.Local) : new DateTime?();
+                _callBack(Guid.Parse(job.Key.Name), nextTime);
 
                 //子任务触发
                 Task.Run(async () =>

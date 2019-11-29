@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Dto
 {
-    public class TaskInfo
+    public class ScheduleInfo
     {
-        public TaskInfo()
+        public ScheduleInfo()
         {
             this.Guardians = new List<int>();
             this.Nexts = new List<Guid>();

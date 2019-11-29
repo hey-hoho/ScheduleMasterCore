@@ -38,13 +38,13 @@ namespace Hos.ScheduleMaster.Core.Log
             });
         }
 
-        public static void Warn(string message, Guid task)
+        public static void Warn(string message, Guid sid)
         {
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Warn,
                 Message = message,
-                ScheduleId = task
+                ScheduleId = sid
             });
         }
 
@@ -58,14 +58,14 @@ namespace Hos.ScheduleMaster.Core.Log
             });
         }
 
-        public static void Error(Exception ex, Guid task)
+        public static void Error(Exception ex, Guid sid)
         {
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Error,
                 Message = ex.Message,
                 StackTrace = ex.StackTrace,
-                ScheduleId = task
+                ScheduleId = sid
             });
         }
 
@@ -79,24 +79,24 @@ namespace Hos.ScheduleMaster.Core.Log
             });
         }
 
-        public static void Error(string message, Guid task)
+        public static void Error(string message, Guid sid)
         {
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Error,
                 Message = message,
-                ScheduleId = task
+                ScheduleId = sid
             });
         }
 
-        public static void Error(string message, Exception exp, Guid task)
+        public static void Error(string message, Exception exp, Guid sid)
         {
             LogManager.Queue.Write(new SystemLogEntity
             {
                 Category = (int)LogCategory.Error,
                 Message = $"{message}，ERROR：{exp.Message}",
                 StackTrace = exp.StackTrace,
-                ScheduleId = task
+                ScheduleId = sid
             });
         }
     }

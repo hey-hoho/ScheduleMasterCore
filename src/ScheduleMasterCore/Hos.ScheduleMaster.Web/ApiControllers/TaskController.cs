@@ -114,7 +114,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <returns></returns>
         [HttpPost, Route("CreateTask")]
         // [ApiParamValidation]
-        public ApiResponseMessage CreateTask([FromBody]TaskInfo task)
+        public ApiResponseMessage CreateTask([FromBody]ScheduleInfo task)
         {
             ScheduleEntity model = new ScheduleEntity
             {
@@ -150,7 +150,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <returns></returns>
         [HttpPost, Route("EditTask")]
         //[ApiParamValidation]
-        public ApiResponseMessage EditTask([FromBody]TaskInfo task)
+        public ApiResponseMessage EditTask([FromBody]ScheduleInfo task)
         {
             var result = _taskService.EditTask(task);
             return result;

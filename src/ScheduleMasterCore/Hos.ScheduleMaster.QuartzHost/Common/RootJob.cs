@@ -36,6 +36,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             using (var scope = new ScopeDbContext())
             {
                 _db = scope.GetDbContext();
+                if (!_db.Schedules.Any(x => x.Id == _sid && x.Status == (int)ScheduleStatus.Running))
+                {
+                    LogHelper.Warn("不存在或没有启动的任务", _sid);
+                    throw new JobExecutionException("不存在或没有启动的任务");
+                }
                 try
                 {
                     getLocked = _db.Database.ExecuteSqlRaw($"INSERT INTO schedulelocks(ScheduleId,Status) values('{_sid.ToString()}',1)") > 0;
@@ -53,18 +58,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         //var instance = job.JobDataMap["instance"] as TaskBase;
                         if (job.JobDataMap["instance"] is TaskBase instance)
                         {
-                            Guid traceId = AddRunTrace();
+                            Guid traceId = GreateRunTrace();
                             Stopwatch stopwatch = new Stopwatch();
                             stopwatch.Restart();
                             TaskContext tctx = new TaskContext(instance);
                             tctx.Node = node;
                             tctx.TaskId = _sid;
                             tctx.TraceId = traceId;
-                            var param = job.JobDataMap["params"];
-                            if (param != null)
-                            {
-                                tctx.CustomParamsJson = param.ToString();
-                            }
+                            tctx.CustomParamsJson = job.JobDataMap["params"]?.ToString();
                             try
                             {
                                 instance.InnerRun(tctx);
@@ -111,7 +112,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             return Task.FromResult(0);
         }
 
-        private Guid AddRunTrace()
+        private Guid GreateRunTrace()
         {
             ScheduleTraceEntity entity = new ScheduleTraceEntity();
             entity.TraceId = Guid.NewGuid();

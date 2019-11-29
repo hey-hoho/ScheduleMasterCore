@@ -45,7 +45,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         [HttpPost, Route("CreateTask")]
-        public ActionResult CreateTask(TaskInfo task)
+        public ActionResult CreateTask(ScheduleInfo task)
         {
             if (!ModelState.IsValid)
             {
@@ -93,7 +93,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _taskService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
-            TaskInfo viewer = ObjectMapper<ScheduleEntity, TaskInfo>.Convert(model);
+            ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
             viewer.Guardians = _taskService.QueryTaskGuardians(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _taskService.QueryTaskReferences(id).Select(x => x.ChildId).ToList();
             return View("Create", viewer);
@@ -106,7 +106,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         [HttpPost, Route("EditTask")]
         //[ApiParamValidation]
-        public ActionResult EditTask(TaskInfo task)
+        public ActionResult EditTask(ScheduleInfo task)
         {
             var result = _taskService.EditTask(task);
             if (result.Status == ResultStatus.Success)

@@ -105,7 +105,7 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
         }
 
-        public ApiResponseMessage EditTask(TaskInfo model)
+        public ApiResponseMessage EditTask(ScheduleInfo model)
         {
             var task = _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == model.Id);
             if (task == null)
@@ -145,6 +145,11 @@ namespace Hos.ScheduleMaster.Core.Services
                 return ServiceResult(ResultStatus.Success, "任务编辑成功!");
             }
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
+        }
+
+        private bool NodeHandle()
+        {
+            return false;
         }
 
         public ApiResponseMessage TaskStart(ScheduleEntity task)
