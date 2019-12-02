@@ -28,7 +28,11 @@ namespace Hos.ScheduleMaster.QuartzHost
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers();
+            services.AddControllers(config =>
+            {
+                //添加全局过滤器
+                config.Filters.Add(typeof(Filters.ApiValidationFilter));
+            });
 
             services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();

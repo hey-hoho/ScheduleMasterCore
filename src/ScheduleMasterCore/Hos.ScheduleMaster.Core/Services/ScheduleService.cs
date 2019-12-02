@@ -147,42 +147,59 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
         }
 
-        private bool NodeHandle()
+        private bool NodesTraverseAction(Guid sid, string router)
         {
+            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.Status == 1).ToList();
+            if (nodeList.Any())
+            {
+                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
+                bool success = false;
+                System.Threading.Tasks.Parallel.ForEach(nodeList, (n) =>
+                {
+                    Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
+                    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", "post", param, header);
+                    success = success || result.Key == System.Net.HttpStatusCode.OK;
+                });
+                return success;
+            }
+            return false;
+        }
+        private bool NodesSelectOne(Guid sid, string router)
+        {
+            //根据节点权重来选择一个节点运行
+            var list = _repositoryFactory.ServerNodes.Where(m => m.Status == 1).OrderBy(x => x.Priority).ToList();
+            int[] arry = new int[list.Count + 1];
+            arry[0] = 0;
+            for (int i = 0; i < list.Count; i++)
+            {
+                arry[i + 1] = list[i].Priority + arry[i];
+            }
+            var sum = list.Sum(x => x.Priority);
+            int rnd = new Random().Next(0, sum);
+            ServerNodeEntity selectedNode = null;
+            for (int i = 1; i < arry.Length; i++)
+            {
+                if (rnd >= arry[i - 1] && rnd < arry[i])
+                {
+                    selectedNode = list[i - 1];
+                    break;
+                }
+            }
+            if (selectedNode != null)
+            {
+                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
+                Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", selectedNode.AccessSecret } };
+                var result = HttpRequest.Send($"{selectedNode.AccessProtocol}://{selectedNode.Host}/{router}", "post", param, header);
+                return result.Key == System.Net.HttpStatusCode.OK;
+            }
             return false;
         }
 
         public ApiResponseMessage TaskStart(ScheduleEntity task)
         {
             if (task == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
-            ScheduleView view = new ScheduleView() { Schedule = task };
-            var users = _repositoryFactory.SystemUsers.Table;
-            var guardians = _repositoryFactory.ScheduleKeepers.Table;
-            view.Keepers = (from t in guardians
-                            join u in users on t.UserId equals u.Id
-                            where t.ScheduleId == task.Id && !string.IsNullOrEmpty(u.Email)
-                            select new KeyValuePair<string, string>(u.RealName, u.Email)
-                    ).ToList();
-            var children = _repositoryFactory.ScheduleKeepers.Table;
-            view.Children = (from c in children
-                             join t in _repositoryFactory.Schedules.Table on c.ScheduleId equals t.Id
-                             select new { t.Id, t.Title }
-                             ).ToDictionary(x => x.Id, x => x.Title);
             //启动任务
-            bool success = false;
-            //QuartzManager.StartWithRetry(view, (nextRunTime) =>
-            //{
-            //    //每次运行成功后更新任务的运行情况
-            //    var t = QueryById(task.Id);
-            //    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
-            //    {
-            //        LastRunTime = DateTime.Now,
-            //        NextRunTime = nextRunTime,
-            //        TotalRunCount = t.TotalRunCount + 1
-            //    });
-            //    _unitOfWork.Commit();
-            //    LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
-            //});
+            bool success = NodesTraverseAction(task.Id, "api/quartz/start");
             if (success)
             {
                 //启动成功后更新任务状态为运行中
@@ -213,7 +230,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = false;//QuartzManager.Pause(task);
+                bool success = NodesTraverseAction(task.Id, "api/quartz/pause");
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -241,7 +258,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
-                bool success = false;//QuartzManager.Resume(task);
+                bool success = NodesTraverseAction(task.Id, "api/quartz/resume");
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -268,7 +285,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = false;//QuartzManager.RunOnce(id);
+                bool success = NodesSelectOne(sid, "api/quartz/runonce");
                 if (success)
                 {
                     //运行成功后更新信息
@@ -295,19 +312,20 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
-                bool success = false;
-                //QuartzManager.Stop(task, () =>
-                //{
-                //    _repositoryFactory.Tasks.UpdateBy(m => m.Id == task.Id, m => new TaskEntity
-                //    {
-                //        Status = (int)TaskStatus.Stop,
-                //        NextRunTime = null
-                //    });
-                //    _unitOfWork.Commit();
-                //});
+                bool success = NodesTraverseAction(task.Id, "api/quartz/stop");
                 if (success)
                 {
-                    return ServiceResult(ResultStatus.Success, "任务已停止运行!");
+                    //更新任务状态为已停止
+                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
+                    {
+                        Status = (int)ScheduleStatus.Stop,
+                        NextRunTime = null
+                    });
+                    if (_unitOfWork.Commit() > 0)
+                    {
+                        return ServiceResult(ResultStatus.Success, "任务已停止运行!");
+                    }
+                    return ServiceResult(ResultStatus.Failed, "更新任务状态失败!");
                 }
                 return ServiceResult(ResultStatus.Failed, "任务停止失败!");
             }

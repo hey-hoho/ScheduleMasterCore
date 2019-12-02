@@ -55,7 +55,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             task.NextRunTime = nextRunTime;
             task.TotalRunCount += 1;
             _db.SaveChanges();
-            LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
+            //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
         }
 
         [HttpPost, Route("Stop")]
@@ -93,7 +93,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok();
+            return Ok("5555555555555555");
             //Common.QuartzManager.StartWithRetry(new Core.Models.ScheduleView
             //{
             //    Schedule = new Core.Models.ScheduleEntity
