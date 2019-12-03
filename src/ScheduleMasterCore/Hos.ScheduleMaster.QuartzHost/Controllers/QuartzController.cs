@@ -11,7 +11,7 @@ using Hos.ScheduleMaster.Core.Log;
 namespace Hos.ScheduleMaster.QuartzHost.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class QuartzController : ControllerBase
     {
         private readonly ILogger<QuartzController> _logger;
@@ -23,7 +23,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             _db = db;
         }
 
-        [HttpPost, Route("Start")]
+        [HttpPost]
         public async Task<IActionResult> Start(Guid sid)
         {
             var task = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status == (int)ScheduleStatus.Stop);
@@ -58,7 +58,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
         }
 
-        [HttpPost, Route("Stop")]
+        [HttpPost]
         public async Task<IActionResult> Stop(Guid sid)
         {
             bool success = await QuartzManager.Stop(sid);
@@ -66,7 +66,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             return BadRequest();
         }
 
-        [HttpPost, Route("Pause")]
+        [HttpPost]
         public async Task<IActionResult> Pause(Guid sid)
         {
             bool success = await QuartzManager.Pause(sid);
@@ -74,7 +74,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             return BadRequest();
         }
 
-        [HttpPost, Route("Resume")]
+        [HttpPost]
         public async Task<IActionResult> Resume(Guid sid)
         {
             bool success = await QuartzManager.Resume(sid);
@@ -82,12 +82,18 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             return BadRequest();
         }
 
-        [HttpPost, Route("RunOnce")]
+        [HttpPost]
         public async Task<IActionResult> RunOnce(Guid sid)
         {
             bool success = await QuartzManager.RunOnce(sid);
             if (success) return Ok();
             return BadRequest();
+        }
+
+        [HttpGet]
+        public IActionResult HealthCheck()
+        {
+            return Ok("i am ok");
         }
 
         [HttpGet]

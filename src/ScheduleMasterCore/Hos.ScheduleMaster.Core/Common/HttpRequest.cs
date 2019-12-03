@@ -37,19 +37,24 @@ namespace Hos.ScheduleMaster.Core.Common
                         webRequest.Headers.Add(item.Key, item.Value);
                     }
                 }
-                //   Write   the   request   
-                Stream reqStream = webRequest.GetRequestStream();
-                reqStream.Write(requestBytes, 0, requestBytes.Length);
-                reqStream.Close();
-                //   Get   a   response   
-                HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
-                if (webRequest.HaveResponse)
+                if (method.ToLower().Equals("post"))
                 {
-                    StreamReader stream = new StreamReader(webResponse.GetResponseStream(), System.Text.Encoding.GetEncoding("UTF-8"));
-                    string responseString = stream.ReadToEnd();
-                    stream.Close();
-                    webResponse.Close();
-                    return new KeyValuePair<HttpStatusCode, string>(webResponse.StatusCode, responseString);
+                    //   Write   the   request   
+                    Stream reqStream = webRequest.GetRequestStream();
+                    reqStream.Write(requestBytes, 0, requestBytes.Length);
+                    reqStream.Close();
+                }
+                //   Get   a   response   
+                webRequest.Timeout = 30000;
+                using (HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse())
+                {
+                    if (webRequest.HaveResponse)
+                    {
+                        StreamReader stream = new StreamReader(webResponse.GetResponseStream(), System.Text.Encoding.GetEncoding("UTF-8"));
+                        string responseString = stream.ReadToEnd();
+                        stream.Close();
+                        return new KeyValuePair<HttpStatusCode, string>(webResponse.StatusCode, responseString);
+                    }
                 }
             }
             catch (WebException ex)

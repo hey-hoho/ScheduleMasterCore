@@ -37,7 +37,7 @@ namespace Hos.ScheduleMaster.Core
             //    }
             //}
             //属性赋值
-            var properties = serviceType.GetProperties(BindingFlags.Public | BindingFlags.NonPublic).AsEnumerable().Where(x => x.Name.StartsWith("_"));
+            var properties = serviceType.GetProperties().AsEnumerable().Where(x => x.Name.StartsWith("_"));
             foreach (PropertyInfo property in properties)
             {
                 var autowiredAttr = property.GetCustomAttribute<AutowiredAttribute>();

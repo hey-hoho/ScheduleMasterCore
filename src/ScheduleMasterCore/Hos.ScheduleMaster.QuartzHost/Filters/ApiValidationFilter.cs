@@ -11,7 +11,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
     {
         public void OnActionExecuted(ActionExecutedContext context)
         {
-            var secret = context.HttpContext.Request.Headers["ms_secret"].FirstOrDefault();
+            var secret = context.HttpContext.Request.Headers["sm_secret"].FirstOrDefault();
             if (!Common.QuartzManager.AccessSecret.Equals(secret))
             {
                 context.Result = new BadRequestResult();

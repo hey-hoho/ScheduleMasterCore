@@ -115,6 +115,9 @@ namespace Hos.ScheduleMaster.Web
             ConfigurationCache.Refresh();
             //初始化日志管理器
             Core.Log.LogManager.Init("master-node");
+            //初始化系统任务
+            FluentScheduler.JobManager.Initialize(new Infrastructure.SystemSchedulerRegistry());
+            FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job: ", info.Exception);
         }
     }
 

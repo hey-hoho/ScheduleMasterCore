@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Net;
 using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Services
@@ -147,18 +148,23 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
         }
 
-        private bool NodesTraverseAction(Guid sid, string router)
+        private bool NodesTraverseAction(Guid sid, string router, string verb = "post", Action<ServerNodeEntity, KeyValuePair<HttpStatusCode, string>> callback = null)
         {
             var nodeList = _repositoryFactory.ServerNodes.Where(x => x.Status == 1).ToList();
             if (nodeList.Any())
             {
-                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
+                Dictionary<string, string> param = new Dictionary<string, string>();
+                if (sid != Guid.Empty)
+                {
+                    param.Add("sid", sid.ToString());
+                }
                 bool success = false;
                 System.Threading.Tasks.Parallel.ForEach(nodeList, (n) =>
                 {
                     Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
-                    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", "post", param, header);
-                    success = success || result.Key == System.Net.HttpStatusCode.OK;
+                    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
+                    success = success || result.Key == HttpStatusCode.OK;
+                    callback?.Invoke(n, result);
                 });
                 return success;
             }
@@ -353,6 +359,19 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
             }
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能删除!");
+        }
+
+        public void NodeCheck()
+        {
+            NodesTraverseAction(Guid.Empty, "api/quartz/healthcheck", "get", (node, result) =>
+            {
+                _repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == node.NodeName, x => new ServerNodeEntity
+                {
+                    Status = result.Key == HttpStatusCode.OK ? 1 : 0,
+                    LastUpdateTime = DateTime.Now
+                });
+                _unitOfWork.Commit();
+            });
         }
 
         /// <summary>
