@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Hos.ScheduleMaster.Web.Infrastructure
+namespace Hos.ScheduleMaster.Web.AppStart
 {
     public class SystemSchedulerRegistry : Registry
     {
@@ -31,7 +31,7 @@ namespace Hos.ScheduleMaster.Web.Infrastructure
                 Core.Services.ScheduleService service = new Core.Services.ScheduleService();
                 AutowiredServiceProvider provider = new AutowiredServiceProvider();
                 provider.PropertyActivate(service, scope.ServiceProvider);
-                service.NodeCheck();
+                service.WorkerHealthCheck();
             }
         }
     }

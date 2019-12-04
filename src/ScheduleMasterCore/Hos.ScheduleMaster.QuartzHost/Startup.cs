@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.QuartzHost.Filters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -31,7 +32,8 @@ namespace Hos.ScheduleMaster.QuartzHost
             services.AddControllers(config =>
             {
                 //添加全局过滤器
-                config.Filters.Add(typeof(Filters.ApiValidationFilter));
+                config.Filters.Add(typeof(ApiValidationFilter));
+                config.Filters.Add(typeof(GlobalExceptionFilter));
             });
 
             services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
@@ -65,6 +67,8 @@ namespace Hos.ScheduleMaster.QuartzHost
             Core.Log.LogManager.Init(Environment.MachineName);
             //初始化Quartz
             Common.QuartzManager.InitScheduler().Wait();
+            //启动系统任务
+            Common.QuartzManager.Start<AppStart.TaskClearJob>("task-clear", "0 0/1 * * * ? *").Wait();
 
             appLifetime.ApplicationStopping.Register(OnStopping);
         }

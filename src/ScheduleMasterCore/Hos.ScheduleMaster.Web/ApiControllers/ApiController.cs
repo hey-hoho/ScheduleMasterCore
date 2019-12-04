@@ -15,9 +15,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="result">返回内容</param>
         /// <returns></returns>
-        protected ApiResponseMessage ApiResponse(ResultStatus status, string message, object data = null)
+        protected ServiceResponseMessage ApiResponse(ResultStatus status, string message, object data = null)
         {
-            return new ApiResponseMessage(status, message, data);
+            return new ServiceResponseMessage(status, message, data);
         }
     }
 }

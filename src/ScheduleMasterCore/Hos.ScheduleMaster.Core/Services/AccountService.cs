@@ -52,6 +52,10 @@ namespace Hos.ScheduleMaster.Core.Services
             return _repositoryFactory.SystemUsers.WherePager(pager, m => m.Status != (int)SystemUserStatus.Deleted, m => m.CreateTime, false);
         }
 
+        /// <summary>
+        /// 查询所有未删除的用户
+        /// </summary>
+        /// <returns></returns>
         public List<SystemUserEntity> GetUserAll()
         {
             return _repositoryFactory.SystemUsers.WhereOrderBy(m => m.Status != (int)SystemUserStatus.Deleted, m => m.CreateTime, false).ToList();

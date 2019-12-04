@@ -24,6 +24,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\css\" />
+    <Folder Include="Plugins\" />
   </ItemGroup>
 
 </Project>

@@ -30,6 +30,10 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <returns></returns>
         ListPager<SystemUserEntity> GetUserPager(ListPager<SystemUserEntity> pager);
 
+        /// <summary>
+        /// 查询所有未删除的用户
+        /// </summary>
+        /// <returns></returns>
         List<SystemUserEntity> GetUserAll();
 
         /// <summary>

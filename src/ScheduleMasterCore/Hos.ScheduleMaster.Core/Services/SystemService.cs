@@ -10,11 +10,20 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(ISystemService))]
     public class SystemService : BaseService, ISystemService
     {
+        /// <summary>
+        /// 查询所有配置项
+        /// </summary>
+        /// <returns></returns>
         public List<SystemConfigEntity> GetConfigList()
         {
             return _repositoryFactory.SystemConfigs.Table.ToList();
         }
 
+        /// <summary>
+        /// 保存配置信息
+        /// </summary>
+        /// <param name="items"></param>
+        /// <returns></returns>
         public bool SaveConfig(Dictionary<string, string> items)
         {
             foreach (var item in items)

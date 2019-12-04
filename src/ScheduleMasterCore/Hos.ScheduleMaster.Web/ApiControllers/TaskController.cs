@@ -15,7 +15,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
     public class TaskController : ApiController
     {
         [Autowired]
-        public IScheduleService _taskService { get; set; }
+        public IScheduleService _scheduleService { get; set; }
 
         //private readonly ILogger<TaskController> _logger;
 
@@ -37,7 +37,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             {
                 pager.AddFilter(m => m.Title.Contains(name));
             }
-            pager = _taskService.QueryPager(pager);
+            pager = _scheduleService.QueryPager(pager);
             var result = new
             {
                 total = pager.Total,
@@ -64,9 +64,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet, Route("QueryTaskDetail")]
-        public ApiResponseMessage QueryTaskDetail(Guid id)
+        public ServiceResponseMessage QueryTaskDetail(Guid id)
         {
-            var entity = _taskService.QueryById(id);
+            var entity = _scheduleService.QueryById(id);
             return ApiResponse(ResultStatus.Success, "请求数据成功", entity);
         }
 
@@ -98,7 +98,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             {
                 pager.AddFilter(m => m.CreateTime <= enddate);
             }
-            pager = _taskService.QueryLogPager(pager);
+            pager = _scheduleService.QueryLogPager(pager);
             var result = new
             {
                 total = pager.Total,
@@ -114,7 +114,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <returns></returns>
         [HttpPost, Route("CreateTask")]
         // [ApiParamValidation]
-        public ApiResponseMessage CreateTask([FromBody]ScheduleInfo task)
+        public ServiceResponseMessage CreateTask([FromBody]ScheduleInfo task)
         {
             ScheduleEntity model = new ScheduleEntity
             {
@@ -131,12 +131,12 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 RunMoreTimes = task.RunMoreTimes,
                 TotalRunCount = 0
             };
-            var result = _taskService.AddTask(model, task.Guardians, task.Nexts);
+            var result = _scheduleService.AddTask(model, task.Guardians, task.Nexts);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _taskService.TaskStart(model);
+                    var start = _scheduleService.TaskStart(model);
                     return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), model.Id);
                 }
             }
@@ -150,9 +150,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <returns></returns>
         [HttpPost, Route("EditTask")]
         //[ApiParamValidation]
-        public ApiResponseMessage EditTask([FromBody]ScheduleInfo task)
+        public ServiceResponseMessage EditTask([FromBody]ScheduleInfo task)
         {
-            var result = _taskService.EditTask(task);
+            var result = _scheduleService.EditTask(task);
             return result;
         }
 
@@ -162,14 +162,14 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("StartTask")]
-        public ApiResponseMessage StartTask(Guid id)
+        public ServiceResponseMessage StartTask(Guid id)
         {
-            var task = _taskService.QueryById(id);
+            var task = _scheduleService.QueryById(id);
             if (task == null || task.Status != (int)ScheduleStatus.Stop)
             {
                 return ApiResponse(ResultStatus.Failed, "任务在停止状态下才能启动！");
             }
-            var result = _taskService.TaskStart(task);
+            var result = _scheduleService.TaskStart(task);
             return result;
         }
 
@@ -179,9 +179,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("PauseTask")]
-        public ApiResponseMessage PauseTask(Guid id)
+        public ServiceResponseMessage PauseTask(Guid id)
         {
-            var result = _taskService.PauseTask(id);
+            var result = _scheduleService.PauseTask(id);
             return result;
         }
 
@@ -191,9 +191,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("RunOnceTask")]
-        public ApiResponseMessage RunOnceTask(Guid id)
+        public ServiceResponseMessage RunOnceTask(Guid id)
         {
-            var result = _taskService.RunOnceTask(id);
+            var result = _scheduleService.RunOnceTask(id);
             return result;
         }
 
@@ -203,9 +203,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("ResumeTask")]
-        public ApiResponseMessage ResumeTask(Guid id)
+        public ServiceResponseMessage ResumeTask(Guid id)
         {
-            var result = _taskService.ResumeTask(id);
+            var result = _scheduleService.ResumeTask(id);
             return result;
         }
 
@@ -215,9 +215,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("StopTask")]
-        public ApiResponseMessage StopTask(Guid id)
+        public ServiceResponseMessage StopTask(Guid id)
         {
-            var result = _taskService.StopTask(id);
+            var result = _scheduleService.StopTask(id);
             return result;
         }
 
@@ -227,9 +227,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, Route("DeleteTask")]
-        public ApiResponseMessage DeleteTask(Guid id)
+        public ServiceResponseMessage DeleteTask(Guid id)
         {
-            var result = _taskService.DeleteTask(id);
+            var result = _scheduleService.DeleteTask(id);
             return result;
         }
     }

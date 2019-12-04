@@ -14,22 +14,43 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(IScheduleService))]
     public class ScheduleService : BaseService, IScheduleService
     {
-
+        /// <summary>
+        /// 查询所有未删除的任务
+        /// </summary>
+        /// <returns></returns>
         public List<ScheduleEntity> QueryAll()
         {
             return _repositoryFactory.Schedules.Where(m => m.Status != (int)ScheduleStatus.Deleted).ToList();
         }
 
+        /// <summary>
+        /// 查询任务列表
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
         public ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager)
         {
             return _repositoryFactory.Schedules.WherePager(pager, m => m.Status != (int)ScheduleStatus.Deleted, m => m.CreateTime, false);
         }
 
+        /// <summary>
+        /// 查询日志分页数据
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
         public ListPager<SystemLogEntity> QueryLogPager(ListPager<SystemLogEntity> pager)
         {
             return _repositoryFactory.SystemLogs.WherePager(pager, m => true, m => m.Id, false);
         }
 
+        /// <summary>
+        /// 根据条件删除日志
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="category"></param>
+        /// <param name="startdate"></param>
+        /// <param name="enddate"></param>
+        /// <returns></returns>
         public int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
             Expression<Func<SystemLogEntity, bool>> where = m => true;
@@ -53,22 +74,44 @@ namespace Hos.ScheduleMaster.Core.Services
             return _unitOfWork.Commit();
         }
 
+        /// <summary>
+        /// id查询任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
         public ScheduleEntity QueryById(Guid sid)
         {
             return _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == sid);
         }
 
-        public List<ScheduleKeeperEntity> QueryTaskGuardians(Guid sid)
+        /// <summary>
+        /// 查询任务的监护人
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public List<ScheduleKeeperEntity> QueryScheduleKeepers(Guid sid)
         {
             return _repositoryFactory.ScheduleKeepers.Where(x => x.ScheduleId == sid).ToList();
         }
 
-        public List<ScheduleReferenceEntity> QueryTaskReferences(Guid sid)
+        /// <summary>
+        /// 查询任务的子级任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public List<ScheduleReferenceEntity> QueryScheduleReferences(Guid sid)
         {
             return _repositoryFactory.ScheduleReferences.Where(x => x.ScheduleId == sid).ToList();
         }
 
-        public ApiResponseMessage AddTask(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
+        /// <summary>
+        /// 添加一个任务
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="keepers"></param>
+        /// <param name="nexts"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage AddTask(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
         {
             model.CreateTime = DateTime.Now;
             _repositoryFactory.Schedules.Add(model);
@@ -106,7 +149,12 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
         }
 
-        public ApiResponseMessage EditTask(ScheduleInfo model)
+        /// <summary>
+        /// 编辑任务信息
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage EditTask(ScheduleInfo model)
         {
             var task = _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == model.Id);
             if (task == null)
@@ -148,9 +196,17 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
         }
 
-        private bool NodesTraverseAction(Guid sid, string router, string verb = "post", Action<ServerNodeEntity, KeyValuePair<HttpStatusCode, string>> callback = null)
+        /// <summary>
+        /// 遍历所有worker并执行操作
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="router"></param>
+        /// <param name="verb"></param>
+        /// <param name="callback"></param>
+        /// <returns></returns>
+        private bool WorkersTraverseAction(Guid sid, string router, string verb = "post", Action<ServerNodeEntity, KeyValuePair<HttpStatusCode, string>> callback = null)
         {
-            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.Status == 1).ToList();
+            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 1).ToList();
             if (nodeList.Any())
             {
                 Dictionary<string, string> param = new Dictionary<string, string>();
@@ -170,7 +226,14 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             return false;
         }
-        private bool NodesSelectOne(Guid sid, string router)
+
+        /// <summary>
+        /// 根据权重选择一个worker执行操作
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="router"></param>
+        /// <returns></returns>
+        private bool WorkerSelectOne(Guid sid, string router)
         {
             //根据节点权重来选择一个节点运行
             var list = _repositoryFactory.ServerNodes.Where(m => m.Status == 1).OrderBy(x => x.Priority).ToList();
@@ -201,15 +264,20 @@ namespace Hos.ScheduleMaster.Core.Services
             return false;
         }
 
-        public ApiResponseMessage TaskStart(ScheduleEntity task)
+        /// <summary>
+        /// 启动一个任务
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage TaskStart(ScheduleEntity model)
         {
-            if (task == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
+            if (model == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
             //启动任务
-            bool success = NodesTraverseAction(task.Id, "api/quartz/start");
+            bool success = WorkersTraverseAction(model.Id, "api/quartz/start");
             if (success)
             {
                 //启动成功后更新任务状态为运行中
-                _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == model.Id, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Running
                 });
@@ -221,7 +289,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == model.Id, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
                     NextRunTime = null
@@ -231,12 +299,17 @@ namespace Hos.ScheduleMaster.Core.Services
             }
         }
 
-        public ApiResponseMessage PauseTask(Guid sid)
+        /// <summary>
+        /// 暂停一个任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage PauseTask(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = NodesTraverseAction(task.Id, "api/quartz/pause");
+                bool success = WorkersTraverseAction(task.Id, "api/quartz/pause");
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -259,12 +332,17 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能暂停!");
         }
 
-        public ApiResponseMessage ResumeTask(Guid sid)
+        /// <summary>
+        /// 恢复一个任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage ResumeTask(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
-                bool success = NodesTraverseAction(task.Id, "api/quartz/resume");
+                bool success = WorkersTraverseAction(task.Id, "api/quartz/resume");
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -286,12 +364,17 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能恢复运行!");
         }
 
-        public ApiResponseMessage RunOnceTask(Guid sid)
+        /// <summary>
+        /// 执行一次任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage RunOnceTask(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = NodesSelectOne(sid, "api/quartz/runonce");
+                bool success = WorkerSelectOne(sid, "api/quartz/runonce");
                 if (success)
                 {
                     //运行成功后更新信息
@@ -313,12 +396,18 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             return ServiceResult(ResultStatus.Failed, "任务不在运行状态下!");
         }
-        public ApiResponseMessage StopTask(Guid sid)
+
+        /// <summary>
+        /// 停止一个任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage StopTask(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
-                bool success = NodesTraverseAction(task.Id, "api/quartz/stop");
+                bool success = WorkersTraverseAction(task.Id, "api/quartz/stop");
                 if (success)
                 {
                     //更新任务状态为已停止
@@ -338,7 +427,12 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能停止!");
         }
 
-        public ApiResponseMessage DeleteTask(Guid sid)
+        /// <summary>
+        /// 删除一个任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage DeleteTask(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status != (int)ScheduleStatus.Deleted)
@@ -361,9 +455,12 @@ namespace Hos.ScheduleMaster.Core.Services
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能删除!");
         }
 
-        public void NodeCheck()
+        /// <summary>
+        /// worker健康检查
+        /// </summary>
+        public void WorkerHealthCheck()
         {
-            NodesTraverseAction(Guid.Empty, "api/quartz/healthcheck", "get", (node, result) =>
+            WorkersTraverseAction(Guid.Empty, "api/quartz/healthcheck", "get", (node, result) =>
             {
                 _repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == node.NodeName, x => new ServerNodeEntity
                 {
@@ -394,6 +491,13 @@ namespace Hos.ScheduleMaster.Core.Services
             return Guid.Empty;
         }
 
+        /// <summary>
+        /// 更新运行记录
+        /// </summary>
+        /// <param name="traceId"></param>
+        /// <param name="timeSpan"></param>
+        /// <param name="result"></param>
+        /// <returns></returns>
         public bool UpdateRunTrace(Guid traceId, double timeSpan, ScheduleRunResult result)
         {
             if (traceId == Guid.Empty)

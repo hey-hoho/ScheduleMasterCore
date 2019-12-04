@@ -25,9 +25,9 @@ namespace Hos.ScheduleMaster.Core.Services
         //    this._unitOfWork = unitOfWork;
         //}
 
-        protected ApiResponseMessage ServiceResult(ResultStatus status, string msg = "", object data = null)
+        protected ServiceResponseMessage ServiceResult(ResultStatus status, string msg = "", object data = null)
         {
-            return new ApiResponseMessage(status, msg, data);
+            return new ServiceResponseMessage(status, msg, data);
         }
     }
 

@@ -10,13 +10,14 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Common;
+using Microsoft.AspNetCore.Http;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
     public class TaskController : AdminController
     {
         [Autowired]
-        public IScheduleService _taskService { get; set; }
+        public IScheduleService _scheduleService { get; set; }
 
         //public TaskController(IAccountService accountService, IScheduleService taskService)
         //{
@@ -40,18 +41,18 @@ namespace Hos.ScheduleMaster.Web.Controllers
         public ActionResult Create()
         {
             ViewBag.UserList = _accountService.GetUserAll();
-            ViewBag.TaskList = _taskService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             return View();
         }
 
         [HttpPost, Route("CreateTask")]
-        public ActionResult CreateTask(ScheduleInfo task)
+        public ActionResult CreateTask(ScheduleInfo task, IFormFile file)
         {
             if (!ModelState.IsValid)
             {
                 return DangerTip("数据验证失败！");
             }
-            ScheduleEntity model = new ScheduleEntity
+           ScheduleEntity model = new ScheduleEntity
             {
                 AssemblyName = task.AssemblyName,
                 ClassName = task.ClassName,
@@ -61,17 +62,17 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 Remark = task.Remark,
                 StartDate = task.StartDate,
                 Title = task.Title,
-                Status = (int)Core.Models.ScheduleStatus.Stop,
+                Status = (int)ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
                 RunMoreTimes = task.RunMoreTimes,
                 TotalRunCount = 0
             };
-            var result = _taskService.AddTask(model, task.Guardians, task.Nexts);
+            var result = _scheduleService.AddTask(model, task.Guardians, task.Nexts);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _taskService.TaskStart(model);
+                    var start = _scheduleService.TaskStart(model);
                     return SuccessTip("任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
                 }
                 return SuccessTip("任务创建成功！", Url.Action("Index"));
@@ -86,16 +87,16 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public ActionResult Edit(Guid id)
         {
-            var model = _taskService.QueryById(id);
+            var model = _scheduleService.QueryById(id);
             if (model == null)
             {
                 return PageNotFound();
             }
             ViewBag.UserList = _accountService.GetUserAll();
-            ViewBag.TaskList = _taskService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
-            viewer.Guardians = _taskService.QueryTaskGuardians(id).Select(x => x.UserId).ToList();
-            viewer.Nexts = _taskService.QueryTaskReferences(id).Select(x => x.ChildId).ToList();
+            viewer.Guardians = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
+            viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();
             return View("Create", viewer);
         }
 
@@ -108,7 +109,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         //[ApiParamValidation]
         public ActionResult EditTask(ScheduleInfo task)
         {
-            var result = _taskService.EditTask(task);
+            var result = _scheduleService.EditTask(task);
             if (result.Status == ResultStatus.Success)
             {
                 return SuccessTip("任务编辑成功！", Url.Action("Index"));
@@ -133,7 +134,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             List<SelectListItem> selectData = new List<SelectListItem>();
             selectData.Add(new SelectListItem() { Text = "系统日志", Value = "0" });
-            selectData.AddRange(_taskService.QueryAll().Select(row => new SelectListItem
+            selectData.AddRange(_scheduleService.QueryAll().Select(row => new SelectListItem
             {
                 Text = row.Title,
                 Value = row.Id.ToString(),
@@ -154,7 +155,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
-            var result = _taskService.DeleteLog(sid, category, startdate, enddate);
+            var result = _scheduleService.DeleteLog(sid, category, startdate, enddate);
             if (result > 0)
             {
                 return SuccessTip($"清理成功！本次清理【{result}】条");

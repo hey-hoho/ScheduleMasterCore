@@ -14,6 +14,12 @@ namespace Hos.ScheduleMaster.Core.Models
         public string NodeName { get; set; }
 
         /// <summary>
+        /// 节点类型 master/worker
+        /// </summary>
+        [Required]
+        public string NodeType { get; set; }
+
+        /// <summary>
         /// 访问协议，http/https
         /// </summary>
         public string AccessProtocol { get; set; }

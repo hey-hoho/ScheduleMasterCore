@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Hos.ScheduleMaster.Core
+namespace Hos.ScheduleMaster.Core.Common
 {
-  public static  class Extension
+    public static class Extensions
     {
         /// <summary>
         /// 格式化为yyyy-MM-dd HH:mm:ss

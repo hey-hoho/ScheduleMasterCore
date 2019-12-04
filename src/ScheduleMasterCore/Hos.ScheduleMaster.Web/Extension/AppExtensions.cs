@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -28,13 +30,14 @@ namespace Hos.ScheduleMaster.Web.Extension
                 using (var dbContext = scope.ServiceProvider.GetRequiredService<Core.Models.SmDbContext>())
                 {
                     //不需要先执行Add-migration迁移命令，如果数据库不存在，则自动创建并返回true
-                    //dbContext.Database.EnsureCreated();
+                    var c = dbContext.Database.EnsureCreated();
+                    //dbContext.GetInfrastructure().GetService<IMigrator>().Migrate();
                     //检测是否有待迁移内容，有的话，自动应用迁移
-                    IEnumerable<string> migrations = dbContext.Database.GetPendingMigrations();
-                    if (migrations.Any())
-                    {
-                        dbContext.Database.Migrate();
-                    }
+                    //IEnumerable<string> migrations = dbContext.Database.GetPendingMigrations();
+                    //if (migrations.Any())
+                    //{
+                    //    dbContext.Database.Migrate();
+                    //}
                 }
             }
             return webhost;

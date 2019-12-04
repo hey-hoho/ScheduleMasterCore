@@ -19,5 +19,16 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             return View();
         }
+
+        /// <summary>
+        /// 下载插件包
+        /// </summary>
+        /// <param name="pluginName"></param>
+        /// <returns></returns>
+        public IActionResult DownloadPluginFile(string pluginName)
+        {
+            var stream = System.IO.File.OpenRead($"{System.IO.Directory.GetCurrentDirectory()}\\Plugins\\{pluginName}.zip");
+            return File(stream, "application/octet-stream", $"{pluginName}.zip");
+        }
     }
 }

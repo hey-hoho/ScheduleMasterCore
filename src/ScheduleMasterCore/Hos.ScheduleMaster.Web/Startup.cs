@@ -7,6 +7,7 @@ using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
 using Hos.ScheduleMaster.Web.Extension;
+using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -45,6 +46,7 @@ namespace Hos.ScheduleMaster.Web
             services.AddHosControllers(this);
             services.AddMvc(options =>
             {
+                options.Filters.Add(typeof(GlobalExceptionFilter));
                 //options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
                 //    new System.Text.Json.JsonSerializerOptions
                 //    {
@@ -116,7 +118,7 @@ namespace Hos.ScheduleMaster.Web
             //初始化日志管理器
             Core.Log.LogManager.Init("master-node");
             //初始化系统任务
-            FluentScheduler.JobManager.Initialize(new Infrastructure.SystemSchedulerRegistry());
+            FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
             FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job: ", info.Exception);
         }
     }

@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core
 {
-    public class ApiResponseMessage
+    public class ServiceResponseMessage
     {
-        public ApiResponseMessage() { }
+        public ServiceResponseMessage() { }
 
         /// <summary>
         /// 构造函数
@@ -15,7 +15,7 @@ namespace Hos.ScheduleMaster.Core
         /// <param name="status"></param>
         /// <param name="msg"></param>
         /// <param name="data"></param>
-        public ApiResponseMessage(ResultStatus status, string msg = "", object data = null)
+        public ServiceResponseMessage(ResultStatus status, string msg = "", object data = null)
         {
             this.Status = status;
             this.Message = msg;

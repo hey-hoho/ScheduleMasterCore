@@ -23,19 +23,20 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
     public class QuartzManager
     {
         /// <summary>
-        /// 节点标识
+        /// worker标识
         /// </summary>
         public static string NodeIdentity { get; private set; }
 
         /// <summary>
-        /// 访问秘钥
+        /// worker访问秘钥
         /// </summary>
         public static string AccessSecret { get; private set; }
 
-        private QuartzManager()
-        {
-        }
+        private QuartzManager() { }
 
+        /// <summary>
+        /// 调度器实例
+        /// </summary>
         private static IScheduler _scheduler = null;
 
         /// <summary>
@@ -69,6 +70,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
+        /// <summary>
+        /// 更新节点状态
+        /// </summary>
+        /// <param name="isStarted"></param>
         private static void MarkNode(bool isStarted)
         {
             using (var scope = new Core.ScopeDbContext())
@@ -79,7 +84,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     if (isStarted)
                     {
-                        node.Status = isStarted ? 1 : 0;
+                        node.Status = 1;
                         node.AccessSecret = Guid.NewGuid().ToString("n");
                     }
                     else
@@ -308,6 +313,26 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 LogHelper.Error($"_scheduler.CheckExists=false", sid);
             }
             return false;
+        }
+
+        /// <summary>
+        /// 执行自定义任务类
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="identity"></param>
+        /// <param name="cronExp"></param>
+        /// <returns></returns>
+        public static async Task Start<T>(string identity, string cronExp) where T : IJob
+        {
+            IJobDetail job = JobBuilder.Create<T>().WithIdentity(identity).Build();
+            CronTriggerImpl trigger = new CronTriggerImpl
+            {
+                CronExpressionString = cronExp,
+                Name = identity,
+                Key = new TriggerKey(identity)
+            };
+            trigger.StartTimeUtc = DateTimeOffset.Now;
+            await _scheduler.ScheduleJob(job, trigger);
         }
 
         #region 私有方法
