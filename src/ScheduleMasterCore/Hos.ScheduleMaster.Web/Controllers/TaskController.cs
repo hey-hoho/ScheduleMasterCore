@@ -11,6 +11,7 @@ using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Common;
 using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
@@ -45,14 +46,28 @@ namespace Hos.ScheduleMaster.Web.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 创建任务
+        /// </summary>
+        /// <param name="task"></param>
+        /// <returns></returns>
         [HttpPost, Route("CreateTask")]
-        public ActionResult CreateTask(ScheduleInfo task, IFormFile file)
+        public async Task<ActionResult> CreateTask(ScheduleInfo task)
         {
             if (!ModelState.IsValid)
             {
                 return DangerTip("数据验证失败！");
             }
-           ScheduleEntity model = new ScheduleEntity
+            IFormFile file = Request.Form.Files["file"];
+            if (file != null && file.Length > 0)
+            {
+                var filePath = Directory.GetCurrentDirectory() + "/Plugins/" + file.FileName;
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+            }
+            ScheduleEntity model = new ScheduleEntity
             {
                 AssemblyName = task.AssemblyName,
                 ClassName = task.ClassName,

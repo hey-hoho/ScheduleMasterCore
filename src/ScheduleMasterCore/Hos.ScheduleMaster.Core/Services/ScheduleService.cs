@@ -236,7 +236,7 @@ namespace Hos.ScheduleMaster.Core.Services
         private bool WorkerSelectOne(Guid sid, string router)
         {
             //根据节点权重来选择一个节点运行
-            var list = _repositoryFactory.ServerNodes.Where(m => m.Status == 1).OrderBy(x => x.Priority).ToList();
+            var list = _repositoryFactory.ServerNodes.Where(m => m.NodeType == "worker" && m.Status == 1).OrderBy(x => x.Priority).ToList();
             int[] arry = new int[list.Count + 1];
             arry[0] = 0;
             for (int i = 0; i < list.Count; i++)

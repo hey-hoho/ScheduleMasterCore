@@ -17,16 +17,12 @@ using System.Threading.Tasks;
 using System.Threading;
 using Hos.ScheduleMaster.Core.Common;
 using Microsoft.EntityFrameworkCore;
+using Hos.ScheduleMaster.Core;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
     public class QuartzManager
     {
-        /// <summary>
-        /// worker标识
-        /// </summary>
-        public static string NodeIdentity { get; private set; }
-
         /// <summary>
         /// worker访问秘钥
         /// </summary>
@@ -44,7 +40,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// </summary>
         public static async Task InitScheduler()
         {
-            NodeIdentity = Environment.MachineName;
             try
             {
                 if (_scheduler == null)
@@ -76,26 +71,40 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <param name="isStarted"></param>
         private static void MarkNode(bool isStarted)
         {
+            var setting = ConfigurationCache.NodeSetting;
             using (var scope = new Core.ScopeDbContext())
             {
+                bool isCreate = false;
                 var db = scope.GetDbContext();
-                var node = db.ServerNodes.FirstOrDefault(x => x.NodeName == NodeIdentity);
-                if (node != null)
+                var node = db.ServerNodes.FirstOrDefault(x => x.NodeName == setting.IdentityName);
+                if (isStarted)
                 {
-                    if (isStarted)
+                    if (node == null)
                     {
-                        node.Status = 1;
-                        node.AccessSecret = Guid.NewGuid().ToString("n");
+                        isCreate = true;
+                        node = new ServerNodeEntity();
                     }
-                    else
+                    node.NodeName = setting.IdentityName;
+                    node.NodeType = setting.Role;
+                    node.MachineName = Environment.MachineName;
+                    node.AccessProtocol = setting.Protocol;
+                    node.Host = $"{setting.IP}:{setting.Port}";
+                    node.Priority = setting.Priority;
+                    node.Status = 1;
+                    node.AccessSecret = Guid.NewGuid().ToString("n");
+                    if (isCreate) db.ServerNodes.Add(node);
+                }
+                else
+                {
+                    if (node != null)
                     {
                         node.Status = 0;
                         node.AccessSecret = null;
                     }
-                    if (db.SaveChanges() > 0)
-                    {
-                        AccessSecret = node.AccessSecret;
-                    }
+                }
+                if (db.SaveChanges() > 0)
+                {
+                    AccessSecret = node.AccessSecret;
                 }
             }
         }

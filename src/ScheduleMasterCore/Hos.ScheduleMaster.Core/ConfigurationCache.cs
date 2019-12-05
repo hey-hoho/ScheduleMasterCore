@@ -12,6 +12,8 @@ namespace Hos.ScheduleMaster.Core
 {
     public static class ConfigurationCache
     {
+        public static NodeSetting NodeSetting { get; private set; }
+
         public static IServiceProvider RootServiceProvider { get; set; }
 
         private static ConcurrentDictionary<string, string> _cacheContainer;
@@ -21,6 +23,11 @@ namespace Hos.ScheduleMaster.Core
             //初始分配100个容量，避免配置项多了以后频繁扩容，100基本够用了
             //并发级别为1，表示仅允许1个线程同时更新
             _cacheContainer = new ConcurrentDictionary<string, string>(1, 100);
+        }
+
+        public static void SetNode(NodeSetting setting)
+        {
+            NodeSetting = setting;
         }
 
         public static void Refresh()
@@ -65,5 +72,20 @@ namespace Hos.ScheduleMaster.Core
 
         #endregion
 
+    }
+
+    public class NodeSetting
+    {
+        public string IdentityName { get; set; }
+
+        public string Role { get; set; }
+
+        public string Protocol { get; set; }
+
+        public string IP { get; set; }
+
+        public int Port { get; set; }
+
+        public int Priority { get; set; }
     }
 }

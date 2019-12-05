@@ -26,7 +26,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
     {
         Guid _sid;
         SmDbContext _db;
-        string node = QuartzManager.NodeIdentity;
+        string node = ConfigurationCache.NodeSetting.IdentityName;
 
         public Task Execute(IJobExecutionContext context)
         {

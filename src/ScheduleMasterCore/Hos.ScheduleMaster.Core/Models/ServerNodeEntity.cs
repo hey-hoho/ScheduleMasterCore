@@ -20,8 +20,14 @@ namespace Hos.ScheduleMaster.Core.Models
         public string NodeType { get; set; }
 
         /// <summary>
+        /// 所在机器
+        /// </summary>
+        public string MachineName { get; set; }
+
+        /// <summary>
         /// 访问协议，http/https
         /// </summary>
+        [Required]
         public string AccessProtocol { get; set; }
 
         /// <summary>

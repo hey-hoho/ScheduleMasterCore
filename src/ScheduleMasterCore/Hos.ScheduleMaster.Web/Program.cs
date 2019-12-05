@@ -22,6 +22,7 @@ namespace Hos.ScheduleMaster.Web
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://*:30000");
                 })
                 //.UseDefaultServiceProvider(options =>
                 //{

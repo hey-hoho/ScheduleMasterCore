@@ -19,7 +19,7 @@
         </div>
         <div class="widget-body">
             <div id="horizontal-form">
-                <form class="form-horizontal" action="@(Model==null?"/Task/CreateTask":"/Task/EditTask")" data-ajax="true" data-ajax-method="post" id="form1" novalidate="novalidate">
+                <form class="form-horizontal" action="@(Model==null?"/Task/CreateTask":"/Task/EditTask")" data-ajax="true" data-ajax-method="post" id="form1" novalidate="novalidate" enctype="multipart/form-data">
                     <div class="form-group">
                         <div class="col-sm-2">
                             <button type="submit" class="btn btn-primary">保  存</button>
@@ -115,6 +115,12 @@
                                     <label for="" class="col-sm-2 control-label no-padding-right">备注</label>
                                     <div class="col-sm-6">
                                         @Html.TextAreaFor(x => x.Remark, new { @class = "form-control", placeholder = "" })
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="" class="col-sm-2 control-label no-padding-right">程序包</label>
+                                    <div class="col-sm-6">
+                                        <input type="file" name="file" accept="aplication/zip" />
                                     </div>
                                 </div>
                                 <div class="form-group @(Model == null ? "" : "hide")">

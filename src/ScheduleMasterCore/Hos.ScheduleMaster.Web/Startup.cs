@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Pomelo.EntityFrameworkCore.MySql;
 
 namespace Hos.ScheduleMaster.Web
@@ -62,7 +63,7 @@ namespace Hos.ScheduleMaster.Web
                 ////设置时间格式
                 //option.SerializerSettings.DateFormatString = "yyyy-MM-dd";
             });
-
+            services.Configure<NodeSetting>(Configuration.GetSection("NodeSetting"));
             //配置authorrize
             services.AddAuthentication(b =>
             {
@@ -89,7 +90,7 @@ namespace Hos.ScheduleMaster.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<NodeSetting> node)
         {
             if (env.IsDevelopment())
             {
@@ -114,9 +115,12 @@ namespace Hos.ScheduleMaster.Web
 
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
+            ConfigurationCache.SetNode(node.Value);
             ConfigurationCache.Refresh();
             //初始化日志管理器
-            Core.Log.LogManager.Init("master-node");
+            Core.Log.LogManager.Init();
+            //注册节点
+            AppStart.NodeRegistry.Register();
             //初始化系统任务
             FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
             FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job: ", info.Exception);

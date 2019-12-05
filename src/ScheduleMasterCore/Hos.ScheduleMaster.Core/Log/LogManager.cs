@@ -14,7 +14,7 @@ namespace Hos.ScheduleMaster.Core.Log
     {
         public static BufferQueue<SystemLogEntity> Queue;
 
-        public static void Init(string node)
+        public static void Init()
         {
             Queue = new BufferQueue<SystemLogEntity>();
             var td = new System.Threading.Thread(() =>
@@ -26,7 +26,7 @@ namespace Hos.ScheduleMaster.Core.Log
                     {
                         Queue.Read((item, index) =>
                         {
-                            item.Node = node;
+                            item.Node = ConfigurationCache.NodeSetting.IdentityName;
                             item.CreateTime = DateTime.Now;
                             db.SystemLogs.Add(item);
                         });

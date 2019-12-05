@@ -118,14 +118,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult Get()
         {
-            var sourcePath = "https://localhost:44301/static/downloadpluginfile?pluginname=test";
-            var zipPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\test.zip";
-            var pluginPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\test";
-            WebClient client = new WebClient();
-            client.DownloadFile(new Uri(sourcePath), zipPath);
-            //将指定 zip 存档中的所有文件都解压缩到文件系统的一个目录下
-            ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
-            System.IO.File.Delete(zipPath);
+            //var sourcePath = "https://localhost:44301/static/downloadpluginfile?pluginname=test";
+            //var zipPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\test.zip";
+            //var pluginPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\test";
+            //WebClient client = new WebClient();
+            //client.DownloadFile(new Uri(sourcePath), zipPath);
+            ////将指定 zip 存档中的所有文件都解压缩到文件系统的一个目录下
+            //ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
+            //System.IO.File.Delete(zipPath);
             return Ok("5555555555555555");
             //Common.QuartzManager.StartWithRetry(new Core.Models.ScheduleView
             //{
