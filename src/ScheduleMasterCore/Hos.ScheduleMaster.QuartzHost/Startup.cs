@@ -36,13 +36,12 @@ namespace Hos.ScheduleMaster.QuartzHost
                 config.Filters.Add(typeof(ApiValidationFilter));
                 config.Filters.Add(typeof(GlobalExceptionFilter));
             });
-            services.Configure<NodeSetting>(Configuration.GetSection("NodeSetting"));
             services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime, IOptions<NodeSetting> node)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             var s = Environment.MachineName;
             if (env.IsDevelopment())
@@ -63,7 +62,7 @@ namespace Hos.ScheduleMaster.QuartzHost
 
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             //加载全局缓存
-            ConfigurationCache.SetNode(node.Value);
+            ConfigurationCache.SetNode(Configuration.GetSection("NodeSetting").Get<NodeSetting>());
             ConfigurationCache.Refresh();
             //初始化日志管理器
             Core.Log.LogManager.Init();

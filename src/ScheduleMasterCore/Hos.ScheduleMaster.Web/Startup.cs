@@ -63,7 +63,6 @@ namespace Hos.ScheduleMaster.Web
                 ////设置时间格式
                 //option.SerializerSettings.DateFormatString = "yyyy-MM-dd";
             });
-            services.Configure<NodeSetting>(Configuration.GetSection("NodeSetting"));
             //配置authorrize
             services.AddAuthentication(b =>
             {
@@ -90,11 +89,17 @@ namespace Hos.ScheduleMaster.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IOptions<NodeSetting> node)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
             }
             app.UseCookiePolicy();
             app.UseHttpsRedirection();
@@ -112,10 +117,9 @@ namespace Hos.ScheduleMaster.Web
                      name: "default",
                      pattern: "{controller=Login}/{action=Index}/{id?}");
             });
-
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
-            ConfigurationCache.SetNode(node.Value);
+            ConfigurationCache.SetNode(Configuration.GetSection("NodeSetting").Get<NodeSetting>());
             ConfigurationCache.Refresh();
             //初始化日志管理器
             Core.Log.LogManager.Init();
@@ -124,7 +128,15 @@ namespace Hos.ScheduleMaster.Web
             //初始化系统任务
             FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
             FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job: ", info.Exception);
+
+            appLifetime.ApplicationStopping.Register(OnStopping);
         }
+        private void OnStopping()
+        {
+            // Perform on-stopping activities here
+            Core.Log.LogManager.Shutdown();
+        }
+
     }
 
     public class HosControllerActivator : IControllerActivator
