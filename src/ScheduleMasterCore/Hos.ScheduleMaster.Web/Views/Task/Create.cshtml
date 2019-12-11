@@ -120,7 +120,7 @@
                                 <div class="form-group">
                                     <label for="" class="col-sm-2 control-label no-padding-right">程序包</label>
                                     <div class="col-sm-6">
-                                        <input type="file" name="file" accept="aplication/zip" />
+                                        <input type="file" name="file" accept=".zip" />
                                     </div>
                                 </div>
                                 <div class="form-group @(Model == null ? "" : "hide")">
@@ -299,7 +299,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $tools.formValidate("form1");
+            hos.ui.util.formValidate("form1");
             $("#e2").select2({ allowClear: true });
             $('.dd').nestable({ maxDepth: 1 });
             $('.dd-handle a').on('mousedown', function (e) {
@@ -344,7 +344,7 @@
             });
             $("#btn_param_add").click(function () {
                 if ($("#params-list .form-group").length >= 8) {
-                    $tools.infoTip("最多只能添加8个参数~");
+                    hos.ui.util.infoTip("最多只能添加8个参数~");
                     return;
                 }
                 var html = template('param_templ');
@@ -371,15 +371,15 @@
 
         var handlers = {
             beforeSubmit: function () {
-                //$tools.showLoading();
+                //hos.ui.util.showLoading();
             },
             onComplete: function (xhr, state) {
-                //$tools.hideLoading();
+                //hos.ui.util.hideLoading();
                 var data = xhr.responseJSON;
                 if (data.Status === 1) {
-                    $tools.infoTip(data.Message, "/task/index");
+                    hos.ui.util.infoTip(data.Message, "/task/index");
                 } else {
-                    $tools.errorTip(data.Message);
+                    hos.ui.util.errorTip(data.Message);
                 }
             }
         }

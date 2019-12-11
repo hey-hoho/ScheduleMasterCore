@@ -51,7 +51,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        [HttpPost, Route("CreateTask")]
+        [HttpPost]
         public async Task<ActionResult> CreateTask(ScheduleInfo task)
         {
             if (!ModelState.IsValid)
@@ -120,7 +120,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        [HttpPost, Route("EditTask")]
+        [HttpPost]
         //[ApiParamValidation]
         public ActionResult EditTask(ScheduleInfo task)
         {

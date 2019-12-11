@@ -50,17 +50,17 @@ namespace Hos.ScheduleMaster.Web.Controllers
 
         protected JavaScriptResult SuccessTip(string text, string redirect = "", string callback = "null")
         {
-            return new JavaScriptResult() { Scripts = $"$tools.successTip('{text}','{redirect}',{callback});" };
+            return new JavaScriptResult() { Scripts = $"hos.ui.util.successTip('{text}','{redirect}',{callback});" };
         }
 
         protected JavaScriptResult DangerTip(string text, string redirect = "", string callback = "null")
         {
-            return new JavaScriptResult() { Scripts = $"$tools.errorTip('{text}','{redirect}',{callback});" };
+            return new JavaScriptResult() { Scripts = $"hos.ui.util.errorTip('{text}','{redirect}',{callback});" };
         }
 
         protected JavaScriptResult WarningTip(string text, string redirect = "", string callback = "null")
         {
-            return new JavaScriptResult() { Scripts = $"$tools.warningTip('{text}','{redirect}',{callback});" };
+            return new JavaScriptResult() { Scripts = $"hos.ui.util.warningTip('{text}','{redirect}',{callback});" };
         }
 
         #endregion

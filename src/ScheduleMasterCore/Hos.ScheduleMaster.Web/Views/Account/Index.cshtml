@@ -100,19 +100,19 @@
                 this.request(title, '/Account/UserDelete?id=' + value, "删除");
             },
             request: function (title, url, action) {
-                $tools.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
                     function () {
                         $.post(url, null)
                             .then(function (res) {
                                 if (res.Status === 1) {
-                                    $tools.successTip(res.Message);
+                                    hos.ui.util.successTip(res.Message);
                                     $('#table').bootstrapTable('refresh');
                                 } else {
-                                    $tools.errorTip(res.Message);
+                                    hos.ui.util.errorTip(res.Message);
                                 }
                             })
                             .fail(function (err) {
-                                $tools.errorTip(err);
+                                hos.ui.util.errorTip(err);
                             });
                     });
             }

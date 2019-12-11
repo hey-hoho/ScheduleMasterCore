@@ -1,8 +1,6 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
@@ -11,19 +9,14 @@ using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApplicationParts;
 using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Pomelo.EntityFrameworkCore.MySql;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Hos.ScheduleMaster.Web
 {
@@ -54,14 +47,15 @@ namespace Hos.ScheduleMaster.Web
 
                 //    }
                 //    ));
-            }).AddJsonOptions(option =>
+            }).AddNewtonsoftJson(option =>
             {
+                //option.JsonSerializerOptions.PropertyNamingPolicy = null;
                 ////忽略循环引用
-                //option.JsonSerializerOptions.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                ////不使用驼峰样式的key
-                //option.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                ////设置时间格式
-                //option.SerializerSettings.DateFormatString = "yyyy-MM-dd";
+                option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+                //不使用驼峰样式的key
+                option.SerializerSettings.ContractResolver = new DefaultContractResolver();
+                //设置时间格式
+                option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
             });
             //配置authorrize
             services.AddAuthentication(b =>
@@ -102,20 +96,20 @@ namespace Hos.ScheduleMaster.Web
                 app.UseHsts();
             }
             app.UseCookiePolicy();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
 
             app.UseRouting();
 
-            app.UseAuthorization();
             app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 //endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                      name: "default",
-                     pattern: "{controller=Login}/{action=Index}/{id?}");
+                     pattern: "{controller}/{action=Index}/{id?}");
             });
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;

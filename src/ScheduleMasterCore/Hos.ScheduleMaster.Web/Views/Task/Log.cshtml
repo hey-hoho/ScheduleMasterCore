@@ -134,7 +134,7 @@
                 task: $("#Task").val(),
                 category: $("#Task").val(),
             };
-            $tools.postJson("@Url.Action("ClearLog")", params)
+            hos.ui.util.postJson("@Url.Action("ClearLog")", params)
         })
 
         function showStackTrace(index) {

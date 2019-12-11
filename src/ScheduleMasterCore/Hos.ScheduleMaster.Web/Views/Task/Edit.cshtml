@@ -123,7 +123,7 @@
     <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $tools.formValidate("form1");
+            hos.ui.util.formValidate("form1");
             var startTime = laydate.render({
                 elem: '#StartDate', type: 'datetime', done: function (value, date, endDate) {
                     date.month = date.month - 1;
@@ -176,15 +176,15 @@
                 });
             },
             beforeSubmit: function () {
-                //$tools.showLoading();
+                //hos.ui.util.showLoading();
             },
             onComplete: function (xhr, state) {
-                //$tools.hideLoading();
+                //hos.ui.util.hideLoading();
                 var data = xhr.responseJSON;
                 if (data.Status === 1) {
-                    $tools.infoTip(data.Message, "/task/index");
+                    hos.ui.util.infoTip(data.Message, "/task/index");
                 } else {
-                    $tools.errorTip(data.Message);
+                    hos.ui.util.errorTip(data.Message);
                 }
             }
         }
