@@ -12,6 +12,7 @@ using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Common;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Hos.ScheduleMaster.Web.Extension;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
@@ -44,6 +45,20 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             return View();
+        }
+
+        public async Task<ActionResult> Upload()
+        {
+            IFormFile file = Request.Form.Files["file"];
+            if (file != null && file.Length > 0)
+            {
+                var filePath = Directory.GetCurrentDirectory() + "/Plugins/" + file.FileName;
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+            }
+            return Content("ok");
         }
 
         /// <summary>
@@ -88,11 +103,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 if (task.RunNow)
                 {
                     var start = _scheduleService.TaskStart(model);
-                    return SuccessTip("任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
+                    return this.JsonNet(true, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
                 }
-                return SuccessTip("任务创建成功！", Url.Action("Index"));
+                return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
             }
-            return DangerTip("任务创建失败！");
+            return this.JsonNet(false, "任务创建失败！");
         }
 
         /// <summary>
@@ -127,10 +142,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _scheduleService.EditTask(task);
             if (result.Status == ResultStatus.Success)
             {
-                return SuccessTip("任务编辑成功！", Url.Action("Index"));
+                return this.JsonNet(true, "任务编辑成功！", Url.Action("Index"));
             }
-            return DangerTip("任务编辑失败！");
-
+            return this.JsonNet(false, "任务编辑失败！");
         }
         /// <summary>
         /// 日志列表页面
@@ -173,9 +187,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _scheduleService.DeleteLog(sid, category, startdate, enddate);
             if (result > 0)
             {
-                return SuccessTip($"清理成功！本次清理【{result}】条");
+                return this.JsonNet(true, "清理成功！本次清理【{result}】条");
             }
-            return DangerTip("没有符合条件的记录！");
+            return this.JsonNet(false, "没有符合条件的记录！");
         }
     }
 }

@@ -5,8 +5,7 @@
             <span class="widget-caption">清理日志</span>
         </div>
         <div class="widget-body">
-            <form class="form-horizontal" action="@Url.Action("ClearLog")" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="" data-ajax-begin="" novalidate="novalidate">
-
+            <form class="form-horizontal" method="post" id="form1" novalidate="novalidate">
                 <div class="form-group">
                     <label for="" class="col-sm-2 control-label no-padding-right">日志类型</label>
                     <div class="col-sm-6">
@@ -74,10 +73,9 @@
                     </div>
                 </div>
 
-
                 <div class="form-group">
                     <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-primary" onclick="return confirm('确认要按所选条件清理日志吗？此操作不可恢复~');">提  交</button>
+                        <button type="button" class="btn btn-primary submit" >提  交</button>
                         <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
                     </div>
                 </div>
@@ -88,7 +86,6 @@
 </div>
 
 @section scripts{
-    <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
     <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
     <script type="text/javascript">
         $(function () {
@@ -122,6 +119,11 @@
                     $("#EndDate").val($(this).attr("data-date"));
                 }
             })
+            hos.ui.util.formSubmit("form1", function (data) {
+                if (confirm('确认要按所选条件清理日志吗？此操作不可恢复~')) {
+                    hos.ui.util.postJson("@Url.Action("ClearLog")", data);
+                }                
+            });
         })
     </script>
 }

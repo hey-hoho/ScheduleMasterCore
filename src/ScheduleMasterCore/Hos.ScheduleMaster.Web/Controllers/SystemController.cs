@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="form"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult SaveConfig(FormCollection form)
+        public ActionResult SaveConfig(IFormCollection form)
         {
             Dictionary<string, string> items = new Dictionary<string, string>();
             foreach (string key in form.Keys)

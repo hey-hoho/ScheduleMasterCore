@@ -1,11 +1,11 @@
 ﻿
-(function($) {
+(function ($) {
     var hos = window.hos = window.hos || {};
 
     var Util = function () {
 
         //漂浮消息的基类
-        this.messager= function (text, type, redirect) {
+        var messager = function (text, type, redirect) {
             var timeout = ((text.length < 13 ? 1 : text.length / 13) * 1300).toString();
             var position = 'top-center';//top-right
             switch (type) {
@@ -19,6 +19,7 @@
                 setTimeout(function () { location.href = redirect; }, timeout);
             }
         }
+        this.messager = messager;
 
         //通用异步方法
         this.ajaxOption = function (url, type) {
@@ -132,6 +133,7 @@
     //表单验证
     Util.prototype.formValidate = function (form, rule, message) {
         $("#" + form).validate({
+            onfocusout: false,
             rules: rule,
             messages: message,
             errorClass: "form-control-error",
@@ -159,15 +161,16 @@
         });
     };
 
-    //对象序列化成json字符串
-    Util.prototype.stringify = function (obj) {
-        return JSON.stringify(obj);
-    };
-
-    //json字符串解析成对象
-    Util.prototype.parse = function (str) {
-        return JSON.parse(str);
-    };
+    //提交表单
+    Util.prototype.formSubmit = function (form, requset) {
+        var $form = $("#" + form);
+        $form.find(".submit").bind("click",function (e) {
+            if (!$form.valid()) { return false; }
+            var data = $form.getFormData();
+            requset(data);
+            e.preventDefault();
+        });
+    }
 
     //生成guid
     Util.prototype.guid = function () {
@@ -179,7 +182,6 @@
             }
             id += (i == 12 ? 4 : (i == 16 ? (random & 3 | 8) : random)).toString(16);
         }
-
         return id;
     };
 
@@ -263,4 +265,24 @@
     $.extend(hos.ui, {
         util: new Util()
     });
-}) (jQuery);
+})(jQuery);
+
+
+//扩展jquery的格式化方法
+$.fn.getFormData = function () {
+    var serializeObj = {};
+    var array = this.serializeArray();
+    //var str = this.serialize();
+    $(array).each(function () {
+        if (serializeObj[this.name]) {
+            if ($.isArray(serializeObj[this.name])) {
+                serializeObj[this.name].push(this.value);
+            } else {
+                serializeObj[this.name] = [serializeObj[this.name], this.value];
+            }
+        } else {
+            serializeObj[this.name] = this.value;
+        }
+    });
+    return serializeObj;
+};

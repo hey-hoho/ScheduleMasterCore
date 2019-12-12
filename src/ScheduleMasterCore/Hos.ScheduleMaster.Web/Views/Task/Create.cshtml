@@ -19,12 +19,14 @@
         </div>
         <div class="widget-body">
             <div id="horizontal-form">
-                <form class="form-horizontal" action="@(Model==null?"/Task/CreateTask":"/Task/EditTask")" data-ajax="true" data-ajax-method="post" id="form1" novalidate="novalidate" enctype="multipart/form-data">
+                <form class="form-horizontal" id="form1" novalidate="novalidate" enctype="multipart/form-data">
                     <div class="form-group">
                         <div class="col-sm-2">
-                            <button type="submit" class="btn btn-primary">保  存</button>
+                            <button type="button" class="btn btn-primary submit">保  存</button>
                             <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
                         </div>
+                        
+
                     </div>
                     <div class="tabbable">
                         <ul class="nav nav-tabs" id="myTab">
@@ -120,7 +122,7 @@
                                 <div class="form-group">
                                     <label for="" class="col-sm-2 control-label no-padding-right">程序包</label>
                                     <div class="col-sm-6">
-                                        <input type="file" name="file" accept=".zip" />
+                                        <div id="upload"></div>
                                     </div>
                                 </div>
                                 <div class="form-group @(Model == null ? "" : "hide")">
@@ -186,11 +188,13 @@
                                                 {
                                                     if (Model != null && Model.Guardians.Any(x => x == item.Id))
                                                     {
-                                                        <option value="@item.Id" selected="selected" /> @item.RealName
+                                                        <option value="@item.Id" selected="selected" />
+                                                        @item.RealName
                                                     }
                                                     else
                                                     {
-                                                        <option value="@item.Id" /> @item.RealName
+                                                        <option value="@item.Id" />
+                                                        @item.RealName
                                                     }
                                                 }
                                             }
@@ -290,12 +294,12 @@
 @section scripts{
     @*https://www.cnblogs.com/landeanfen/p/5035608.html*@
     @*http://blog.csdn.net/u013938465/article/details/53507109*@
-    <script src="~/js/jquery.unobtrusive-ajax.js"></script>
     <script src="~/js/jquery.validate.min.js"></script>
     <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
     <script src="~/assets/js/select2/select2.js"></script>
     <script src="~/js/template-web.js"></script>
     <script src="~/assets/js/nestable/jquery.nestable.min.js"></script>
+    <script src="~/js/jquery.Huploadify.js"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -319,6 +323,12 @@
                     }
                 })
             })
+        	$('#upload').Huploadify({
+		auto:true,
+                fileTypeExts: '*.jpg;*.png;*.exe',
+                multi: false,
+		uploader:'@Url.Action("Upload")',
+		});
 
             var startTime = laydate.render({
                 elem: '#StartDate', type: 'datetime', done: function (value, date, endDate) {
@@ -350,7 +360,8 @@
                 var html = template('param_templ');
                 $("#params-list").append(html);
             })
-            $("#form1").submit(function () {
+            hos.ui.util.formSubmit("form1", function (data) {
+                var formData = new FormData(document.querySelector("#form1"));
                 var params = [];
                 $("#params-list .form-group").each(function (index, item) {
                     var ctrl = $(item);
@@ -360,28 +371,14 @@
                         ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
                     });
                 })
-                $("#CustomParamsJson").val(JSON.stringify(params));
+                formData.CustomParamsJson = JSON.stringify(params);
+                var nexts = [];
                 $("#nexts-list .dd-item").each(function (index, item) {
-                    var ctrl = $(item);
-                    ctrl.append("<input type='hidden' name='Nexts' value='" + ctrl.attr("data-id") + "'>");
+                    nexts.push($(item).attr("data-id"));
                 })
-                return true;
-            })
+                formData.Nexts = nexts;
+                hos.ui.util.postJson("@(Model==null?Url.Action("CreateTask"):Url.Action("EditTask"))", formData);
+            });
         });
-
-        var handlers = {
-            beforeSubmit: function () {
-                //hos.ui.util.showLoading();
-            },
-            onComplete: function (xhr, state) {
-                //hos.ui.util.hideLoading();
-                var data = xhr.responseJSON;
-                if (data.Status === 1) {
-                    hos.ui.util.infoTip(data.Message, "/task/index");
-                } else {
-                    hos.ui.util.errorTip(data.Message);
-                }
-            }
-        }
     </script>
 }
