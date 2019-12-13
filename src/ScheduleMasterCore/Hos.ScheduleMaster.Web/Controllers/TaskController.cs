@@ -21,12 +21,6 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
-        //public TaskController(IAccountService accountService, IScheduleService taskService)
-        //{
-        //    _taskService = taskService;
-        //}
-
-
         /// <summary>
         /// 任务列表页面
         /// </summary>
@@ -47,6 +41,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
             return View();
         }
 
+        /// <summary>
+        /// 上传文件
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
         public async Task<ActionResult> Upload()
         {
             IFormFile file = Request.Form.Files["file"];
@@ -146,50 +145,50 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             return this.JsonNet(false, "任务编辑失败！");
         }
+
         /// <summary>
-        /// 日志列表页面
+        /// 任务运行记录页面
         /// </summary>
         /// <returns></returns>
-        public ActionResult Log()
+        public ActionResult TraceLog()
         {
             return View();
         }
 
         /// <summary>
-        /// 清理日志页面
+        /// 查询运行记录分页
         /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="result"></param>
+        /// <param name="startDate"></param>
+        /// <param name="endDate"></param>
         /// <returns></returns>
-        public ActionResult ClearLog()
+        public ActionResult QueryTraceLog(Guid? sid, int? result, DateTime startDate, DateTime endDate)
         {
-            List<SelectListItem> selectData = new List<SelectListItem>();
-            selectData.Add(new SelectListItem() { Text = "系统日志", Value = "0" });
-            selectData.AddRange(_scheduleService.QueryAll().Select(row => new SelectListItem
+            if (!sid.HasValue)
             {
-                Text = row.Title,
-                Value = row.Id.ToString(),
-                Selected = false
-            }));
-            ViewBag.TaskList = selectData;
-            return View();
-        }
-
-        /// <summary>
-        /// 清理日志
-        /// </summary>
-        /// <param name="task"></param>
-        /// <param name="category"></param>
-        /// <param name="startdate"></param>
-        /// <param name="enddate"></param>
-        /// <returns></returns>
-        [HttpPost, AjaxRequestOnly]
-        public ActionResult ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
-        {
-            var result = _scheduleService.DeleteLog(sid, category, startdate, enddate);
-            if (result > 0)
-            {
-                return this.JsonNet(true, "清理成功！本次清理【{result}】条");
+                return NotFound();
             }
-            return this.JsonNet(false, "没有符合条件的记录！");
+            var pager = new ListPager<ScheduleTraceEntity>();
+            pager.AddFilter(m => m.ScheduleId == sid.Value);
+            pager.AddFilter(m => m.StartTime >= startDate && m.StartTime <= endDate);
+            pager = _scheduleService.QueryTracePager(pager);
+            return DataGrid(pager.Total, pager.Rows);
+        }
+
+        /// <summary>
+        /// 查询运行记录日志
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="tid"></param>
+        /// <returns></returns>
+        public ActionResult QueryTraceDetail(Guid sid, Guid tid)
+        {
+            var pager = new ListPager<SystemLogEntity>();
+            pager.AddFilter(m => m.ScheduleId == sid);
+            pager.AddFilter(m => m.TraceId == tid);
+            pager = _scheduleService.QueryTraceDetail(pager);
+            return DataGrid(pager.Total, pager.Rows);
         }
     }
 }

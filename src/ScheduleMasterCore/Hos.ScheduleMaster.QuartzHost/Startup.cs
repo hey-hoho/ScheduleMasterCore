@@ -63,7 +63,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             //加载全局缓存
             ConfigurationCache.SetNode(Configuration.GetSection("NodeSetting").Get<NodeSetting>());
-            ConfigurationCache.Refresh();
+            ConfigurationCache.Reload();
             //初始化日志管理器
             Core.Log.LogManager.Init();
             //初始化Quartz

@@ -30,7 +30,7 @@ namespace Hos.ScheduleMaster.Core
             NodeSetting = setting;
         }
 
-        public static void Refresh()
+        public static void Reload()
         {
             using (var scope = new ScopeDbContext())
             {
@@ -46,7 +46,7 @@ namespace Hos.ScheduleMaster.Core
         {
             if (_cacheContainer == null)
             {
-                Refresh();
+                Reload();
             }
             if (!_cacheContainer.ContainsKey(key))
             {

@@ -1,0 +1,143 @@
+﻿
+@{
+    ViewData["Title"] = "TraceLog";
+}
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+<div class="page-body">
+    <div class="row">
+        <div class="col-lg-12 col-sm-12 col-xs-12">
+            <div class="widget">
+                <div class="widget-header header-small bordered-bottom bordered-blue">
+                    <span class="widget-caption">查询</span>
+                </div>
+                <div class="widget-body">
+                    <form class="form-inline" role="form" id="serch-form">
+                        <input class="form-control" id="sid" value="@_httpContextAccessor.HttpContext.Request.Query["sid"]" type="text" readonly="readonly" />
+                        <div class="form-group">
+                            <span class="input-icon icon-right">
+                                <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="开始时间">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                        -
+                        <div class="form-group">
+                            <span class="input-icon icon-right">
+                                <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="结束时间">
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                        <div class="form-group">
+                            <select class="form-control" id="Status" name="Status">
+                                <option>运行结果</option>
+                                <option value="0">无结果</option>
+                                <option value="1">运行成功</option>
+                                <option value="2">运行失败</option>
+                                <option value="3">互斥取消</option>
+                            </select>
+                        </div>
+                        <button type="button" class="btn btn-default" id="btn_search" onclick="tarceViewer.reload();">查询</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-5 col-sm-5 col-xs-12">
+            <div class="widget">
+                <div class="widget-header header-small">
+                    <span class="widget-caption">运行记录</span>
+                </div>
+                <div class="widget-body">
+                    <table id="table-trace" class="mychar1-table"></table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 col-sm-7 col-xs-12">
+            <div class="widget">
+                <div class="widget-header header-small">
+                    <span class="widget-caption">日志信息</span>
+                </div>
+                <div class="widget-body">
+                    <table id="table-log" class="mychar1-table"></table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script src="~/assets/js/bootbox/bootbox.js"></script>
+    <script>
+        var tarceViewer, logViewer;
+        $(function () {
+            var startTime = laydate.render({
+                elem: '#StartDate', type: 'date', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    endTime.config.min = date;
+                    $(endTime.config.elem).focus();
+                }
+            });
+            var endTime = laydate.render({
+                elem: '#EndDate', type: 'date', done: function (value, date, endDate) {
+                    date.month = date.month - 1;
+                    startTime.config.max = date;
+                }
+            });
+            tarceViewer = hos.ui.ctrl.gridView("table-trace", {
+                url: '/Task/QueryTraceLog',
+                columns: [
+                    { field: 'ScheduleId', title: '', align: 'center', visible: false },
+                    { field: 'TraceId', title: '', align: 'center', visible: false },
+                    { field: 'Node', title: '节点', align: 'center', width: '8%' },
+                    { field: 'StartTime', title: '开始时间', align: 'center', width: '13%' },
+                    { field: 'EndTime', title: '结束时间', align: 'center', width: '13%' },
+                    { field: 'ElapsedTime', title: '耗时(s)', align: 'center', width: '8%' },
+                    { field: 'Result', title: '运行结果', align: 'center', width: '8%' }
+                ],
+                onClickRow: function (row, $element, field) {
+                    logViewer.reload({ url: '/Task/QueryTraceDetail?sid=' + row.ScheduleId + '&tid=' + row.TraceId });
+                }
+            });
+            logViewer = hos.ui.ctrl.gridView("table-log", {
+                columns: [
+                    {
+                        field: 'Category', title: '类型', align: 'center', width: '10%', formatter: function (value, row, index) {
+                            var text = '';
+                            switch (value) {
+                                case 1:
+                                    text = '<label style="color:#38b03f">信息</label>';
+                                    break;
+                                case 2:
+                                    text = '<label style="color:#f1a325">警告</label>';
+                                    break;
+                                case 3:
+                                    text = '<label style="color:red">异常</label>';
+                                    break;
+                            }
+                            return text;
+                        }
+                    },
+                    { field: 'CreateTime', title: '生成时间', align: 'center', width: '18%' },
+                    {
+                        field: 'Message', title: '内容', formatter: function (value, row, index) {
+                            var text = value;
+                            if (row.Category == 3) {
+                                text += '     <a class="label label-danger graded" onclick="showStackTrace(' + index + ')">查看堆栈</a>';
+                            }
+                            return text;
+                        }
+                    }
+                ]
+            });
+        })
+        function showStackTrace(index) {
+            bootbox.dialog({
+                message: $table.bootstrapTable('getData')[index].StackTrace,
+                title: "堆栈信息",
+                className: "",
+            });
+        }
+    </script>
+}

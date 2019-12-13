@@ -33,46 +33,6 @@ namespace Hos.ScheduleMaster.Core.Services
             return _repositoryFactory.Schedules.WherePager(pager, m => m.Status != (int)ScheduleStatus.Deleted, m => m.CreateTime, false);
         }
 
-        /// <summary>
-        /// 查询日志分页数据
-        /// </summary>
-        /// <param name="pager"></param>
-        /// <returns></returns>
-        public ListPager<SystemLogEntity> QueryLogPager(ListPager<SystemLogEntity> pager)
-        {
-            return _repositoryFactory.SystemLogs.WherePager(pager, m => true, m => m.Id, false);
-        }
-
-        /// <summary>
-        /// 根据条件删除日志
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="category"></param>
-        /// <param name="startdate"></param>
-        /// <param name="enddate"></param>
-        /// <returns></returns>
-        public int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
-        {
-            Expression<Func<SystemLogEntity, bool>> where = m => true;
-            if (sid.HasValue)
-            {
-                where = where.And(x => x.ScheduleId == sid.Value);
-            }
-            if (category.HasValue)
-            {
-                where = where.And(x => x.Category == category.Value);
-            }
-            if (startdate.HasValue)
-            {
-                where = where.And(x => x.CreateTime >= startdate.Value);
-            }
-            if (enddate.HasValue)
-            {
-                where = where.And(x => x.CreateTime < enddate.Value);
-            }
-            _repositoryFactory.SystemLogs.DeleteBy(where);
-            return _unitOfWork.Commit();
-        }
 
         /// <summary>
         /// id查询任务
@@ -469,6 +429,26 @@ namespace Hos.ScheduleMaster.Core.Services
                 });
                 _unitOfWork.Commit();
             });
+        }
+
+        /// <summary>
+        /// 查询运行记录分页信息
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        public ListPager<ScheduleTraceEntity> QueryTracePager(ListPager<ScheduleTraceEntity> pager)
+        {
+            return _repositoryFactory.ScheduleTraces.WherePager(pager, m => m.TraceId != null, m => m.StartTime, false);
+        }
+
+        /// <summary>
+        /// 查询运行记录日志
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        public ListPager<SystemLogEntity> QueryTraceDetail(ListPager<SystemLogEntity> pager)
+        {
+            return _repositoryFactory.SystemLogs.WherePager(pager, m => m.Id > 0, m => m.CreateTime, false);
         }
 
         /// <summary>

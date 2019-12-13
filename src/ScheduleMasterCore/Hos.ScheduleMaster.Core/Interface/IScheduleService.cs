@@ -23,23 +23,6 @@ namespace Hos.ScheduleMaster.Core.Interface
         ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager);
 
         /// <summary>
-        /// 查询日志分页数据
-        /// </summary>
-        /// <param name="pager"></param>
-        /// <returns></returns>
-        ListPager<SystemLogEntity> QueryLogPager(ListPager<SystemLogEntity> pager);
-
-        /// <summary>
-        /// 根据条件删除日志
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="category"></param>
-        /// <param name="startdate"></param>
-        /// <param name="enddate"></param>
-        /// <returns></returns>
-        int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate);
-
-        /// <summary>
         /// id查询任务
         /// </summary>
         /// <param name="sid"></param>
@@ -117,6 +100,20 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="sid"></param>
         /// <returns></returns>
         ServiceResponseMessage DeleteTask(Guid sid);
+
+        /// <summary>
+        /// 查询运行记录分页信息
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        ListPager<ScheduleTraceEntity> QueryTracePager(ListPager<ScheduleTraceEntity> pager);
+
+        /// <summary>
+        /// 查询运行记录日志
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        ListPager<SystemLogEntity> QueryTraceDetail(ListPager<SystemLogEntity> pager);
 
         /// <summary>
         /// 添加一条运行记录

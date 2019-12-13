@@ -17,6 +17,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
+        [Autowired]
+        public ISystemService _systemService { get; set; }
+
         //private readonly ILogger<TaskController> _logger;
 
         //public TaskController(IScheduleService taskService)
@@ -98,7 +101,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             {
                 pager.AddFilter(m => m.CreateTime <= enddate);
             }
-            pager = _scheduleService.QueryLogPager(pager);
+            pager = _systemService.QueryLogPager(pager);
             var result = new
             {
                 total = pager.Total,

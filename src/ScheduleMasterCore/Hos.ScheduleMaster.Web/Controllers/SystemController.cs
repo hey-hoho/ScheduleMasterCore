@@ -1,7 +1,10 @@
 ﻿using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Interface;
+using Hos.ScheduleMaster.Web.Extension;
+using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,10 +17,8 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public ISystemService _systemService { get; set; }
 
-        //public SystemController(ISystemService systemService)
-        //{
-        //    _systemService = systemService;
-        //}
+        [Autowired]
+        public IScheduleService _scheduleService { get; set; }
 
         // GET: System
         public ActionResult Index()
@@ -54,6 +55,53 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 return SuccessTip("保存成功！");
             }
             return DangerTip("保存失败！");
+        }
+
+        /// <summary>
+        /// 日志列表页面
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Log()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// 清理日志页面
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult ClearLog()
+        {
+            List<SelectListItem> selectData = new List<SelectListItem>();
+            selectData.Add(new SelectListItem() { Text = "系统日志", Value = "0" });
+            selectData.AddRange(_scheduleService.QueryAll().Select(row => new SelectListItem
+            {
+                Text = row.Title,
+                Value = row.Id.ToString(),
+                Selected = false
+            }));
+            ViewBag.TaskList = selectData;
+            return View();
+        }
+
+
+        /// <summary>
+        /// 清理日志
+        /// </summary>
+        /// <param name="task"></param>
+        /// <param name="category"></param>
+        /// <param name="startdate"></param>
+        /// <param name="enddate"></param>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
+        {
+            var result = _systemService.DeleteLog(sid, category, startdate, enddate);
+            if (result > 0)
+            {
+                return this.JsonNet(true, "清理成功！本次清理【{result}】条");
+            }
+            return this.JsonNet(false, "没有符合条件的记录！");
         }
     }
 }

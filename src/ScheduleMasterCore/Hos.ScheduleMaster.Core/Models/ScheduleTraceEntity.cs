@@ -44,7 +44,6 @@ namespace Hos.ScheduleMaster.Core.Models
     /// </summary>
     public enum ScheduleRunResult
     {
-
         /// <summary>
         /// 无结果
         /// </summary>

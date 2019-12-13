@@ -23,31 +23,12 @@
 
 @section scripts{
     <!--Page Related Scripts-->
-
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
     <script>
-        var $table = $('#table');
-        $table.bootstrapTable({
+        var grid = hos.ui.ctrl.gridView("table", {
             url: '/api/Task/QueryList',
-            dataType: "json",
-            toolbar: '#toolbar',                //工具按钮用哪个容器
-            striped: true,                      //是否显示行间隔色
-            singleSelect: false,
-            pagination: true, //分页
-            pageNumber: 1,                       //初始化加载第一页，默认第一页
-            pageSize: 15,                       //每页的记录行数（*）
-            pageList: [10, 20, 50],        //可供选择的每页的行数（*）
-            search: false, //显示搜索框
-            queryParams: function (params) {
-                $("#toolbar .form-control")
-                    .each(function (index, item) {
-                        params[item.id] = item.value;
-                    });
-                return params;
-            },
-            sidePagination: "server", //服务端处理分页
-            columns: [{
+             columns: [{
                 field: 'Title',
                 title: '名称'
             }, {
@@ -94,7 +75,7 @@
                 field: 'id',
                 align: 'center',
                 formatter: function (value, row, index) {
-                    var l = '<a href="/Task/Log?task=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Task/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
+                    var l = '<a href="/Task/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Task/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
                     if (row.Status == 0) {
                         l += '<button class="btn btn-xs btn-primary" onclick="handlers.taskStart(' + row.Id + ',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(' + row.Id + ',\'' + row.Title + '\')">删除</button>';
                     }
@@ -110,7 +91,7 @@
             ]
         });
         $('#btn_table_search').on("click", function () {
-            $table.bootstrapTable('refresh');
+            grid.bootstrapTable('refresh');
         });
         var handlers = {
             taskStart: function (value, title) {
