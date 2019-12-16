@@ -16,7 +16,8 @@ using Hos.ScheduleMaster.Web.Extension;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
-    public class TaskController : AdminController
+    [Route("/[controller]/[action]")]
+    public class ScheduleController : AdminController
     {
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
@@ -66,20 +67,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="task"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<ActionResult> CreateTask(ScheduleInfo task)
+        public ActionResult Create(ScheduleInfo task)
         {
             if (!ModelState.IsValid)
             {
                 return DangerTip("数据验证失败！");
-            }
-            IFormFile file = Request.Form.Files["file"];
-            if (file != null && file.Length > 0)
-            {
-                var filePath = Directory.GetCurrentDirectory() + "/Plugins/" + file.FileName;
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
             }
             ScheduleEntity model = new ScheduleEntity
             {
@@ -96,12 +88,12 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 RunMoreTimes = task.RunMoreTimes,
                 TotalRunCount = 0
             };
-            var result = _scheduleService.AddTask(model, task.Guardians, task.Nexts);
+            var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _scheduleService.TaskStart(model);
+                    var start = _scheduleService.Start(model);
                     return this.JsonNet(true, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
                 }
                 return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
@@ -124,7 +116,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
-            viewer.Guardians = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
+            viewer.Keepers = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();
             return View("Create", viewer);
         }
@@ -136,9 +128,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         [HttpPost]
         //[ApiParamValidation]
-        public ActionResult EditTask(ScheduleInfo task)
+        public ActionResult Edit(ScheduleInfo task)
         {
-            var result = _scheduleService.EditTask(task);
+            var result = _scheduleService.Edit(task);
             if (result.Status == ResultStatus.Success)
             {
                 return this.JsonNet(true, "任务编辑成功！", Url.Action("Index"));
@@ -169,11 +161,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 return NotFound();
             }
-            var pager = new ListPager<ScheduleTraceEntity>();
+            var pager = new ListPager<ScheduleTraceEntity>(PageIndex, PageSize);
             pager.AddFilter(m => m.ScheduleId == sid.Value);
             pager.AddFilter(m => m.StartTime >= startDate && m.StartTime <= endDate);
             pager = _scheduleService.QueryTracePager(pager);
-            return DataGrid(pager.Total, pager.Rows);
+            return GridData(pager.Total, pager.Rows);
         }
 
         /// <summary>
@@ -184,11 +176,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public ActionResult QueryTraceDetail(Guid sid, Guid tid)
         {
-            var pager = new ListPager<SystemLogEntity>();
+            var pager = new ListPager<SystemLogEntity>(PageIndex, PageSize);
             pager.AddFilter(m => m.ScheduleId == sid);
             pager.AddFilter(m => m.TraceId == tid);
             pager = _scheduleService.QueryTraceDetail(pager);
-            return DataGrid(pager.Total, pager.Rows);
+            return GridData(pager.Total, pager.Rows);
         }
     }
 }

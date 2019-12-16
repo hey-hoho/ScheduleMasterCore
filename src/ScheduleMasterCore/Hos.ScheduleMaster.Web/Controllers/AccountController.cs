@@ -40,13 +40,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [AjaxRequestOnlyAttribute]
         public ActionResult LoadUserPager(string name)
         {
-            var pager = new ListPager<SystemUserEntity>();
+            var pager = new ListPager<SystemUserEntity>(PageIndex, PageSize);
             if (!string.IsNullOrEmpty(name))
             {
                 pager.AddFilter(m => m.UserName.Contains(name) || m.RealName.Contains(name));
             }
             pager = _accountService.GetUserPager(pager);
-            return DataGrid(pager.Total, pager.Rows.Select(x => new
+            return GridData(pager.Total, pager.Rows.Select(x => new
             {
                 CreateTime = x.CreateTime.StringFormat(),
                 x.Id,

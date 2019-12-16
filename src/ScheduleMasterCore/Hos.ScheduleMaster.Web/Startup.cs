@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Reflection;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
@@ -9,14 +8,10 @@ using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace Hos.ScheduleMaster.Web
 {
@@ -41,22 +36,20 @@ namespace Hos.ScheduleMaster.Web
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(GlobalExceptionFilter));
-                //options.OutputFormatters.Add(new SystemTextJsonOutputFormatter(
-                //    new System.Text.Json.JsonSerializerOptions
-                //    {
-
-                //    }
-                //    ));
-            }).AddNewtonsoftJson(option =>
+            }).AddJsonOptions(option =>
             {
-                //option.JsonSerializerOptions.PropertyNamingPolicy = null;
-                ////忽略循环引用
-                option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-                //不使用驼峰样式的key
-                option.SerializerSettings.ContractResolver = new DefaultContractResolver();
-                //设置时间格式
-                option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+                option.JsonSerializerOptions.PropertyNamingPolicy = null;
+                option.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
             });
+            //    .AddNewtonsoftJson(option =>
+            //{
+            //    ////忽略循环引用
+            //    option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            //    //不使用驼峰样式的key
+            //    option.SerializerSettings.ContractResolver = new DefaultContractResolver();
+            //    //设置时间格式
+            //    option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
+            //});
             //配置authorrize
             services.AddAuthentication(b =>
             {
@@ -131,54 +124,5 @@ namespace Hos.ScheduleMaster.Web
             Core.Log.LogManager.Shutdown();
         }
 
-    }
-
-    public class HosControllerActivator : IControllerActivator
-    {
-        public object Create(ControllerContext actionContext)
-        {
-            var controllerType = actionContext.ActionDescriptor.ControllerTypeInfo.AsType();
-            var instance = actionContext.HttpContext.RequestServices.GetRequiredService(controllerType);
-            PropertyActivate(instance, actionContext.HttpContext.RequestServices);
-            return instance;
-        }
-
-        public virtual void Release(ControllerContext context, object controller)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
-            if (controller == null)
-            {
-                throw new ArgumentNullException(nameof(controller));
-            }
-            if (controller is IDisposable disposable)
-            {
-                disposable.Dispose();
-            }
-        }
-
-        private void PropertyActivate(object service, IServiceProvider provider)
-        {
-            var serviceType = service.GetType();
-            var properties = serviceType.GetProperties().AsEnumerable().Where(x => x.Name.StartsWith("_"));
-            foreach (PropertyInfo property in properties)
-            {
-                var autowiredAttr = property.GetCustomAttribute<AutowiredAttribute>();
-                if (autowiredAttr != null)
-                {
-                    //从DI容器获取实例
-                    var innerService = provider.GetService(property.PropertyType);
-                    if (innerService != null)
-                    {
-                        //递归解决服务嵌套问题
-                        PropertyActivate(innerService, provider);
-                        //属性赋值
-                        property.SetValue(service, innerService);
-                    }
-                }
-            }
-        }
     }
 }

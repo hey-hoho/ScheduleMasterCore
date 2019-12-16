@@ -1,5 +1,7 @@
 ﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Interface;
+using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Web.Extension;
 using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Http;
@@ -64,6 +66,39 @@ namespace Hos.ScheduleMaster.Web.Controllers
         public ActionResult Log()
         {
             return View();
+        }
+
+
+        /// <summary>
+        /// 查询日志记录
+        /// </summary>
+        /// <param name="enddate"></param>
+        /// <param name="sid"></param>
+        /// <param name="startdate"></param>
+        /// <param name="category"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult QueryLogPager(DateTime? startdate, DateTime? enddate, Guid? sid, int? category)
+        {
+            var pager = new ListPager<SystemLogEntity>(PageIndex, PageSize);
+            if (sid.HasValue)
+            {
+                pager.AddFilter(m => m.ScheduleId == sid);
+            }
+            if (category.HasValue && category.Value > 0)
+            {
+                pager.AddFilter(m => m.Category == category);
+            }
+            if (startdate.HasValue)
+            {
+                pager.AddFilter(m => m.CreateTime >= startdate);
+            }
+            if (enddate.HasValue)
+            {
+                pager.AddFilter(m => m.CreateTime <= enddate);
+            }
+            pager = _systemService.QueryLogPager(pager);
+            return GridData(pager.Total, pager.Rows);
         }
 
         /// <summary>

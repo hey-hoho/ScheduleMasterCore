@@ -5,21 +5,28 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Common
 {
+
     /// <summary>
     /// 列表分页器
     /// by hoho
     /// </summary>
     public class ListPager<TModel>
     {
+        public ListPager(int pageIndex, int pageSize)
+        {
+            this.PageIndex = pageIndex;
+            this.PageSize = pageSize;
+        }
+
         /// <summary>
         /// 当前页码
         /// </summary>
-        public int PageIndex { get; set; }
+        public int PageIndex { get; private set; }
 
         /// <summary>
         /// 每页数据条数
         /// </summary>
-        public int PageSize { get; set; }
+        public int PageSize { get; private set; }
 
         /// <summary>
         /// 分页要跳过的条数

@@ -20,6 +20,38 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public IAccountService _accountService { get; set; }
 
+        public int PageIndex
+        {
+            get
+            {
+                var value = Request.Query["pageNumber"];
+                if (string.IsNullOrEmpty(value))
+                {
+                    value = Request.Form["pageNumber"];
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    return 1;
+                }
+                return Convert.ToInt32(value);
+            }
+        }
+        public int PageSize
+        {
+            get
+            {
+                var value = Request.Query["pageSize"];
+                if (string.IsNullOrEmpty(value))
+                {
+                    value = Request.Form["pageSize"];
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    return 1;
+                }
+                return Convert.ToInt32(value);
+            }
+        }
 
         //public AdminController(IAccountService accountService)
         //{
@@ -32,7 +64,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="total"></param>
         /// <param name="data"></param>
         /// <returns></returns>
-        public JsonNetResult DataGrid(int total, object data)
+        public JsonNetResult GridData(int total, object data)
         {
             return this.JsonNet(new { total, rows = data });
         }
@@ -121,7 +153,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                         {
                             context.Result = new JsonNetResult()
                             {
-                                Data = new { Success = false, Msg = "登录已超时！" }
+                                Data = new { Success = false, Message = "登录已超时！" }
                             };
                         }
                         else

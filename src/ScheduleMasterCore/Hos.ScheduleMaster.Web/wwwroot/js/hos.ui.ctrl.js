@@ -10,10 +10,12 @@
             striped: true,//是否显示行间隔色
             singleSelect: false,
             pagination: true, //分页
-            pageNumber: 1, //初始化加载第一页，默认第一页
-            pageSize: 15, //每页的记录行数（*）
-            pageList: [10, 20, 50], //可供选择的每页的行数（*）
+            queryParamsType:"",
+            //pageNumber: 1, //初始化加载第一页，默认第一页
+            pageSize: 20, //每页的记录行数（*）
+            pageList: [10, 20, 50,100], //可供选择的每页的行数（*）
             search: false, //显示搜索框
+            //smartDisplay: false,
             queryParams: function (params) {
                 $("#serch-form .form-control")
                     .each(function (index, item) {

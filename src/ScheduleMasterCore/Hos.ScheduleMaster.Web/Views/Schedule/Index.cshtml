@@ -6,13 +6,13 @@
 
 
 <div class="page-body">
-    <div id="toolbar" class="form-inline">
-        <a href="@Url.Action("Create","Task")" class="btn btn-primary">创建任务</a>
+    <div id="serch-form" class="form-inline">
+        <a href="@Url.Action("Create","Schedule")" class="btn btn-primary">创建任务</a>
         <div class="pull-right">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="任务名称" id="name">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" type="button" id="btn_table_search"><i class="fa fa-search blue"></i></button>
+                    <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
                 </span>
             </div>
         </div>
@@ -28,28 +28,14 @@
     <script>
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/api/Task/QueryList',
-             columns: [{
-                field: 'Title',
-                title: '名称'
-            }, {
-                field: 'RunMode',
-                title: '运行模式'
-            }, {
-                field: 'StartTime',
-                title: '开始运行'
-            }, {
-                field: 'LastRunTime',
-                title: '上次运行时间'
-            }, {
-                field: 'NextRunTime',
-                title: '下次运行时间'
-            }, {
-                field: 'TotalRunCount',
-                title: '运行次数'
-            }, {
-                field: 'Status',
-                title: '状态',
-                formatter: function (value, row, index) {
+            columns: [{ field: 'Title', title: '名称', width: '20', widthUnit: '%' },
+            { field: 'RunMode', title: '运行模式', width: '5', widthUnit: '%' },
+            { field: 'StartTime', title: '开始运行', width: '8', widthUnit: '%' },
+            { field: 'LastRunTime', title: '上次运行时间', width: '8', widthUnit: '%' },
+            { field: 'NextRunTime', title: '下次运行时间', width: '8', widthUnit: '%' },
+            { field: 'TotalRunCount', title: '运行次数', width: '5', widthUnit: '%' },
+            {
+                field: 'Status', title: '状态', width: '5', widthUnit: '%', formatter: function (value, row, index) {
                     var str = '';
                     switch (value) {
                         case -1:
@@ -67,15 +53,11 @@
                     }
                     return str;
                 }
-            }, {
-                field: 'createTime',
-                title: '创建时间'
-            }, {
-                title: '操作',
-                field: 'id',
-                align: 'center',
-                formatter: function (value, row, index) {
-                    var l = '<a href="/Task/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Task/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
+            },
+            { field: 'createTime', title: '创建时间', width: '8', widthUnit: '%' },
+            {
+                title: '操作', field: 'id', align: 'center', width: '10', widthUnit: '%', formatter: function (value, row, index) {
+                    var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
                     if (row.Status == 0) {
                         l += '<button class="btn btn-xs btn-primary" onclick="handlers.taskStart(' + row.Id + ',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(' + row.Id + ',\'' + row.Title + '\')">删除</button>';
                     }
@@ -85,32 +67,29 @@
                     if (row.Status == 2) {
                         l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(' + row.Id + ',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(' + row.Id + ',\'' + row.Title + '\')">停止</button>';
                     }
-                    return l ;
+                    return l;
                 }
             }
             ]
         });
-        $('#btn_table_search').on("click", function () {
-            grid.bootstrapTable('refresh');
-        });
         var handlers = {
             taskStart: function (value, title) {
-                this.request(title, '/Task/StartTask?id=' + value, "启动");
+                this.request(title, '/Schedule/StartTask?id=' + value, "启动");
             },
             taskDelete: function (value, title) {
-                this.request(title, '/Task/DeleteTask?id=' + value, "删除");
+                this.request(title, '/Schedule/DeleteTask?id=' + value, "删除");
             },
             taskPause: function (value, title) {
-                this.request(title, '/Task/PauseTask?id=' + value, "暂停");
+                this.request(title, '/Schedule/PauseTask?id=' + value, "暂停");
             },
             taskRun: function (value, title) {
-                this.request(title, '/Task/RunOnceTask?id=' + value, "立即运行");
+                this.request(title, '/Schedule/RunOnceTask?id=' + value, "立即运行");
             },
             taskResume: function (value, title) {
-                this.request(title, '/Task/ResumeTask?id=' + value, "恢复");
+                this.request(title, '/Schedule/ResumeTask?id=' + value, "恢复");
             },
             taskStop: function (value, title) {
-                this.request(title, '/Task/StopTask?id=' + value, "停止");
+                this.request(title, '/Schedule/StopTask?id=' + value, "停止");
             },
             request: function (title, url, action) {
                 hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',

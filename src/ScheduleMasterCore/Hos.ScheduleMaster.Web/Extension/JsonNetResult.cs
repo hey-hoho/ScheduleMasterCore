@@ -6,6 +6,7 @@ using System.Web;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Hos.ScheduleMaster.Web.Extension
 {
@@ -20,7 +21,11 @@ namespace Hos.ScheduleMaster.Web.Extension
             Settings = new JsonSerializerSettings
             {
                 //忽略掉循环引用         
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                //设置时间格式
+                DateFormatString = "yyyy-MM-dd HH:mm:ss",
+                //不使用驼峰样式的key
+                ContractResolver = new DefaultContractResolver()
             };
         }
 
@@ -51,7 +56,7 @@ namespace Hos.ScheduleMaster.Web.Extension
     {
         public static JsonNetResult JsonNet(this Controller controller, bool success, string msg = "", string url = "", object data = null)
         {
-            return JsonNet(new { Success = success, Msg = msg, Url = url, Data = data });
+            return JsonNet(new { Success = success, Message = msg, Url = url, Data = data });
         }
 
         public static JsonNetResult JsonNet(this Controller controller, object data)

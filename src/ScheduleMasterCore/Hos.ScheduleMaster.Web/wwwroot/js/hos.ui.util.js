@@ -36,14 +36,14 @@
                 },
                 success: function (xhrResult) {
                     if (xhrResult.Success === true) {
-                        if (xhrResult.Msg != null && xhrResult.Msg.length > 0) {
-                            messager(xhrResult.Msg, 'success', xhrResult.Url);
+                        if (xhrResult.Message != null && xhrResult.Message.length > 0) {
+                            messager(xhrResult.Message, 'success', xhrResult.Url);
                         }
                         if (typeof (this.callback) === "function") {
                             this.callback(xhrResult);
                         }
                     } else {
-                        messager(xhrResult.Msg, 'warning');
+                        messager(xhrResult.Message, 'warning');
                     }
                 },
                 error: function (xhr, errorType, error) {

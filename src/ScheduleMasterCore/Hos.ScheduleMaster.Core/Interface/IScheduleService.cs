@@ -50,56 +50,56 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
         /// <returns></returns>
-        ServiceResponseMessage AddTask(ScheduleEntity model, List<int> guardians, List<Guid> nexts);
+        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts);
 
         /// <summary>
         /// 编辑任务信息
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ServiceResponseMessage EditTask(ScheduleInfo model);
+        ServiceResponseMessage Edit(ScheduleInfo model);
 
         /// <summary>
         /// 启动一个任务
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ServiceResponseMessage TaskStart(ScheduleEntity task);
+        ServiceResponseMessage Start(ScheduleEntity task);
 
         /// <summary>
         /// 暂停一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage PauseTask(Guid sid);
+        ServiceResponseMessage Pause(Guid sid);
 
         /// <summary>
         /// 恢复一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage ResumeTask(Guid sid);
+        ServiceResponseMessage Resume(Guid sid);
 
         /// <summary>
         /// 执行一次任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage RunOnceTask(Guid sid);
+        ServiceResponseMessage RunOnce(Guid sid);
 
         /// <summary>
         /// 停止一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage StopTask(Guid sid);
+        ServiceResponseMessage Stop(Guid sid);
 
         /// <summary>
         /// 删除一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage DeleteTask(Guid sid);
+        ServiceResponseMessage Delete(Guid sid);
 
         /// <summary>
         /// 查询运行记录分页信息

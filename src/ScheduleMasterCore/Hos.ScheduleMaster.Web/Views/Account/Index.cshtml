@@ -6,13 +6,13 @@
 
 
 <div class="page-body">
-    <div id="toolbar" class="form-inline">
+    <div id="serch-form" class="form-inline">
         <a href="@Url.Action("Edit","Account")" class="btn btn-primary">创建用户</a>
         <div class="pull-right">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="用户名、姓名" id="name">
                 <span class="input-group-btn">
-                    <button class="btn btn-default" type="button" id="btn_table_search"><i class="fa fa-search blue"></i></button>
+                    <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
                 </span>
             </div>
         </div>
@@ -27,26 +27,8 @@
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
     <script>
-        var $table = $('#table');
-        $table.bootstrapTable({
+        var grid = hos.ui.ctrl.gridView("table", {
             url: '/Account/LoadUserPager',
-            dataType: "json",
-            toolbar: '#toolbar',                //工具按钮用哪个容器
-            striped: true,                      //是否显示行间隔色
-            singleSelect: false,
-            pagination: true, //分页
-            pageNumber: 1,                       //初始化加载第一页，默认第一页
-            pageSize: 10,                       //每页的记录行数（*）
-            pageList: [10, 25, 50, 100],        //可供选择的每页的行数（*）
-            search: false, //显示搜索框
-            queryParams: function (params) {
-                $("#toolbar .form-control")
-                    .each(function (index, item) {
-                        params[item.id] = item.value;
-                    });
-                return params;
-            },
-            sidePagination: "server", //服务端处理分页
             columns: [{
                 field: 'UserName',
                 title: '用户名'
@@ -83,9 +65,6 @@
             }
             ]
         });
-        $('#btn_table_search').on("click", function () {
-            $table.bootstrapTable('refresh');
-        });
         var handlers = {
             accountEnable: function (value, title) {
                 this.request(title, '/Account/UserEnable?id=' + value, "启用");
@@ -106,7 +85,7 @@
                             .then(function (res) {
                                 if (res.Status === 1) {
                                     hos.ui.util.successTip(res.Message);
-                                    $('#table').bootstrapTable('refresh');
+                                    grid.reload();
                                 } else {
                                     hos.ui.util.errorTip(res.Message);
                                 }

@@ -71,7 +71,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
         /// <returns></returns>
-        public ServiceResponseMessage AddTask(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
+        public ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
         {
             model.CreateTime = DateTime.Now;
             _repositoryFactory.Schedules.Add(model);
@@ -114,7 +114,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public ServiceResponseMessage EditTask(ScheduleInfo model)
+        public ServiceResponseMessage Edit(ScheduleInfo model)
         {
             var task = _repositoryFactory.Schedules.FirstOrDefault(m => m.Id == model.Id);
             if (task == null)
@@ -138,7 +138,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 Title = model.Title
             });
             _repositoryFactory.ScheduleKeepers.DeleteBy(x => x.ScheduleId == model.Id);
-            _repositoryFactory.ScheduleKeepers.AddRange(model.Guardians.Select(x => new ScheduleKeeperEntity
+            _repositoryFactory.ScheduleKeepers.AddRange(model.Keepers.Select(x => new ScheduleKeeperEntity
             {
                 ScheduleId = model.Id,
                 UserId = x
@@ -229,7 +229,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public ServiceResponseMessage TaskStart(ScheduleEntity model)
+        public ServiceResponseMessage Start(ScheduleEntity model)
         {
             if (model == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
             //启动任务
@@ -264,7 +264,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage PauseTask(Guid sid)
+        public ServiceResponseMessage Pause(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
@@ -297,7 +297,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage ResumeTask(Guid sid)
+        public ServiceResponseMessage Resume(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
@@ -329,7 +329,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage RunOnceTask(Guid sid)
+        public ServiceResponseMessage RunOnce(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
@@ -362,7 +362,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage StopTask(Guid sid)
+        public ServiceResponseMessage Stop(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
@@ -392,7 +392,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage DeleteTask(Guid sid)
+        public ServiceResponseMessage Delete(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status != (int)ScheduleStatus.Deleted)

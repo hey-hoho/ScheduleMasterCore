@@ -19,7 +19,7 @@
         </div>
         <div class="widget-body">
             <div id="horizontal-form">
-                <form class="form-horizontal" id="form1" novalidate="novalidate" enctype="multipart/form-data">
+                <form class="form-horizontal" id="form1" novalidate="novalidate">
                     <div class="form-group">
                         <div class="col-sm-2">
                             <button type="button" class="btn btn-primary submit">保  存</button>
@@ -184,7 +184,7 @@
                                                 var userList = ViewBag.UserList as List<Hos.ScheduleMaster.Core.Models.SystemUserEntity>;
                                                 foreach (var item in userList)
                                                 {
-                                                    if (Model != null && Model.Guardians.Any(x => x == item.Id))
+                                                    if (Model != null && Model.Keepers.Any(x => x == item.Id))
                                                     {
                                                         <option value="@item.Id" selected="selected" />
                                                         @item.RealName
@@ -359,7 +359,6 @@
                 $("#params-list").append(html);
             })
             hos.ui.util.formSubmit("form1", function (data) {
-                var formData = new FormData(document.querySelector("#form1"));
                 var params = [];
                 $("#params-list .form-group").each(function (index, item) {
                     var ctrl = $(item);
@@ -369,13 +368,13 @@
                         ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
                     });
                 })
-                formData.CustomParamsJson = JSON.stringify(params);
+                data.CustomParamsJson = JSON.stringify(params);
                 var nexts = [];
                 $("#nexts-list .dd-item").each(function (index, item) {
                     nexts.push($(item).attr("data-id"));
                 })
-                formData.Nexts = nexts;
-                hos.ui.util.postJson("@(Model==null?Url.Action("CreateTask"):Url.Action("EditTask"))", formData);
+                data.Nexts = nexts;
+                hos.ui.util.postJson("@(Model==null?"/api/Task/Create":"/Schedule/Edit")", data);
             });
         });
     </script>

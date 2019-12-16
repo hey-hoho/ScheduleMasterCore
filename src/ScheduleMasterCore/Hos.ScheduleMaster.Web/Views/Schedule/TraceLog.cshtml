@@ -86,7 +86,7 @@
                 }
             });
             tarceViewer = hos.ui.ctrl.gridView("table-trace", {
-                url: '/Task/QueryTraceLog',
+                url: '/Schedule/QueryTraceLog',
                 columns: [
                     { field: 'ScheduleId', title: '', align: 'center', visible: false },
                     { field: 'TraceId', title: '', align: 'center', visible: false },
@@ -97,7 +97,7 @@
                     { field: 'Result', title: '运行结果', align: 'center', width: '8%' }
                 ],
                 onClickRow: function (row, $element, field) {
-                    logViewer.reload({ url: '/Task/QueryTraceDetail?sid=' + row.ScheduleId + '&tid=' + row.TraceId });
+                    logViewer.reload({ url: '/Schedule/QueryTraceDetail?sid=' + row.ScheduleId + '&tid=' + row.TraceId });
                 }
             });
             logViewer = hos.ui.ctrl.gridView("table-log", {

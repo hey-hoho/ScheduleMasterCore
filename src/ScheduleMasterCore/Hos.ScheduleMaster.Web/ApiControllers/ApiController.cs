@@ -10,6 +10,39 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
     [ApiController]
     public class ApiController: ControllerBase
     {
+        public int PageIndex
+        {
+            get
+            {
+                var value = Request.Query["pageNumber"];
+                if (string.IsNullOrEmpty(value))
+                {
+                    value = Request.Form["pageNumber"];
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    return 1;
+                }
+                return Convert.ToInt32(value);
+            }
+        }
+        public int PageSize
+        {
+            get
+            {
+                var value = Request.Query["pageSize"];
+                if (string.IsNullOrEmpty(value))
+                {
+                    value = Request.Form["pageSize"];
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    return 1;
+                }
+                return Convert.ToInt32(value);
+            }
+        }
+
         /// <summary>
         /// 接口统一的返回消息
         /// </summary>

@@ -9,7 +9,7 @@ namespace Hos.ScheduleMaster.Core.Dto
     {
         public ScheduleInfo()
         {
-            this.Guardians = new List<int>();
+            this.Keepers = new List<int>();
             this.Nexts = new List<Guid>();
             this.Params = new List<ScheduleParam>();
         }
@@ -45,7 +45,7 @@ namespace Hos.ScheduleMaster.Core.Dto
         /// <summary>
         /// 报警联系人id
         /// </summary>
-        public List<int> Guardians { get; set; }
+        public List<int> Keepers { get; set; }
 
         /// <summary>
         /// 后置任务id

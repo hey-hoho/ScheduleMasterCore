@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Hos.ScheduleMaster.Web.ApiControllers
 {
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     public class TaskController : ApiController
     {
         [Autowired]
@@ -32,10 +32,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        [HttpGet, Route("QueryList")]
+        [HttpGet]
         public object QueryList(string name = "")
         {
-            var pager = new ListPager<ScheduleEntity>();
+            var pager = new ListPager<ScheduleEntity>(PageIndex, PageSize);
             if (!string.IsNullOrEmpty(name))
             {
                 pager.AddFilter(m => m.Title.Contains(name));
@@ -66,58 +66,22 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpGet, Route("QueryTaskDetail")]
+        [HttpGet]
         public ServiceResponseMessage QueryTaskDetail(Guid id)
         {
             var entity = _scheduleService.QueryById(id);
             return ApiResponse(ResultStatus.Success, "请求数据成功", entity);
         }
 
-        /// <summary>
-        /// 查询日志记录
-        /// </summary>
-        /// <param name="enddate"></param>
-        /// <param name="task"></param>
-        /// <param name="startdate"></param>
-        /// <param name="category"></param>
-        /// <returns></returns>
-        [HttpGet, Route("QueryLogPager")]
-        public object QueryLogPager(DateTime? startdate, DateTime? enddate, Guid? task, int? category)
-        {
-            var pager = new ListPager<SystemLogEntity>();
-            if (task.HasValue)
-            {
-                pager.AddFilter(m => m.ScheduleId == task);
-            }
-            if (category.HasValue && category.Value > 0)
-            {
-                pager.AddFilter(m => m.Category == category);
-            }
-            if (startdate.HasValue)
-            {
-                pager.AddFilter(m => m.CreateTime >= startdate);
-            }
-            if (enddate.HasValue)
-            {
-                pager.AddFilter(m => m.CreateTime <= enddate);
-            }
-            pager = _systemService.QueryLogPager(pager);
-            var result = new
-            {
-                total = pager.Total,
-                rows = pager.Rows
-            };
-            return result;
-        }
 
         /// <summary>
         /// 创建任务并启动
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        [HttpPost, Route("CreateTask")]
+        [HttpPost]
         // [ApiParamValidation]
-        public ServiceResponseMessage CreateTask([FromBody]ScheduleInfo task)
+        public ServiceResponseMessage Create([FromForm]ScheduleInfo task)
         {
             ScheduleEntity model = new ScheduleEntity
             {
@@ -134,12 +98,12 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 RunMoreTimes = task.RunMoreTimes,
                 TotalRunCount = 0
             };
-            var result = _scheduleService.AddTask(model, task.Guardians, task.Nexts);
+            var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _scheduleService.TaskStart(model);
+                    var start = _scheduleService.Start(model);
                     return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), model.Id);
                 }
             }
@@ -151,11 +115,11 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="task"></param>
         /// <returns></returns>
-        [HttpPost, Route("EditTask")]
+        [HttpPost]
         //[ApiParamValidation]
-        public ServiceResponseMessage EditTask([FromBody]ScheduleInfo task)
+        public ServiceResponseMessage Edit([FromForm]ScheduleInfo task)
         {
-            var result = _scheduleService.EditTask(task);
+            var result = _scheduleService.Edit(task);
             return result;
         }
 
@@ -164,15 +128,15 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("StartTask")]
-        public ServiceResponseMessage StartTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage Start([FromQuery]Guid id)
         {
             var task = _scheduleService.QueryById(id);
             if (task == null || task.Status != (int)ScheduleStatus.Stop)
             {
                 return ApiResponse(ResultStatus.Failed, "任务在停止状态下才能启动！");
             }
-            var result = _scheduleService.TaskStart(task);
+            var result = _scheduleService.Start(task);
             return result;
         }
 
@@ -181,10 +145,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("PauseTask")]
-        public ServiceResponseMessage PauseTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage Pause([FromQuery]Guid id)
         {
-            var result = _scheduleService.PauseTask(id);
+            var result = _scheduleService.Pause(id);
             return result;
         }
 
@@ -193,10 +157,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("RunOnceTask")]
-        public ServiceResponseMessage RunOnceTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage RunOnce([FromQuery]Guid id)
         {
-            var result = _scheduleService.RunOnceTask(id);
+            var result = _scheduleService.RunOnce(id);
             return result;
         }
 
@@ -205,10 +169,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("ResumeTask")]
-        public ServiceResponseMessage ResumeTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage Resume([FromQuery]Guid id)
         {
-            var result = _scheduleService.ResumeTask(id);
+            var result = _scheduleService.Resume(id);
             return result;
         }
 
@@ -217,10 +181,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("StopTask")]
-        public ServiceResponseMessage StopTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage Stop([FromQuery]Guid id)
         {
-            var result = _scheduleService.StopTask(id);
+            var result = _scheduleService.Stop(id);
             return result;
         }
 
@@ -229,10 +193,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        [HttpPost, Route("DeleteTask")]
-        public ServiceResponseMessage DeleteTask(Guid id)
+        [HttpPost]
+        public ServiceResponseMessage Delete([FromQuery]Guid id)
         {
-            var result = _scheduleService.DeleteTask(id);
+            var result = _scheduleService.Delete(id);
             return result;
         }
     }

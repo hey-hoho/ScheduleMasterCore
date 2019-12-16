@@ -23,6 +23,11 @@ namespace Hos.ScheduleMaster.Core
         }
 
         /// <summary>
+        /// 成功标记
+        /// </summary>
+        public bool Success { get => (int)Status == 1; set { } }
+
+        /// <summary>
         /// 返回状态码
         /// </summary>
         public ResultStatus Status { get; set; }
