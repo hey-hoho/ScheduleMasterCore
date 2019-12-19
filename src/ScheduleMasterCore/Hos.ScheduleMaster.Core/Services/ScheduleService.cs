@@ -174,15 +174,23 @@ namespace Hos.ScheduleMaster.Core.Services
                 {
                     param.Add("sid", sid.ToString());
                 }
-                bool success = false;
-                System.Threading.Tasks.Parallel.ForEach(nodeList, (n) =>
-                {
-                    Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
-                    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
-                    success = success || result.Key == HttpStatusCode.OK;
-                    callback?.Invoke(n, result);
-                });
-                return success;
+                //bool success = false;
+                var result = nodeList.AsParallel().Select(n =>
+                  {
+                      Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
+                      var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
+                      //success = success || result.Key == HttpStatusCode.OK;
+                      callback?.Invoke(n, result);
+                      return result.Key == HttpStatusCode.OK;
+                  }).ToArray();
+                //System.Threading.Tasks.Parallel.ForEach(nodeList, (n) =>
+                //{
+                //    Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
+                //    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
+                //    success = success || result.Key == HttpStatusCode.OK;
+                //    callback?.Invoke(n, result);
+                //});
+                return result.All(x => x == true);
             }
             return false;
         }
@@ -219,7 +227,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
                 Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", selectedNode.AccessSecret } };
                 var result = HttpRequest.Send($"{selectedNode.AccessProtocol}://{selectedNode.Host}/{router}", "post", param, header);
-                return result.Key == System.Net.HttpStatusCode.OK;
+                return result.Key == HttpStatusCode.OK;
             }
             return false;
         }

@@ -43,11 +43,13 @@ namespace Hos.ScheduleMaster.Core.Repository
 
         public void DeleteBy(Expression<Func<TModel, bool>> where)
         {
-            var list = DbSet.Where(where);
-            foreach (var item in list)
-            {
-                DbSet.Remove(item);
-            }
+            var query = DbSet.Where(where);
+            DeleteBy(query);
+        }
+
+        public void DeleteBy(IQueryable<TModel> query)
+        {
+            DbSet.RemoveRange(query.AsEnumerable());
         }
 
         public void Update(TModel entity, params Expression<Func<TModel, object>>[] modifiedPropertyNames)

@@ -12,14 +12,14 @@
         <div class="pull-right">
             <div class="form-group">
                 <span class="input-icon icon-right">
-                    <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="开始时间">
+                    <input type="text" class="form-control date-picker" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" name="StartDate" id="StartDate" placeholder="开始时间">
                     <i class="fa fa-calendar"></i>
                 </span>
             </div>
             -
             <div class="form-group">
                 <span class="input-icon icon-right">
-                    <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="结束时间">
+                    <input type="text" class="form-control" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" name="EndDate" id="EndDate" placeholder="结束时间">
                     <i class="fa fa-calendar"></i>
                 </span>
             </div>
@@ -97,7 +97,7 @@
         $('#btn_clear').on("click", function () {
             var params = {
                 task: $("#Task").val(),
-                category: $("#Task").val(),
+                category: $("#Category").val(),
             };
             hos.ui.util.postJson("@Url.Action("ClearLog")", params)
         })

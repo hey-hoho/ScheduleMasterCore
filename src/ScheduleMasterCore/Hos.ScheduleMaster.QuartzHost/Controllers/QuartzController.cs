@@ -42,7 +42,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
                         ).ToList();
                 view.Children = (from c in _db.ScheduleReferences
                                  join t in _db.Schedules on c.ChildId equals t.Id
-                                 where c.ScheduleId == model.Id
+                                 where c.ScheduleId == model.Id && c.ChildId != model.Id
                                  select new { t.Id, t.Title }
                                 ).ToDictionary(x => x.Id, x => x.Title);
                 bool success = await QuartzManager.StartWithRetry(view, StartedEvent);

@@ -59,24 +59,24 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
-            Expression<Func<SystemLogEntity, bool>> where = m => true;
+            IQueryable<SystemLogEntity> query = _repositoryFactory.SystemLogs.Table;
             if (sid.HasValue)
             {
-                where = where.And(x => x.ScheduleId == sid.Value);
+                query = query.Where(x => x.ScheduleId == sid.Value);
             }
             if (category.HasValue)
             {
-                where = where.And(x => x.Category == category.Value);
+                query = query.Where(x => x.Category == category.Value);
             }
             if (startdate.HasValue)
             {
-                where = where.And(x => x.CreateTime >= startdate.Value);
+                query = query.Where(x => x.CreateTime >= startdate.Value);
             }
             if (enddate.HasValue)
             {
-                where = where.And(x => x.CreateTime < enddate.Value);
+                query = query.Where(x => x.CreateTime < enddate.Value);
             }
-            _repositoryFactory.SystemLogs.DeleteBy(where);
+            _repositoryFactory.SystemLogs.DeleteBy(query);
             return _unitOfWork.Commit();
         }
     }

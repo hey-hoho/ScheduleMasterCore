@@ -54,6 +54,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             bool result = _systemService.SaveConfig(items);
             if (result)
             {
+                ConfigurationCache.Reload();
                 return SuccessTip("保存成功！");
             }
             return DangerTip("保存失败！");
@@ -123,7 +124,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <summary>
         /// 清理日志
         /// </summary>
-        /// <param name="task"></param>
+        /// <param name="sid"></param>
         /// <param name="category"></param>
         /// <param name="startdate"></param>
         /// <param name="enddate"></param>
@@ -134,7 +135,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _systemService.DeleteLog(sid, category, startdate, enddate);
             if (result > 0)
             {
-                return this.JsonNet(true, "清理成功！本次清理【{result}】条");
+                return this.JsonNet(true, $"清理成功！本次清理【{result}】条");
             }
             return this.JsonNet(false, "没有符合条件的记录！");
         }

@@ -27,7 +27,7 @@ namespace Hos.ScheduleMaster.Core.Log
                         Queue.Read((item, index) =>
                         {
                             item.Node = ConfigurationCache.NodeSetting.IdentityName;
-                            item.CreateTime = DateTime.Now;
+                            ///item.CreateTime = DateTime.Now;
                             db.SystemLogs.Add(item);
                         });
                         db.SaveChanges();

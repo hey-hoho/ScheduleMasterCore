@@ -165,7 +165,7 @@
                                                     <input type="text" class="form-control" name="ParamValue" value="@item.ParamValue" placeholder="" required="" maxlength="100">
                                                 </div>
                                                 <div class="col-xs-4">
-                                                    <input type="text" class="form-control" name="ParamValue" value="@item.ParamValue" placeholder="" required="" maxlength="200">
+                                                    <input type="text" class="form-control" name="ParamRemark" value="@item.ParamRemark" placeholder="" required="" maxlength="200">
                                                 </div>
                                                 <div class="buttons-preview">
                                                     <a class="btn btn-danger icon-only white" onclick="$(this).parents('.form-group').remove();"><i class="fa fa-times "></i></a>
@@ -179,7 +179,7 @@
                                 <div class="form-group">
                                     <label for="" class="col-sm-2 control-label no-padding-right">通知人</label>
                                     <div class="col-sm-6">
-                                        <select id="e2" name="Guardians" multiple="multiple" style="width: 100%;">
+                                        <select id="e2" name="Keepers" multiple="multiple" style="width: 100%;">
                                             @{
                                                 var userList = ViewBag.UserList as List<Hos.ScheduleMaster.Core.Models.SystemUserEntity>;
                                                 foreach (var item in userList)

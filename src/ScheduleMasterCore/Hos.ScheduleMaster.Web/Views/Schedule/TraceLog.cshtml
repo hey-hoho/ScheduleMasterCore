@@ -15,27 +15,28 @@
                         <input class="form-control" id="sid" value="@_httpContextAccessor.HttpContext.Request.Query["sid"]" type="text" readonly="readonly" />
                         <div class="form-group">
                             <span class="input-icon icon-right">
-                                <input type="text" class="form-control date-picker" name="StartDate" id="StartDate" placeholder="开始时间">
+                                <input type="text" class="form-control date-picker" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" name="StartDate" id="StartDate" placeholder="开始时间">
                                 <i class="fa fa-calendar"></i>
                             </span>
                         </div>
                         -
                         <div class="form-group">
                             <span class="input-icon icon-right">
-                                <input type="text" class="form-control" name="EndDate" id="EndDate" placeholder="结束时间">
+                                <input type="text" class="form-control" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")" name="EndDate" id="EndDate" placeholder="结束时间">
                                 <i class="fa fa-calendar"></i>
                             </span>
                         </div>
                         <div class="form-group">
                             <select class="form-control" id="Status" name="Status">
-                                <option>运行结果</option>
+                                <option value="">运行结果</option>
                                 <option value="0">无结果</option>
                                 <option value="1">运行成功</option>
                                 <option value="2">运行失败</option>
                                 <option value="3">互斥取消</option>
                             </select>
                         </div>
-                        <button type="button" class="btn btn-default" id="btn_search" onclick="tarceViewer.reload();">查询</button>
+                        <button type="button" class="btn btn-primary" id="btn_search" onclick="tarceViewer.reload();">查询</button>
+                        <button type="button" class="btn btn-default" id="btn_back" onclick="history.back();">返回</button>
                     </form>
                 </div>
             </div>
