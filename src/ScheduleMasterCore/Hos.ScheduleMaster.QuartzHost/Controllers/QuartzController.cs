@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Start(Guid sid)
+        public async Task<IActionResult> Start([FromBody]Guid sid)
         {
             var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status == (int)ScheduleStatus.Stop);
             if (model != null)
@@ -65,7 +65,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
 
         private async Task LoadPluginFile(string name)
         {
-            var sourcePath = "https://localhost:44301/static/downloadpluginfile?pluginname=test";
+            var master = _db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
+            if (master == null)
+            {
+                throw new InvalidOperationException("cannot find master.");
+            }
+            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + name;
             var zipPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\{name}.zip";
             var pluginPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\{name}";
             using (WebClient client = new WebClient())

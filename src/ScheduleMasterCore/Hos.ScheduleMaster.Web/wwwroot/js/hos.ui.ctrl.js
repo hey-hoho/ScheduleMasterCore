@@ -30,6 +30,13 @@
         grid.reload = function (params) {
             this.bootstrapTable("refresh", params);
         }
+        grid.getData = function (rowIndex) {
+            var data = this.bootstrapTable("getData");
+            if (rowIndex && rowIndex > -1) {
+                return data[rowIndex];
+            }
+            return data;
+        }
         return grid;
     }
 

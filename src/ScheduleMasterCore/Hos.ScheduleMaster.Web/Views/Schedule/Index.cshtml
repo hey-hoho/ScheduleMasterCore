@@ -57,15 +57,15 @@
             { field: 'createTime', title: '创建时间', width: '8', widthUnit: '%' },
             {
                 title: '操作', field: 'id', align: 'center', width: '10', widthUnit: '%', formatter: function (value, row, index) {
-                    var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  <a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  ';
+                    var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  ';
                     if (row.Status == 0) {
-                        l += '<button class="btn btn-xs btn-primary" onclick="handlers.taskStart(' + row.Id + ',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(' + row.Id + ',\'' + row.Title + '\')">删除</button>';
+                        l += '<a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  <button class="btn btn-xs btn-primary" onclick="handlers.taskStart(\'' + row.Id + '\',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(\'' + row.Id + '\',\'' + row.Title + '\')">删除</button>';
                     }
                     if (row.Status == 1) {
-                        l += '<button class="btn btn-xs btn-warning" onclick="handlers.taskPause(' + row.Id + ',\'' + row.Title + '\')">暂停</button>  <button class="btn btn-xs btn-primary" onclick="handlers.taskRun(' + row.Id + ',\'' + row.Title + '\')">运行</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(' + row.Id + ',\'' + row.Title + '\')">停止</button>';
+                        l += '<button class="btn btn-xs btn-warning" onclick="handlers.taskPause(\'' + row.Id + '\',\'' + row.Title + '\')">暂停</button>  <button class="btn btn-xs btn-primary" onclick="handlers.taskRun(\'' + row.Id + '\',\'' + row.Title + '\')">运行</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
                     }
                     if (row.Status == 2) {
-                        l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(' + row.Id + ',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(' + row.Id + ',\'' + row.Title + '\')">停止</button>';
+                        l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(\'' + row.Id + '\',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
                     }
                     return l;
                 }
@@ -74,22 +74,22 @@
         });
         var handlers = {
             taskStart: function (value, title) {
-                this.request(title, '/Schedule/StartTask?id=' + value, "启动");
+                this.request(title, '/Task/Start?id=' + value, "启动");
             },
             taskDelete: function (value, title) {
-                this.request(title, '/Schedule/DeleteTask?id=' + value, "删除");
+                this.request(title, '/Task/Delete?id=' + value, "删除");
             },
             taskPause: function (value, title) {
-                this.request(title, '/Schedule/PauseTask?id=' + value, "暂停");
+                this.request(title, '/Task/Pause?id=' + value, "暂停");
             },
             taskRun: function (value, title) {
-                this.request(title, '/Schedule/RunOnceTask?id=' + value, "立即运行");
+                this.request(title, '/Task/RunOnce?id=' + value, "立即运行");
             },
             taskResume: function (value, title) {
-                this.request(title, '/Schedule/ResumeTask?id=' + value, "恢复");
+                this.request(title, '/Task/Resume?id=' + value, "恢复");
             },
             taskStop: function (value, title) {
-                this.request(title, '/Schedule/StopTask?id=' + value, "停止");
+                this.request(title, '/Task/Stop?id=' + value, "停止");
             },
             request: function (title, url, action) {
                 hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Text;
 
@@ -14,14 +15,21 @@ namespace Hos.ScheduleMaster.Core.Common
             try
             {
                 string postDataStr = string.Empty;
-                StringBuilder sb = new StringBuilder("{");
-                if (param != null)
+                if (param != null && param.Count > 0)
                 {
-                    foreach (var item in param)
+                    if (param.Count == 1)
                     {
-                        sb.Append("\"" + item.Key + "\":\"" + item.Value + "\",");
+                        postDataStr = "\"" + param.First().Value + "\"";
                     }
-                    postDataStr = sb.ToString().TrimEnd(',') + "}";
+                    else
+                    {
+                        StringBuilder sb = new StringBuilder("{");
+                        foreach (var item in param)
+                        {
+                            sb.Append("\"" + item.Key + "\":\"" + item.Value + "\",");
+                        }
+                        postDataStr = sb.ToString().TrimEnd(',') + "}";
+                    }
                 }
                 byte[] requestBytes = Encoding.GetEncoding("UTF-8").GetBytes(postDataStr);
                 //   Build   the   request.   

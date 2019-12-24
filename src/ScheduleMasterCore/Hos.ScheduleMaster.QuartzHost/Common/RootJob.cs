@@ -131,7 +131,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         private void UpdateRunTrace(Guid traceId, double elapsed, ScheduleRunResult result)
         {
             if (traceId == Guid.Empty) return;
-            _db.Database.ExecuteSqlRaw($"update scheduletraces set result={(int)result},elapsedtime={elapsed} where traceid='{traceId}'");
+            _db.Database.ExecuteSqlRaw($"update scheduletraces set result={(int)result},elapsedtime={elapsed},endtime='{DateTime.Now}' where traceid='{traceId}'");
         }
     }
 }

@@ -104,7 +104,7 @@
 
         function showStackTrace(index) {
             bootbox.dialog({
-                message: $table.bootstrapTable('getData')[index].StackTrace,
+                message: grid.getData(index).StackTrace,
                 title: "堆栈信息",
                 className: "",
             });
