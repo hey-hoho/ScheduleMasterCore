@@ -27,9 +27,24 @@ namespace Hos.ScheduleMaster.Web.AppStart
                 node.MachineName = Environment.MachineName;
                 node.AccessProtocol = setting.Protocol;
                 node.Host = $"{setting.IP}:{setting.Port}";
+                node.AccessSecret = Guid.NewGuid().ToString("n");
                 node.Status = 1;
                 if (isCreate) db.ServerNodes.Add(node);
                 db.SaveChanges();
+            }
+        }
+
+        public static void Shutdown()
+        {
+            using (var scope = new Core.ScopeDbContext())
+            {
+                var db = scope.GetDbContext();
+                var node = db.ServerNodes.FirstOrDefault(x => x.NodeName == ConfigurationCache.NodeSetting.IdentityName);
+                if (node != null)
+                {
+                    node.Status = 0;
+                    db.SaveChanges();
+                }
             }
         }
     }

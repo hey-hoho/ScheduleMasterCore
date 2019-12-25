@@ -35,7 +35,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 是否周期运行
         /// </summary>
         [Required]
-        public bool RunMoreTimes { get; set; }
+        public bool RunLoop { get; set; }
 
         /// <summary>
         /// cron表达式

@@ -28,14 +28,15 @@
     <script>
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/api/Task/QueryList',
-            columns: [{ field: 'Title', title: '名称', width: '20', widthUnit: '%' },
-            { field: 'RunMode', title: '运行模式', width: '5', widthUnit: '%' },
-            { field: 'StartTime', title: '开始运行', width: '8', widthUnit: '%' },
-            { field: 'LastRunTime', title: '上次运行时间', width: '8', widthUnit: '%' },
-            { field: 'NextRunTime', title: '下次运行时间', width: '8', widthUnit: '%' },
-            { field: 'TotalRunCount', title: '运行次数', width: '5', widthUnit: '%' },
+            columns: [
+            { field: 'Title', title: '名称', width: '20' },
+            { field: 'RunMode', title: '运行模式', width: '5', align: 'center' },
+            { field: 'StartTime', title: '开始运行', width: '8', align: 'center' },
+            { field: 'LastRunTime', title: '上次运行时间', width: '8', align: 'center'},
+            { field: 'NextRunTime', title: '下次运行时间', width: '8', align: 'center'},
+            { field: 'TotalRunCount', title: '运行次数', width: '5', align: 'center' },
             {
-                field: 'Status', title: '状态', width: '5', widthUnit: '%', formatter: function (value, row, index) {
+                field: 'Status', title: '状态', width: '5', align: 'center', formatter: function (value, row, index) {
                     var str = '';
                     switch (value) {
                         case -1:
@@ -54,9 +55,9 @@
                     return str;
                 }
             },
-            { field: 'createTime', title: '创建时间', width: '8', widthUnit: '%' },
+            { field: 'CreateTime', title: '创建时间', width: '8', align: 'center'},
             {
-                title: '操作', field: 'id', align: 'center', width: '10', widthUnit: '%', formatter: function (value, row, index) {
+                title: '操作', field: 'id', align: 'center', width: '10', formatter: function (value, row, index) {
                     var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  ';
                     if (row.Status == 0) {
                         l += '<a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  <button class="btn btn-xs btn-primary" onclick="handlers.taskStart(\'' + row.Id + '\',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(\'' + row.Id + '\',\'' + row.Title + '\')">删除</button>';

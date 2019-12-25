@@ -53,13 +53,17 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
 
         private void StartedEvent(Guid sid, DateTime? nextRunTime)
         {
-            //每次运行成功后更新任务的运行情况
-            var task = _db.Schedules.FirstOrDefault(x => x.Id == sid);
-            if (task == null) return;
-            task.LastRunTime = DateTime.Now;
-            task.NextRunTime = nextRunTime;
-            task.TotalRunCount += 1;
-            _db.SaveChanges();
+            using (var scope = new Core.ScopeDbContext())
+            {
+                var db = scope.GetDbContext();
+                //每次运行成功后更新任务的运行情况
+                var task = db.Schedules.FirstOrDefault(x => x.Id == sid);
+                if (task == null) return;
+                task.LastRunTime = DateTime.Now;
+                task.NextRunTime = nextRunTime;
+                task.TotalRunCount += 1;
+                db.SaveChanges();
+            }
             //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
         }
 
@@ -76,14 +80,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             using (WebClient client = new WebClient())
             {
                 await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
-                //将指定 zip 存档中的所有文件都解压缩到文件系统的一个目录下
-                ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
-                System.IO.File.Delete(zipPath);
             }
+            //将指定 zip 存档中的所有文件都解压缩到文件系统的一个目录下
+            ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
+            System.IO.File.Delete(zipPath);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Stop(Guid sid)
+        public async Task<IActionResult> Stop([FromBody]Guid sid)
         {
             bool success = await QuartzManager.Stop(sid);
             if (success) return Ok();
@@ -91,7 +95,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Pause(Guid sid)
+        public async Task<IActionResult> Pause([FromBody]Guid sid)
         {
             bool success = await QuartzManager.Pause(sid);
             if (success) return Ok();
@@ -99,7 +103,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Resume(Guid sid)
+        public async Task<IActionResult> Resume([FromBody]Guid sid)
         {
             bool success = await QuartzManager.Resume(sid);
             if (success) return Ok();
@@ -107,7 +111,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RunOnce(Guid sid)
+        public async Task<IActionResult> RunOnce([FromBody]Guid sid)
         {
             bool success = await QuartzManager.RunOnce(sid);
             if (success) return Ok();

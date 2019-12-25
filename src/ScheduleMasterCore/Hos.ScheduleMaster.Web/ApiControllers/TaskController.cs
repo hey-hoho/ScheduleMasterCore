@@ -20,13 +20,6 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         [Autowired]
         public ISystemService _systemService { get; set; }
 
-        //private readonly ILogger<TaskController> _logger;
-
-        //public TaskController(IScheduleService taskService)
-        //{
-        //    _taskService = taskService;
-        //}
-
         /// <summary>
         /// 查询分页数据
         /// </summary>
@@ -51,7 +44,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                     StartTime = m.StartDate,
                     m.LastRunTime,
                     m.NextRunTime,
-                    RunMode = m.RunMoreTimes ? "周期运行" : "一次运行",
+                    RunMode = m.RunLoop ? "周期运行" : "一次运行",
                     m.Remark,
                     m.Status,
                     m.Title,
@@ -95,7 +88,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 Title = task.Title,
                 Status = (int)ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
-                RunMoreTimes = task.RunMoreTimes,
+                RunLoop = task.RunLoop,
                 TotalRunCount = 0
             };
             var result = _scheduleService.Add(model, task.Keepers, task.Nexts);

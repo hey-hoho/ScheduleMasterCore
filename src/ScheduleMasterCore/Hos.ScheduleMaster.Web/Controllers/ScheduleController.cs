@@ -85,7 +85,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 Title = task.Title,
                 Status = (int)ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
-                RunMoreTimes = task.RunMoreTimes,
+                RunLoop = task.RunLoop,
                 TotalRunCount = 0
             };
             var result = _scheduleService.Add(model, task.Keepers, task.Nexts);

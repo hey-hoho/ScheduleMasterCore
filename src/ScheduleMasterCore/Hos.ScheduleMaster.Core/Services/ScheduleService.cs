@@ -130,7 +130,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 AssemblyName = model.AssemblyName,
                 ClassName = model.ClassName,
                 CronExpression = model.CronExpression,
-                RunMoreTimes = model.RunMoreTimes,
+                RunLoop = model.RunLoop,
                 CustomParamsJson = model.CustomParamsJson,
                 EndDate = model.EndDate,
                 Remark = model.Remark,

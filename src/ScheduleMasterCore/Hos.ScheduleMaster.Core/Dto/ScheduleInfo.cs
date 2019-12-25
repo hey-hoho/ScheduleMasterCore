@@ -19,7 +19,7 @@ namespace Hos.ScheduleMaster.Core.Dto
         [Required, MaxLength(50)]
         public string Title { get; set; }
 
-        public bool RunMoreTimes { get; set; }
+        public bool RunLoop { get; set; }
 
         [MaxLength(500)]
         public string Remark { get; set; }

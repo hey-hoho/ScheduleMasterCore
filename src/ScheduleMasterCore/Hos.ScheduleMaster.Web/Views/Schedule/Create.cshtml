@@ -57,17 +57,17 @@
                                     <label for="" class="col-sm-2 control-label no-padding-right">按周期运行</label>
                                     <div class="col-sm-6">
                                         <label>
-                                            <input class="checkbox-slider toggle colored-blue yesno" @(Model != null && Model.RunMoreTimes ? "checked=''" : "") name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
+                                            <input class="checkbox-slider toggle colored-blue yesno" @(Model != null && Model.RunLoop ? "checked=''" : "") name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
                                             @*@Html.CheckBoxFor(x => x.RunMoreTimes, new { @class = "checkbox-slider toggle colored-blue yesno" })*@
                                             <span class="text" style="margin-top: 5px;"></span>
                                         </label>
                                         <p class="help-block">如果关闭按钮表示在任务开始时只执行一次</p>
                                     </div>
                                 </div>
-                                <div class="form-group  @(Model == null || !Model.RunMoreTimes ? "hide" : "")" id="ctn_CronExpression">
+                                <div class="form-group  @(Model == null || !Model.RunLoop ? "hide" : "")" id="ctn_CronExpression">
                                     <label for="" class="col-sm-2 control-label no-padding-right">Cron表达式</label>
                                     <div class="col-sm-6">
-                                        <input type="text" class="form-control" name="CronExpression" id="CronExpression" placeholder="">
+                                        @Html.TextBoxFor(x => x.CronExpression, new { @class = "form-control", placeholder = "" })
                                         <p class="help-block"><a target="_blank" href="http://cron.qqe2.com/">生成工具</a></p>
                                     </div>
                                 </div>

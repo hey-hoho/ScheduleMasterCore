@@ -88,23 +88,30 @@
             });
             tarceViewer = hos.ui.ctrl.gridView("table-trace", {
                 url: '/Schedule/QueryTraceLog',
+                pageSize:15,
                 columns: [
                     { field: 'ScheduleId', title: '', align: 'center', visible: false },
                     { field: 'TraceId', title: '', align: 'center', visible: false },
-                    { field: 'Node', title: '节点', align: 'center', width: '8%' },
-                    { field: 'StartTime', title: '开始时间', align: 'center', width: '13%' },
-                    { field: 'EndTime', title: '结束时间', align: 'center', width: '13%' },
-                    { field: 'ElapsedTime', title: '耗时(s)', align: 'center', width: '8%' },
-                    { field: 'Result', title: '运行结果', align: 'center', width: '8%' }
+                    { field: 'Node', title: '节点', align: 'center', width: '5'},
+                    { field: 'StartTime', title: '开始时间', align: 'center', width: '15' },
+                    { field: 'EndTime', title: '结束时间', align: 'center', width: '15' },
+                    { field: 'ElapsedTime', title: '耗时(s)', align: 'center', width: '5' },
+                    {
+                        field: 'Result', title: '运行结果', align: 'center', width: '5',  formatter: function (value, row, index) {
+                            var dict = ["无结果", "运行成功", "运行失败", "互斥取消"];
+                            return dict[value];
+                        }
+                    }
                 ],
                 onClickRow: function (row, $element, field) {
                     logViewer.reload({ url: '/Schedule/QueryTraceDetail?sid=' + row.ScheduleId + '&tid=' + row.TraceId });
                 }
             });
             logViewer = hos.ui.ctrl.gridView("table-log", {
+                pageSize:10,
                 columns: [
                     {
-                        field: 'Category', title: '类型', align: 'center', width: '10%', formatter: function (value, row, index) {
+                        field: 'Category', title: '类型', align: 'center', width: '10',formatter: function (value, row, index) {
                             var text = '';
                             switch (value) {
                                 case 1:
@@ -120,7 +127,7 @@
                             return text;
                         }
                     },
-                    { field: 'CreateTime', title: '生成时间', align: 'center', width: '18%' },
+                    { field: 'CreateTime', title: '生成时间', align: 'center', width: '18' },
                     {
                         field: 'Message', title: '内容', formatter: function (value, row, index) {
                             var text = value;
@@ -132,6 +139,7 @@
                     }
                 ]
             });
+            $(".fixed-table-toolbar").remove();
         })
         function showStackTrace(index) {
             bootbox.dialog({

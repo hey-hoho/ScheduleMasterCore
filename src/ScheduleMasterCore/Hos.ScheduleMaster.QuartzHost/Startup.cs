@@ -30,7 +30,7 @@ namespace Hos.ScheduleMaster.QuartzHost
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers(config =>
+            services.AddControllersWithViews(config =>
             {
                 //添加全局过滤器
                 config.Filters.Add(typeof(ApiValidationFilter));
@@ -50,7 +50,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             }
 
             app.UseHttpsRedirection();
-
+            app.UseStaticFiles();
             app.UseRouting();
 
             app.UseAuthorization();

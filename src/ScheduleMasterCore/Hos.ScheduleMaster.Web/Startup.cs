@@ -122,6 +122,7 @@ namespace Hos.ScheduleMaster.Web
         {
             // Perform on-stopping activities here
             Core.Log.LogManager.Shutdown();
+            AppStart.NodeRegistry.Shutdown();
         }
 
     }

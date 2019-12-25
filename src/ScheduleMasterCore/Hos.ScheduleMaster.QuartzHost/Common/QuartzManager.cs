@@ -377,7 +377,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             _scheduler.ListenerManager.AddJobListener(new JobRunListener(view.Schedule.Id.ToString(), callBack),
                 KeyMatcher<JobKey>.KeyEquals(new JobKey(view.Schedule.Id.ToString())));
 
-            if (view.Schedule.RunMoreTimes)
+            if (view.Schedule.RunLoop)
             {
                 if (!CronExpression.IsValidExpression(view.Schedule.CronExpression))
                 {

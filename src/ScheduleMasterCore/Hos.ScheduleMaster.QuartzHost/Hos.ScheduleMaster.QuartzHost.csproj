@@ -22,4 +22,8 @@
     <Folder Include="Plugins\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\index.html" />
+  </ItemGroup>
+
 </Project>
