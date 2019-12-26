@@ -69,7 +69,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// 更新节点状态
         /// </summary>
         /// <param name="isStarted"></param>
-        private static void MarkNode(bool isStarted)
+        /// <param name="isOnStop"></param>
+        private static void MarkNode(bool isStarted, bool isOnStop = false)
         {
             var setting = ConfigurationCache.NodeSetting;
             using (var scope = new Core.ScopeDbContext())
@@ -90,7 +91,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     node.AccessProtocol = setting.Protocol;
                     node.Host = $"{setting.IP}:{setting.Port}";
                     node.Priority = setting.Priority;
-                    node.Status = 1;
+                    node.Status = 2;
                     node.AccessSecret = Guid.NewGuid().ToString("n");
                     if (isCreate) db.ServerNodes.Add(node);
                 }
@@ -98,7 +99,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     if (node != null)
                     {
-                        node.Status = 0;
+                        node.Status = isOnStop ? 0 : 1;
                         node.AccessSecret = null;
                     }
                 }
@@ -112,7 +113,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         /// 关闭调度系统
         /// </summary>
-        public static async Task Shutdown()
+        public static async Task Shutdown(bool isOnStop = false)
         {
             try
             {
@@ -121,7 +122,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     //等待任务运行完成再关闭调度
                     await _scheduler.Shutdown(true);
-                    MarkNode(false);
+                    MarkNode(false, isOnStop);
                     LogHelper.Info("任务调度平台已经停止！");
                 }
             }

@@ -37,5 +37,20 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="enddate"></param>
         /// <returns></returns>
         int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate);
+
+        /// <summary>
+        /// 查询节点分页数据
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        ListPager<ServerNodeEntity> QueryNodePager(ListPager<ServerNodeEntity> pager);
+
+        /// <summary>
+        /// 节点操作
+        /// </summary>
+        /// <param name="nodeName"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        bool NodeSwich(string nodeName, int status);
     }
 }

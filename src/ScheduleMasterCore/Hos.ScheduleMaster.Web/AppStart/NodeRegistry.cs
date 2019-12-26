@@ -28,7 +28,8 @@ namespace Hos.ScheduleMaster.Web.AppStart
                 node.AccessProtocol = setting.Protocol;
                 node.Host = $"{setting.IP}:{setting.Port}";
                 node.AccessSecret = Guid.NewGuid().ToString("n");
-                node.Status = 1;
+                node.Status = 2;
+                node.LastUpdateTime = DateTime.Now;
                 if (isCreate) db.ServerNodes.Add(node);
                 db.SaveChanges();
             }

@@ -1,0 +1,79 @@
+﻿
+@{
+    ViewData["Title"] = "Node";
+}
+
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+
+
+<div class="page-body">
+    <div id="serch-form" class="form-inline">
+        @*<a href="@Url.Action("Edit","Account")" class="btn btn-primary">创建用户</a>*@
+        <div class="pull-right">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="节点名\主机名\主机地址" id="keyword">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <table id="table" class="mychar1-table"></table>
+</div>
+
+
+@section scripts{
+    <!--Page Related Scripts-->
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script>
+        var grid = hos.ui.ctrl.gridView("table", {
+            url: '/System/QueryNodePager',
+            columns: [
+                { field: 'NodeName', title: '节点名称', align: 'center',width:'10' },
+                { field: 'NodeType', title: '节点类型', align: 'center',width:'8' },
+                { field: 'MachineName', title: '主机名', align: 'center' ,width:'8'},
+                { field: 'AccessProtocol', title: '访问协议' , align: 'center',width:'8'},
+                { field: 'Host', title: '主机地址',width:'15' },
+                { field: 'LastUpdateTime', title: '最后更新时间', align: 'center',width:'15' },
+                { field: 'Status', title: '状态', align: 'center',width:'10' ,  formatter: function (value, row, index) {
+                    var dict = [
+                        "<span class='label label-danger graded'>下线</span>",
+                        "<span class='label label-warning graded'>停机</span>",
+                        "<span class='label label-azure graded'>运行</span>"
+                    ];
+                      return dict[value];
+                 }},
+                { field: 'Priority', title: '权重', align: 'center' ,width:'8'},
+                {
+                    title: '操作', field: 'id', align: 'center', formatter: function (value, row, index) {
+                        if (row.NodeType == "master") return '';
+                    if (row.Status == 1) {
+                        return '<button class="btn btn-xs btn-primary" onclick="handlers.accountEnable(\'' + row.NodeName + '\')">启用</button>  ';
+                    }
+                    if (row.Status == 2) {
+                        return '<button class="btn btn-xs btn-warning" onclick="handlers.accountDisable(\'' + row.NodeName + '\')">停机</button>  ';
+                    }
+                }
+            }
+            ]
+        });
+        var handlers = {
+            accountEnable: function (value) {
+                this.request(value, '/System/NodeEnable?name=' + value, "启用");
+            },
+            accountDisable: function (value) {
+                this.request(value, '/System/NodeserDisable?name=' + value, "停机");
+            },
+            request: function (title, url, action) {
+                hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                    function () {
+                        hos.ui.util.postJson(url, null, function () {grid.reload(); })
+                    });
+            }
+        }
+    </script>
+}
+
+
+

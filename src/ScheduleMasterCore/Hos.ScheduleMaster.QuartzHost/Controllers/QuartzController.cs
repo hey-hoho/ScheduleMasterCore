@@ -118,6 +118,34 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             return BadRequest();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> Init()
+        {
+            try
+            {
+                await QuartzManager.InitScheduler();
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Shutdown()
+        {
+            try
+            {
+                await QuartzManager.Shutdown(false);
+                return Ok();
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
+        }
+
         [HttpGet]
         public IActionResult HealthCheck()
         {

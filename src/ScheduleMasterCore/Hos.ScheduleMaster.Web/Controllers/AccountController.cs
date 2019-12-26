@@ -125,9 +125,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _accountService.UpdateUserStatus(id, (int)SystemUserStatus.Available);
             if (result)
             {
-                return this.JsonNet(new ServiceResponseMessage(ResultStatus.Success, "启用成功！"));
+                return this.JsonNet(true, "启用成功！");
             }
-            return this.JsonNet(new ServiceResponseMessage(ResultStatus.Failed, "启用失败！"));
+            return this.JsonNet(false, "启用失败！");
         }
 
         /// <summary>
@@ -141,9 +141,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _accountService.UpdateUserStatus(id, (int)SystemUserStatus.Disabled);
             if (result)
             {
-                return this.JsonNet(new ServiceResponseMessage(ResultStatus.Success, "禁用成功！"));
+                return this.JsonNet(true, "禁用成功！");
             }
-            return this.JsonNet(new ServiceResponseMessage(ResultStatus.Failed, "禁用失败！"));
+            return this.JsonNet(false, "禁用失败！");
         }
 
         /// <summary>
@@ -157,9 +157,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _accountService.UpdateUserStatus(id, (int)SystemUserStatus.Deleted);
             if (result)
             {
-                return this.JsonNet(new ServiceResponseMessage(ResultStatus.Success, "删除成功！"));
+                return this.JsonNet(true, "删除成功！");
             }
-            return this.JsonNet(new ServiceResponseMessage(ResultStatus.Failed, "删除失败！"));
+            return this.JsonNet(false, "删除失败！");
         }
 
         /// <summary>
@@ -174,9 +174,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var result = _accountService.UpdateUserPassword(id, defaultPwd);
             if (result)
             {
-                return this.JsonNet(new ServiceResponseMessage(ResultStatus.Success, "重置成功！"));
+                return this.JsonNet(true, "重置成功！");
             }
-            return this.JsonNet(new ServiceResponseMessage(ResultStatus.Failed, "重置失败！"));
+            return this.JsonNet(false, "重置失败！");
         }
     }
 }

@@ -29,6 +29,62 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         /// <summary>
+        /// 节点列表页面
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Node()
+        {
+            return View();
+        }
+
+        /// <summary>
+        /// 节点分页数据
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult QueryNodePager(string keyword)
+        {
+            var pager = new ListPager<ServerNodeEntity>(PageIndex, PageSize);
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                pager.AddFilter(x => x.MachineName.Contains(keyword) || x.NodeName.Contains(keyword) || x.Host.Contains(keyword));
+            }
+            pager = _systemService.QueryNodePager(pager);
+            return GridData(pager.Total, pager.Rows);
+        }
+
+        /// <summary>
+        /// 节点启用
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult NodeEnable(string name)
+        {
+            var result = _systemService.NodeSwich(name, 2);
+            if (result)
+            {
+                return this.JsonNet(true, "操作成功！");
+            }
+            return this.JsonNet(false, "操作失败！");
+        }
+
+        /// <summary>
+        /// 节点停机
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult NodeDisable(string name)
+        {
+            var result = _systemService.NodeSwich(name, 1);
+            if (result)
+            {
+                return this.JsonNet(true, "操作成功！");
+            }
+            return this.JsonNet(false, "操作失败！");
+        }
+
+        /// <summary>
         /// 参数配置页面
         /// </summary>
         /// <returns></returns>
@@ -68,7 +124,6 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             return View();
         }
-
 
         /// <summary>
         /// 查询日志记录

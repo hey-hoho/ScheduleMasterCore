@@ -79,5 +79,31 @@ namespace Hos.ScheduleMaster.Core.Services
             _repositoryFactory.SystemLogs.DeleteBy(query);
             return _unitOfWork.Commit();
         }
+
+        /// <summary>
+        /// 查询节点分页数据
+        /// </summary>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        public ListPager<ServerNodeEntity> QueryNodePager(ListPager<ServerNodeEntity> pager)
+        {
+            return _repositoryFactory.ServerNodes.WherePager(pager, m => true, m => m.NodeType, false);
+        }
+
+        /// <summary>
+        /// 节点操作
+        /// </summary>
+        /// <param name="nodeName"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public bool NodeSwich(string nodeName, int status)
+        {
+            var node = _repositoryFactory.ServerNodes.FirstOrDefault(x => x.NodeName == nodeName);
+            if (node == null || node.NodeType == "master" || node.Status == 0) return false;
+            string router = status == 2 ? "init" : "shutdown";
+            Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
+            var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", "post", null, header);
+            return result.Key == System.Net.HttpStatusCode.OK;
+        }
     }
 }

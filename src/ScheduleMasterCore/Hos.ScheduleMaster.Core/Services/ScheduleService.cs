@@ -166,7 +166,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         private bool WorkersTraverseAction(Guid sid, string router, string verb = "post", Action<ServerNodeEntity, KeyValuePair<HttpStatusCode, string>> callback = null)
         {
-            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 1).ToList();
+            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2).ToList();
             if (nodeList.Any())
             {
                 Dictionary<string, string> param = new Dictionary<string, string>();
@@ -174,22 +174,13 @@ namespace Hos.ScheduleMaster.Core.Services
                 {
                     param.Add("sid", sid.ToString());
                 }
-                //bool success = false;
                 var result = nodeList.AsParallel().Select(n =>
                   {
                       Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
                       var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
-                      //success = success || result.Key == HttpStatusCode.OK;
                       callback?.Invoke(n, result);
                       return result.Key == HttpStatusCode.OK;
                   }).ToArray();
-                //System.Threading.Tasks.Parallel.ForEach(nodeList, (n) =>
-                //{
-                //    Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
-                //    var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
-                //    success = success || result.Key == HttpStatusCode.OK;
-                //    callback?.Invoke(n, result);
-                //});
                 return result.All(x => x == true);
             }
             return false;
@@ -204,7 +195,7 @@ namespace Hos.ScheduleMaster.Core.Services
         private bool WorkerSelectOne(Guid sid, string router)
         {
             //根据节点权重来选择一个节点运行
-            var list = _repositoryFactory.ServerNodes.Where(m => m.NodeType == "worker" && m.Status == 1).OrderBy(x => x.Priority).ToList();
+            var list = _repositoryFactory.ServerNodes.Where(m => m.NodeType == "worker" && m.Status == 2).OrderBy(x => x.Priority).ToList();
             int[] arry = new int[list.Count + 1];
             arry[0] = 0;
             for (int i = 0; i < list.Count; i++)
@@ -430,11 +421,16 @@ namespace Hos.ScheduleMaster.Core.Services
         {
             WorkersTraverseAction(Guid.Empty, "api/quartz/healthcheck", "get", (node, result) =>
             {
-                _repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == node.NodeName, x => new ServerNodeEntity
+                node.LastUpdateTime = DateTime.Now;
+                if (result.Key != HttpStatusCode.OK)
                 {
-                    Status = result.Key == HttpStatusCode.OK ? 1 : 0,
-                    LastUpdateTime = DateTime.Now
-                });
+                    node.Status = 0;
+                }
+                //_repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == node.NodeName, x => new ServerNodeEntity
+                //{
+                //    Status = result.Key == HttpStatusCode.OK ? 1 : 0,
+                //    LastUpdateTime = DateTime.Now
+                //});
                 _unitOfWork.Commit();
             });
         }
