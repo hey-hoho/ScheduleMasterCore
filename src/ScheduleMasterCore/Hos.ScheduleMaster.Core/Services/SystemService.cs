@@ -102,7 +102,7 @@ namespace Hos.ScheduleMaster.Core.Services
             if (node == null || node.NodeType == "master" || node.Status == 0) return false;
             string router = status == 2 ? "init" : "shutdown";
             Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
-            var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", "post", null, header);
+            var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/api/quartz/{router}", "post", null, header);
             return result.Key == System.Net.HttpStatusCode.OK;
         }
     }

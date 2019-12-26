@@ -66,7 +66,7 @@ namespace Hos.ScheduleMaster.Web
                 b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
             //EF数据库上下文
-            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+            services.AddDbContextPool<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
 
             //注入Uow依赖
             services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();

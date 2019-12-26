@@ -104,7 +104,7 @@
 
         function showStackTrace(index) {
             bootbox.dialog({
-                message: grid.getData(index).StackTrace,
+                message: "<p>"+grid.getData(index).StackTrace+"</p>",
                 title: "堆栈信息",
                 className: "",
             });

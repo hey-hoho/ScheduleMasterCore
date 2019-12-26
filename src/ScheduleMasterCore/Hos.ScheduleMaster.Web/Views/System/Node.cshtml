@@ -63,7 +63,7 @@
                 this.request(value, '/System/NodeEnable?name=' + value, "启用");
             },
             accountDisable: function (value) {
-                this.request(value, '/System/NodeserDisable?name=' + value, "停机");
+                this.request(value, '/System/NodeDisable?name=' + value, "停机");
             },
             request: function (title, url, action) {
                 hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',

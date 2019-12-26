@@ -49,15 +49,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
                     properties["quartz.threadPool.threadCount"] = "50";
                     properties["quartz.threadPool.threadPriority"] = "Normal";
-
                     ISchedulerFactory factory = new StdSchedulerFactory(properties);
-
                     _scheduler = await factory.GetScheduler();
-                    await _scheduler.Clear();
-                    await _scheduler.Start();
-                    MarkNode(true);
-                    LogHelper.Info("任务调度平台初始化成功！");
                 }
+                await _scheduler.Start();
+                await _scheduler.Clear();
+                MarkNode(true);
+                LogHelper.Info("任务调度平台初始化成功！");
             }
             catch (Exception ex)
             {
@@ -100,7 +98,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     if (node != null)
                     {
                         node.Status = isOnStop ? 0 : 1;
-                        node.AccessSecret = null;
+                        if (isOnStop) node.AccessSecret = null;
                     }
                 }
                 if (db.SaveChanges() > 0)
@@ -124,6 +122,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     await _scheduler.Shutdown(true);
                     MarkNode(false, isOnStop);
                     LogHelper.Info("任务调度平台已经停止！");
+                    _scheduler = null;
                 }
             }
             catch (Exception ex)

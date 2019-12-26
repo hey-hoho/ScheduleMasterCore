@@ -36,7 +36,7 @@ namespace Hos.ScheduleMaster.QuartzHost
                 config.Filters.Add(typeof(ApiValidationFilter));
                 config.Filters.Add(typeof(GlobalExceptionFilter));
             });
-            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+            services.AddDbContextPool<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
         }
 
