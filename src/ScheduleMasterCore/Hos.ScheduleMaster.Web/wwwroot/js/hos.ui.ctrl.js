@@ -32,7 +32,7 @@
         }
         grid.getData = function (rowIndex) {
             var data = this.bootstrapTable("getData");
-            if (rowIndex && rowIndex > -1) {
+            if (typeof(rowIndex)=='number' && rowIndex > -1) {
                 return data[rowIndex];
             }
             return data;

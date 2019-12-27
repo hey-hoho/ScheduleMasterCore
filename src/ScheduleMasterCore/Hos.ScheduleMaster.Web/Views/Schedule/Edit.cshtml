@@ -41,7 +41,7 @@
                                     <label for="" class="col-sm-2 control-label no-padding-right">按周期运行</label>
                                     <div class="col-sm-6">
                                         <label>
-                                            <input class="checkbox-slider toggle colored-blue yesno" checked="" name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
+                                            <input class="checkbox-slider toggle colored-blue yesno" checked="" name="RunLoop" id="RunLoop" type="checkbox" value="true">
                                             <span class="text" style="margin-top: 5px;"></span>
                                         </label>
                                         <p class="help-block">如果关闭按钮表示在任务开始时只执行一次</p>
@@ -137,7 +137,7 @@
                     startTime.config.max = date;
                 }
             });
-            $("#RunMoreTimes").click(function () {
+            $("#RunLoop").click(function () {
                 if (this.checked) {
                     $("#ctn_CronExpression").removeClass("hide");
                     $("#CronExpression").rules("add", { required: true });
@@ -159,11 +159,11 @@
                         $("#id").val(handlers.taskId);
                         $("#Title").val(result.Data.Title);
                         $("#CronExpression").val(result.Data.CronExpression);
-                        if (result.Data.RunMoreTimes) {
+                        if (result.Data.RunLoop) {
                             $("#CronExpression").rules("add", { required: true });
                         } else {
                             $("#ctn_CronExpression").addClass("hide");
-                            $("#RunMoreTimes").removeAttr("checked");
+                            $("#RunLoop").removeAttr("checked");
                             $("#CronExpression").rules("remove", "required");
                         }
                         $("#AssemblyName").val(result.Data.AssemblyName);

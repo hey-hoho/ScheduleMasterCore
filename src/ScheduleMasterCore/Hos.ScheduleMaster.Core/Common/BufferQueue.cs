@@ -76,6 +76,7 @@ namespace Hos.ScheduleMaster.Core.Common
         /// </summary>
         private void QueueProcess(Action<T, int> action)
         {
+            if (_outQueue == null) return;
             int cnt = 0;
             while (cnt < UnitReadCount)
             {

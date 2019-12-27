@@ -162,9 +162,8 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="sid"></param>
         /// <param name="router"></param>
         /// <param name="verb"></param>
-        /// <param name="callback"></param>
         /// <returns></returns>
-        private bool WorkersTraverseAction(Guid sid, string router, string verb = "post", Action<ServerNodeEntity, KeyValuePair<HttpStatusCode, string>> callback = null)
+        private bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
         {
             var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2).ToList();
             if (nodeList.Any())
@@ -176,10 +175,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 var result = nodeList.AsParallel().Select(n =>
                   {
-                      Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", n.AccessSecret } };
-                      var result = HttpRequest.Send($"{n.AccessProtocol}://{n.Host}/{router}", verb, param, header);
-                      callback?.Invoke(n, result);
-                      return result.Key == HttpStatusCode.OK;
+                      return NodeRequest(n, router, "post", param);
                   }).ToArray();
                 return result.All(x => x == true);
             }
@@ -216,11 +212,16 @@ namespace Hos.ScheduleMaster.Core.Services
             if (selectedNode != null)
             {
                 Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
-                Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", selectedNode.AccessSecret } };
-                var result = HttpRequest.Send($"{selectedNode.AccessProtocol}://{selectedNode.Host}/{router}", "post", param, header);
-                return result.Key == HttpStatusCode.OK;
+                return NodeRequest(selectedNode, router, "post", param);
             }
             return false;
+        }
+
+        private bool NodeRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param)
+        {
+            Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
+            var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", method, param, header);
+            return result.Key == HttpStatusCode.OK;
         }
 
         /// <summary>
@@ -419,20 +420,22 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         public void WorkerHealthCheck()
         {
-            WorkersTraverseAction(Guid.Empty, "api/quartz/healthcheck", "get", (node, result) =>
+            var workers = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status != 0).ToList();
+            if (!workers.Any())
             {
-                node.LastUpdateTime = DateTime.Now;
-                if (result.Key != HttpStatusCode.OK)
+                return;
+            }
+            workers.ForEach((w) =>
+            {
+                var success = NodeRequest(w, "api/quartz/healthcheck", "get", null);
+                if (!success)
                 {
-                    node.Status = 0;
+                    w.Status = 0;
                 }
-                //_repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == node.NodeName, x => new ServerNodeEntity
-                //{
-                //    Status = result.Key == HttpStatusCode.OK ? 1 : 0,
-                //    LastUpdateTime = DateTime.Now
-                //});
-                _unitOfWork.Commit();
+                w.LastUpdateTime = DateTime.Now;
+                _repositoryFactory.ServerNodes.Update(w);
             });
+            _unitOfWork.Commit();
         }
 
         /// <summary>

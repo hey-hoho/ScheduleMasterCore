@@ -39,10 +39,10 @@ namespace Hos.ScheduleMaster.Base
                 {
                     Run(context);
                 }
-                catch (Exception err)
-                {
-                    throw err;
-                }
+                //catch (Exception err)
+                //{
+                //    throw err;//这里不再抛一次，保留原始堆栈信息
+                //}
                 finally
                 {
                     _isRunning = false;

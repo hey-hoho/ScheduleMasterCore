@@ -143,9 +143,9 @@
         })
         function showStackTrace(index) {
             bootbox.dialog({
-                message: grid.getData(index).StackTrace,
+                message: "<xmp style='overflow: auto;'>"+grid.getData(index).StackTrace+"</xmp>",
                 title: "堆栈信息",
-                className: "",
+                size: "lg"
             });
         }
     </script>

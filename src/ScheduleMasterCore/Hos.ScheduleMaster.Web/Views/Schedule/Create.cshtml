@@ -57,7 +57,7 @@
                                     <label for="" class="col-sm-2 control-label no-padding-right">按周期运行</label>
                                     <div class="col-sm-6">
                                         <label>
-                                            <input class="checkbox-slider toggle colored-blue yesno" @(Model != null && Model.RunLoop ? "checked=''" : "") name="RunMoreTimes" id="RunMoreTimes" type="checkbox" value="true">
+                                            <input class="checkbox-slider toggle colored-blue yesno" @(Model != null && Model.RunLoop ? "checked=''" : "") name="RunLoop" id="RunLoop" type="checkbox" value="true">
                                             @*@Html.CheckBoxFor(x => x.RunMoreTimes, new { @class = "checkbox-slider toggle colored-blue yesno" })*@
                                             <span class="text" style="margin-top: 5px;"></span>
                                         </label>
@@ -341,7 +341,7 @@
                     startTime.config.max = date;
                 }
             });
-            $("#RunMoreTimes").click(function () {
+            $("#RunLoop").click(function () {
                 if (this.checked) {
                     $("#ctn_CronExpression").removeClass("hide");
                     $("#CronExpression").rules("add", { required: true });

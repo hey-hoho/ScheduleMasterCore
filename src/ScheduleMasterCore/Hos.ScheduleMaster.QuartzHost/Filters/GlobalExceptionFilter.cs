@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Log;
 
 namespace Hos.ScheduleMaster.QuartzHost.Filters
 {
@@ -22,6 +23,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
             {
 
             }
+            LogHelper.Error(context.Exception.Message, context.Exception);
             context.ExceptionHandled = true;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Log;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
@@ -22,6 +23,7 @@ namespace Hos.ScheduleMaster.Web.Filters
             {
 
             }
+            LogHelper.Error(context.Exception.Message, context.Exception);
             context.ExceptionHandled = true;
         }
     }

@@ -33,7 +33,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status == (int)ScheduleStatus.Stop);
             if (model != null)
             {
-                await LoadPluginFile(model.AssemblyName);
+                await LoadPluginFile(model);
                 ScheduleView view = new ScheduleView() { Schedule = model };
                 view.Keepers = (from t in _db.ScheduleKeepers
                                 join u in _db.SystemUsers on t.UserId equals u.Id
@@ -67,21 +67,21 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
         }
 
-        private async Task LoadPluginFile(string name)
+        private async Task LoadPluginFile(ScheduleEntity model)
         {
             var master = _db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
             if (master == null)
             {
                 throw new InvalidOperationException("cannot find master.");
             }
-            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + name;
-            var zipPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\{name}.zip";
-            var pluginPath = $"{Directory.GetCurrentDirectory()}\\Plugins\\{name}";
+            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + model.AssemblyName;
+            var zipPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.AssemblyName}.zip";
+            var pluginPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.Id}";
             using (WebClient client = new WebClient())
             {
                 await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
             }
-            //将指定 zip 存档中的所有文件都解压缩到文件系统的一个目录下
+            //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
             ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
             System.IO.File.Delete(zipPath);
         }

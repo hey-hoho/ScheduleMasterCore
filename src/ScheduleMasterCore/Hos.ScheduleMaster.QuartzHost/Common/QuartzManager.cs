@@ -142,7 +142,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             PluginLoadContext lc = null;
             try
             {
-                lc = AssemblyHelper.LoadAssemblyContext(view.Schedule.AssemblyName);
+                lc = AssemblyHelper.LoadAssemblyContext(view.Schedule.Id, view.Schedule.AssemblyName);
                 for (int i = 0; i < 3; i++)
                 {
                     try
@@ -351,7 +351,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             //throw new SchedulerException("SchedulerException");
 
             //在应用程序域中创建实例返回并保存在job中，这是最终调用任务执行的实例
-            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.AssemblyName, view.Schedule.ClassName);
+            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.Id, view.Schedule.AssemblyName, view.Schedule.ClassName);
             if (instance == null)
             {
                 throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");

@@ -66,7 +66,7 @@ namespace Hos.ScheduleMaster.Web
                 b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
             });
             //EF数据库上下文
-            services.AddDbContextPool<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
 
             //注入Uow依赖
             services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();
@@ -102,7 +102,7 @@ namespace Hos.ScheduleMaster.Web
                 //endpoints.MapControllers();
                 endpoints.MapControllerRoute(
                      name: "default",
-                     pattern: "{controller}/{action=Index}/{id?}");
+                     pattern: "{controller=Console}/{action=Index}/{id?}");
             });
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
@@ -114,7 +114,7 @@ namespace Hos.ScheduleMaster.Web
             AppStart.NodeRegistry.Register();
             //初始化系统任务
             FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
-            FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job: ", info.Exception);
+            FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job", info.Exception);
 
             appLifetime.ApplicationStopping.Register(OnStopping);
         }

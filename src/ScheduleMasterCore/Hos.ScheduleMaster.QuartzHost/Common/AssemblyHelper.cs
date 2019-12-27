@@ -39,11 +39,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
-        public static TaskBase CreateTaskInstance(PluginLoadContext context, string assemblyName, string className)
+        public static TaskBase CreateTaskInstance(PluginLoadContext context, Guid sid, string assemblyName, string className)
         {
             try
             {
-                string pluginLocation = GetTaskAssemblyPath(assemblyName);
+                string pluginLocation = GetTaskAssemblyPath(sid, assemblyName);
                 var assembly = context.LoadFromAssemblyName(new AssemblyName(Path.GetFileNameWithoutExtension(pluginLocation)));
                 Type type = assembly.GetType(className, true, true);
                 return Activator.CreateInstance(type) as TaskBase;
@@ -54,9 +54,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
-        public static string GetTaskAssemblyPath(string assemblyName)
+        public static string GetTaskAssemblyPath(Guid sid, string assemblyName)
         {
-            return $"{Directory.GetCurrentDirectory()}\\Plugins\\{assemblyName}\\{assemblyName}.dll".Replace('\\', Path.DirectorySeparatorChar);
+            return $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{sid}\\{assemblyName}.dll".Replace('\\', Path.DirectorySeparatorChar);
         }
 
         /// <summary>
@@ -64,11 +64,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// </summary>
         /// <param name="assemblyName"></param>
         /// <returns></returns>
-        public static PluginLoadContext LoadAssemblyContext(string assemblyName)
+        public static PluginLoadContext LoadAssemblyContext(Guid sid, string assemblyName)
         {
             try
             {
-                string pluginLocation = GetTaskAssemblyPath(assemblyName);
+                string pluginLocation = GetTaskAssemblyPath(sid, assemblyName);
                 PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
                 return loadContext;
 

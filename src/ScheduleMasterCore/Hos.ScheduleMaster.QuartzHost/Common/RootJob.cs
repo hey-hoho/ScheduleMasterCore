@@ -51,11 +51,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 }
                 if (getLocked)
                 {
+                    LogHelper.Info($"节点{node}抢锁成功！准备执行任务....", _sid);
                     IJobDetail job = context.JobDetail;
                     try
                     {
-                        LogHelper.Info($"节点{node}抢锁成功！准备执行任务....", _sid);
-                        //var instance = job.JobDataMap["instance"] as TaskBase;
                         if (job.JobDataMap["instance"] is TaskBase instance)
                         {
                             Guid traceId = GreateRunTrace();
@@ -85,17 +84,17 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             {
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
+                                LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", e, _sid);
                                 throw new BusinessRunException(e);
                             }
                         }
                     }
-                    catch (Exception exp)
-                    {
-                        LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", exp, _sid);
-                        //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
-                        //如果吃掉异常会导致程序误以为本次任务执行成功
-                        throw new JobExecutionException(exp);
-                    }
+                    //catch (Exception exp)
+                    //{
+                    //    //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
+                    //    //如果吃掉异常会导致程序误以为本次任务执行成功
+                    //    throw new JobExecutionException(exp);
+                    //}
                     finally
                     {
                         //为了避免各节点之间的时间差，延迟1秒释放锁

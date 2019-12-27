@@ -36,12 +36,12 @@ namespace Hos.ScheduleMaster.Base
         /// <summary>
         /// 自定义参数
         /// </summary>
-        public string CustomParamsJson { protected get; set; }
+        public string CustomParamsJson { private get; set; }
 
         /// <summary>
         /// 前置任务的运行结果
         /// </summary>
-        public object PreviousResult { protected get; set; }
+        public object PreviousResult { get; set; }
 
         /// <summary>
         /// 本次运行的返回结果

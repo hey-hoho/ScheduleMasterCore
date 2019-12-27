@@ -49,8 +49,11 @@ namespace Hos.ScheduleMaster.QuartzHost
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
+
+            app.UseDefaultFiles();
             app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseAuthorization();
@@ -77,7 +80,7 @@ namespace Hos.ScheduleMaster.QuartzHost
         private void OnStopping()
         {
             // Perform on-stopping activities here
-            Common.QuartzManager.Shutdown().Wait();
+            Common.QuartzManager.Shutdown(true).Wait();
             Core.Log.LogManager.Shutdown();
         }
     }

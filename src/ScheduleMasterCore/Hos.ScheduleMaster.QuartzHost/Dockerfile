@@ -12,4 +12,4 @@ COPY . /app
 EXPOSE 30001
 
 #容器中使用 ["dotnet","系统启动的dll"] 来运行应用程序
-ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.QuartzHost.dll"]
+ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.QuartzHost.dll --server.urls http://*:30001"]
