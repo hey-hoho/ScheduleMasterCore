@@ -215,6 +215,17 @@
         return format;
     };
 
+    //复制文本到剪贴板
+    Util.prototype.copyToClip = function (content) {
+        var aux = document.createElement("input");
+        aux.setAttribute("value", content);
+        document.body.appendChild(aux);
+        aux.select();
+        document.execCommand("copy");
+        document.body.removeChild(aux);
+        this.messager("复制成功","success");
+    }
+
     //获取cookie项
     Util.prototype.getCookiesItem = function (sKey) {
         if (!sKey) { return null; }
@@ -259,6 +270,10 @@
         var aKeys = document.cookie.replace(/((?:^|\s*;)[^\=]+)(?=;|$)|^\s*|\s*(?:\=[^;]*)?(?:\1|$)/g, "").split(/\s*(?:\=[^;]*)?;\s*/);
         for (var nLen = aKeys.length, nIdx = 0; nIdx < nLen; nIdx++) { aKeys[nIdx] = decodeURIComponent(aKeys[nIdx]); }
         return aKeys;
+    }
+
+    Util.prototype.breadCrumb = function (value) {
+        window.parent.renderBreadcrumb(value);
     }
 
     hos.ui = hos.ui || {};

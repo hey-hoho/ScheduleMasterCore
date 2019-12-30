@@ -27,6 +27,7 @@
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
     <script>
+        hos.ui.util.breadCrumb("账号管理");
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/Account/LoadUserPager',
             columns: [{

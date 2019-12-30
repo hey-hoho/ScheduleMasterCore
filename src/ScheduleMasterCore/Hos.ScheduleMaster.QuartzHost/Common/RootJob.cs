@@ -70,7 +70,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                                 instance.InnerRun(tctx);
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
-                                LogHelper.Info($"任务[{job.JobDataMap["name"]}]运行成功！用时{stopwatch.Elapsed.Milliseconds.ToString()}ms", _sid);
+                                LogHelper.Info($"任务[{job.JobDataMap["name"]}]运行成功！用时{stopwatch.Elapsed.Milliseconds.ToString()}ms", _sid, traceId);
                                 //保存运行结果用于子任务触发
                                 context.Result = tctx.Result;
                             }
@@ -84,7 +84,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             {
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
-                                LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", e, _sid);
+                                LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", e, _sid, traceId);
                                 throw new BusinessRunException(e);
                             }
                         }

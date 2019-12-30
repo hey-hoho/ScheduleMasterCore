@@ -72,6 +72,7 @@
     <script src="~/assets/js/bootbox/bootbox.js"></script>
     <script>
         var tarceViewer, logViewer;
+        hos.ui.util.breadCrumb("任务列表-运行日志-@_httpContextAccessor.HttpContext.Request.Query["sid"].ToString().Substring(0,8)");
         $(function () {
             var startTime = laydate.render({
                 elem: '#StartDate', type: 'date', done: function (value, date, endDate) {

@@ -26,11 +26,14 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="items"></param>
         /// <returns></returns>
-        public bool SaveConfig(Dictionary<string, string> items)
+        public bool SaveConfig(Dictionary<string, string> items, string updateUserName)
         {
             foreach (var item in items)
             {
-                _repositoryFactory.SystemConfigs.UpdateBy(x => x.Key == item.Key, new string[] { "Value", "UpdateTime" }, new object[] { items[item.Key], DateTime.Now });
+                _repositoryFactory.SystemConfigs.UpdateBy(
+                    x => x.Key == item.Key,
+                    new string[] { "Value", "UpdateTime", "UpdateUserName" },
+                    new object[] { items[item.Key], DateTime.Now, updateUserName });
             }
             if (items.Any())
             {

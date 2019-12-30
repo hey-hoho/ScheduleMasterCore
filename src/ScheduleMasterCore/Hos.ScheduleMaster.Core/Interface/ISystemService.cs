@@ -18,8 +18,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// 保存配置项
         /// </summary>
         /// <param name="items"></param>
+        /// <param name="updateUserName"></param>
         /// <returns></returns>
-        bool SaveConfig(Dictionary<string, string> items);
+        bool SaveConfig(Dictionary<string, string> items, string updateUserName);
 
         /// <summary>
         /// 查询日志分页数据

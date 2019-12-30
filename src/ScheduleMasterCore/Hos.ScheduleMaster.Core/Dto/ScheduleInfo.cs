@@ -42,6 +42,8 @@ namespace Hos.ScheduleMaster.Core.Dto
 
         public bool RunNow { get; set; }
 
+        public string CreateUserName { get; set; }
+
         /// <summary>
         /// 报警联系人id
         /// </summary>

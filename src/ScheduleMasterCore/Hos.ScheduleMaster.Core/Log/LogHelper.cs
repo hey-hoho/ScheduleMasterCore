@@ -29,6 +29,17 @@ namespace Hos.ScheduleMaster.Core.Log
             });
         }
 
+        public static void Info(string message, Guid sid, Guid traceId)
+        {
+            LogManager.Queue.Write(new SystemLogEntity
+            {
+                Category = (int)LogCategory.Info,
+                Message = message,
+                ScheduleId = sid,
+                TraceId = traceId
+            });
+        }
+
         public static void Warn(string message)
         {
             LogManager.Queue.Write(new SystemLogEntity
@@ -97,6 +108,18 @@ namespace Hos.ScheduleMaster.Core.Log
                 Message = $"{message}，ERROR：{exp.Message}",
                 StackTrace = exp.StackTrace,
                 ScheduleId = sid
+            });
+        }
+
+        public static void Error(string message, Exception exp, Guid sid, Guid traceId)
+        {
+            LogManager.Queue.Write(new SystemLogEntity
+            {
+                Category = (int)LogCategory.Error,
+                Message = $"{message}，ERROR：{exp.Message}",
+                StackTrace = exp.StackTrace,
+                ScheduleId = sid,
+                TraceId = traceId
             });
         }
     }

@@ -37,12 +37,12 @@
                                             <div class="col-sm-6">
                                                 <input type="text" class="form-control" name="@item.Key" placeholder="" value="@item.Value" @(item.IsReuired ? "required=''" : "")>
                                                 <p class="help-block">@item.Remark</p>
-                                            </div>                                            
+                                            </div>
                                         </div>
                                     }
                                 }
                             </div>
-                                    }
+                        }
                     </div>
                 </div>
                 <br />
@@ -56,6 +56,7 @@
     <script src="~/js/jquery.unobtrusive-ajax.js"></script>
     <script src="~/js/jquery.validate.min.js"></script>
     <script type="text/javascript">
+        hos.ui.util.breadCrumb("系统设置-参数配置");
         $(function () {
             hos.ui.util.formValidate("form1");
         })

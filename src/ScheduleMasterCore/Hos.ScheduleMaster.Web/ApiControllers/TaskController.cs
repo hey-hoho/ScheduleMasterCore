@@ -89,7 +89,8 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 Status = (int)ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
                 RunLoop = task.RunLoop,
-                TotalRunCount = 0
+                TotalRunCount = 0,
+                CreateUserName = task.CreateUserName
             };
             var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
             if (result.Status == ResultStatus.Success)

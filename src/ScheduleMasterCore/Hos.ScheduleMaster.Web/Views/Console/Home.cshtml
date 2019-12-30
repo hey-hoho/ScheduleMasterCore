@@ -3,5 +3,326 @@
     ViewBag.Title = "Home";
 }
 
-<h2>Home</h2>
+<div class="page-body">
+    <div class="row">
+        <div class="col-lg-12 col-sm-12 col-xs-12">
+            <div class="well bordered-left bordered-themeprimary">
+                <p>
+                    <i class="fa fa-star yellow margin-right-5"></i>
+                    ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.0平台构建，支持跨平台多节点部署运行。
+                </p>
+                <p>
+                    <i class="fa fa-smile-o yellow margin-right-5"></i>
+                    主要特性包含：简易的Web UI操作、任务动态管理、高可用支持、自定义参数、邮件告警、任务依赖、任务隔离（热插拔）、全链路日志、用户访问控制、开放API（支持业务集成）、调度报表等。
+                </p>
+                <p>
+                    <i class="fa fa-code yellow margin-right-5"></i>
+                    项目地址：<a href="https://github.com/hey-hoho/ScheduleMasterCore" target="_blank">https://github.com/hey-hoho/ScheduleMasterCore</a>  
+                </p>
+                <p><strong>Note:</strong> balabalabala ing......</p>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-9 col-md-9 col-sm-12 col-xs-12">
+            <div class="row">
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                    <div class="databox radius-bordered databox-shadowed databox-graded">
+                        <div class="databox-left bg-orange">
+                            <div class="databox-piechart">
+                                <div data-toggle="easypiechart" class="easyPieChart" data-barcolor="#fff" data-linecap="butt" data-percent="50" data-animate="500" data-linewidth="3" data-size="47" data-trackcolor="rgba(255,255,255,0.1)" style="width: 47px; height: 47px; line-height: 47px;"><span class="white font-90">50%</span><canvas width="47" height="47"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="databox-right">
+                            <span class="databox-number themesecondary">14</span>
+                            <div class="databox-text darkgray">总任务数</div>
+                            <div class="databox-stat themesecondary radius-bordered">
+                                <i class="stat-icon icon-lg fa fa-tasks"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+                    <div class="databox radius-bordered databox-shadowed databox-graded">
+                        <div class="databox-left bg-azure">
+                            <div class="databox-piechart">
+                                <div data-toggle="easypiechart" class="easyPieChart" data-barcolor="#fff" data-linecap="butt" data-percent="76" data-animate="500" data-linewidth="3" data-size="47" data-trackcolor="#7fe2fa" style="width: 47px; height: 47px; line-height: 47px;"><span class="white font-90">76%</span><canvas width="47" height="47"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="databox-right">
+                            <span class="databox-number azure">98</span>
+                            <div class="databox-text darkgray">运行中任务数</div>
+                            <div class="databox-state bg-azure">
+                                <i class="fa fa-check"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
+                    <div class="databox radius-bordered databox-shadowed databox-graded">
+                        <div class="databox-left bg-themeprimary">
+                            <div class="databox-piechart">
+                                <div id="users-pie" data-toggle="easypiechart" class="easyPieChart" data-barcolor="#fff" data-linecap="butt" data-percent="76" data-animate="500" data-linewidth="3" data-size="47" data-trackcolor="rgba(255,255,255,0.1)" style="width: 47px; height: 47px; line-height: 47px;"><span class="white font-90">76%</span><canvas width="47" height="47"></canvas></div>
+                            </div>
+                        </div>
+                        <div class="databox-right">
+                            <span class="databox-number themeprimary">98</span>
+                            <div class="databox-text darkgray">总用户数</div>
+                            <div class="databox-state bg-themeprimary">
+                                <i class="fa fa-user"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg databox-vertical databox-inverted databox-shadowed">
+                        <div class="databox-top">
+                            <div class="databox-sparkline">
+                                <span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themesecondary" data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#ffce55" data-highlightspotcolor="#ffce55" data-highlightlinecolor="#ffce55" data-linewidth="1.5" data-spotradius="2"><canvas width="100" height="125" style="display: inline-block; width: 100px; height: 125px; vertical-align: top;"></canvas></span>
+                            </div>
+                        </div>
+                        <div class="databox-bottom no-padding text-align-center">
+                            <span class="databox-number lightcarbon no-margin">224</span>
+                            <span class="databox-text lightcarbon no-margin">Sale Unit / Hour</span>
 
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg databox-vertical databox-inverted databox-shadowed">
+                        <div class="databox-top">
+                            <div class="databox-sparkline">
+                                <span data-sparkline="line" data-height="125px" data-width="100%" data-fillcolor="false" data-linecolor="themefourthcolor" data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#8cc474" data-highlightspotcolor="#8cc474" data-highlightlinecolor="#8cc474" data-linewidth="1.5" data-spotradius="2"><canvas width="100" height="125" style="display: inline-block; width: 100px; height: 125px; vertical-align: top;"></canvas></span>
+                            </div>
+                        </div>
+                        <div class="databox-bottom no-padding text-align-center">
+                            <span class="databox-number lightcarbon no-margin">7063$</span>
+                            <span class="databox-text lightcarbon no-margin">Income / Hour</span>
+
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg databox-vertical databox-inverted databox-shadowed">
+                        <div class="databox-top">
+                            <div class="databox-piechart">
+                                <div data-toggle="easypiechart" class="easyPieChart block-center" data-barcolor="themeprimary" data-linecap="butt" data-percent="80" data-animate="500" data-linewidth="8" data-size="125" data-trackcolor="#eee" style="width: 125px; height: 125px; line-height: 125px;">
+                                    <span class="font-200"><i class="fa fa-gift themeprimary"></i></span>
+                                    <canvas width="125" height="125"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="databox-bottom no-padding text-align-center">
+                            <span class="databox-number lightcarbon no-margin">9</span>
+                            <span class="databox-text lightcarbon no-margin">NEW ORDERS</span>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-3 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg databox-vertical databox-inverted  databox-shadowed">
+                        <div class="databox-top">
+                            <div class="databox-piechart">
+                                <div data-toggle="easypiechart" class="easyPieChart block-center" data-barcolor="themethirdcolor" data-linecap="butt" data-percent="40" data-animate="500" data-linewidth="8" data-size="125" data-trackcolor="#eee" style="width: 125px; height: 125px; line-height: 125px;">
+                                    <span class="white font-200"><i class="fa fa-tags themethirdcolor"></i></span>
+                                    <canvas width="125" height="125"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="databox-bottom no-padding text-align-center">
+                            <span class="databox-number lightcarbon no-margin">11</span>
+                            <span class="databox-text lightcarbon no-margin">NEW TICKETS</span>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="row">
+                <div class="col-lg-6 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg radius-bordered databox-shadowed databox-vertical">
+                        <div class="databox-top bg-white">
+                            <span class="databox-header green">近一周运行成功</span>
+                        </div>
+                        <div class="databox-bottom bg-white no-padding">
+                            <div class="databox-sparkline">
+                                <span data-sparkline="line" data-height="158px" data-width="100%" data-fillcolor="#ffce55" data-linecolor="#fb6e52" data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#ffce55" data-highlightspotcolor="#fb6e52" data-highlightlinecolor="#fb6e52" data-linewidth="3" data-spotradius="0"><canvas width="665" height="158" style="display: inline-block; width: 665px; height: 158px; vertical-align: top;"></canvas></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-sm-6 col-xs-12">
+                    <div class="databox databox-xlg radius-bordered databox-shadowed databox-vertical">
+                        <div class="databox-top bg-white">
+                            <span class="databox-header orange">近一周运行失败</span>
+                        </div>
+                        <div class="databox-bottom bg-white no-padding">
+                            <div class="databox-sparkline">
+                                <span data-sparkline="line" data-height="158px" data-width="100%" data-fillcolor="#ffce55" data-linecolor="#fb6e52" data-spotcolor="#fafafa" data-minspotcolor="#fafafa" data-maxspotcolor="#ffce55" data-highlightspotcolor="#fb6e52" data-highlightlinecolor="#fb6e52" data-linewidth="3" data-spotradius="0"><canvas width="665" height="158" style="display: inline-block; width: 665px; height: 158px; vertical-align: top;"></canvas></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-3 col-sm-12 col-xs-12">
+            <div class="orders-container">
+                <div class="orders-header">
+                    <h6>我负责的任务</h6>
+                </div>
+                <ul class="orders-list">
+                    <li class="order-item">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Ned Stards</div>
+                                <div class="item-time">
+                                    <i class="fa fa-clock-o"></i>
+                                    <span>10 minutes ago</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">400</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="/Schedule/TraceLog?sid=1212"> <i></i> </a>
+                    </li>
+                    <li class="order-item top">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Steve Lewis</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">620</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                    <li class="order-item top">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Steve Lewis</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">620</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                    <li class="order-item top">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Steve Lewis</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>2 hours ago</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">620</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                    <li class="order-item">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">John Ford</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>Today 8th July</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">220</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                    <li class="order-item">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Kim Basinger</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>Yesterday 7th July</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">400</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                    <li class="order-item">
+                        <div class="row">
+                            <div class="col-lg-8 col-md-8 col-sm-8 col-xs-8 item-left">
+                                <div class="item-booker">Steve Lewis</div>
+                                <div class="item-time">
+                                    <i class="fa fa-calendar"></i>
+                                    <span>5th July</span>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4 item-right">
+                                <div class="item-price">
+                                    <span class="currency">$</span>
+                                    <span class="price">340</span>
+                                </div>
+                            </div>
+                        </div>
+                        <a class="item-more" href="">
+                            <i></i>
+                        </a>
+                    </li>
+                </ul>
+                <div class="orders-footer">
+                    <a class="show-all" href=""><i class="fa fa-angle-down"></i> 查看全部</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section scripts{
+    <script type="text/javascript">
+        hos.ui.util.breadCrumb("仪表盘");
+    </script>
+}

@@ -8,7 +8,6 @@
 
 <div class="page-body">
     <div id="serch-form" class="form-inline">
-        @*<a href="@Url.Action("Edit","Account")" class="btn btn-primary">创建用户</a>*@
         <div class="pull-right">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="节点名\主机名\主机地址" id="keyword">
@@ -27,6 +26,7 @@
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
     <script>
+        hos.ui.util.breadCrumb("节点管理");
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/System/QueryNodePager',
             columns: [

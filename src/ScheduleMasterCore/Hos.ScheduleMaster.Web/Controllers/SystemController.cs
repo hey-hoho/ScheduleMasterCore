@@ -107,7 +107,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 items.Add(key, form[key]);
             }
-            bool result = _systemService.SaveConfig(items);
+            bool result = _systemService.SaveConfig(items, CurrentAdmin.UserName);
             if (result)
             {
                 ConfigurationCache.Reload();

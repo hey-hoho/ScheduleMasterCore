@@ -1,6 +1,6 @@
 ﻿
 @{
-    ViewBag.Title = "任务列表";
+     
 }
 <link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
 
@@ -26,10 +26,16 @@
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
     <script>
+        hos.ui.util.breadCrumb("任务列表");
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/api/Task/QueryList',
             columns: [
-            { field: 'Title', title: '名称', width: '20' },
+            {
+                field: 'Id', title: 'ID', width: '5', formatter: function (value, row, index) {
+                    return '<a href="javascript:" class="tooltips" data-toggle="tooltip" data-original-title="'+value+'" onclick="hos.ui.util.copyToClip(\''+value+'\')">'+value.substring(0,8)+'</a>';
+                }
+            },
+            { field: 'Title', title: '名称', width: '18' },
             { field: 'RunMode', title: '运行模式', width: '5', align: 'center' },
             { field: 'StartTime', title: '开始运行', width: '8', align: 'center' },
             { field: 'LastRunTime', title: '上次运行时间', width: '8', align: 'center'},
@@ -71,7 +77,10 @@
                     return l;
                 }
             }
-            ]
+            ],
+            onPostBody: function (data) {
+                $('[data-toggle="tooltip"]').tooltip() 
+            }
         });
         var handlers = {
             taskStart: function (value, title) {

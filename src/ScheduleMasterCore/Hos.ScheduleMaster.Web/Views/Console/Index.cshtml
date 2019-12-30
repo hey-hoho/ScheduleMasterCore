@@ -2,7 +2,7 @@
 
 @{
     SystemUserEntity admin = ViewBag.CurrentAdmin as SystemUserEntity;
-    ViewBag.Title="ScheduleMaster";
+    ViewBag.Title = "ScheduleMaster";
 }
 
 @section styles{
@@ -81,8 +81,8 @@
             bottom: 0px;
             width: 100%;
             z-index: 9999;
-            left:3px;
-            font-size:10px;
+            left: 3px;
+            font-size: 10px;
         }
     </style>
 }
@@ -179,7 +179,7 @@
                 <li class="active">
                     <a class="menu-link" data-href="@Url.Action("Home", "Console")">
                         <i class="menu-icon glyphicon glyphicon-home"></i>
-                        <span class="menu-text"> Dashboard </span>
+                        <span class="menu-text"> 仪表盘 </span>
                     </a>
                 </li>
                 <!--Databoxes-->
@@ -193,7 +193,7 @@
                 <li>
                     <a class="menu-link" data-href="@Url.Action("Log","System")">
                         <i class="menu-icon fa fa-th"></i>
-                        <span class="menu-text"> 运行日志 </span>
+                        <span class="menu-text"> 系统日志 </span>
                     </a>
                 </li>
                 <li>
@@ -221,7 +221,7 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#">
+                            <a class="menu-link">
                                 <span class="menu-text">开关配置</span>
                             </a>
                         </li>
@@ -243,9 +243,8 @@
                     <ul class="breadcrumb">
                         <li>
                             <i class="fa fa-home"></i>
-                            <a href="#">Home</a>
+                            <span>ScheduleMaster</span>
                         </li>
-                        <li class="active">Dashboard</li>
                     </ul>
                 </div>
                 <!--Header Buttons-->
@@ -299,7 +298,15 @@
                 $('#frame_loading').hide();
             }
         })
-
+        function renderBreadcrumb(value) {
+            if (!value || value.length == 0) return;
+            var list = value.split('-');
+            $("ul.breadcrumb li:gt(0)").remove();
+            var target = $("ul.breadcrumb");
+            for (var i = 0; i < list.length; i++) {
+                target.append("<li>" + list[i] + "</li>");
+            }
+        }
     </script>
 }
 

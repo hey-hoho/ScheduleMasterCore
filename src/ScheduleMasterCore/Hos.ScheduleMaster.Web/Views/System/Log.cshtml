@@ -49,6 +49,7 @@
     <script src="~/assets/js/bootbox/bootbox.js"></script>
 
     <script>
+        hos.ui.util.breadCrumb("系统日志");
         var startTime = laydate.render({
             elem: '#StartDate', type: 'date', done: function (value, date, endDate) {
                 date.month = date.month - 1;

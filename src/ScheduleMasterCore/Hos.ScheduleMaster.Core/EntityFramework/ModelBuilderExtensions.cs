@@ -40,7 +40,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Key = "Email_SmtpServer",
                     Name = "邮件服务器",
                     Value = "",
-                    Group = "Email",
+                    Group = "邮件配置",
                     Remark = remark,
                     Sort = 1
                 },
@@ -51,7 +51,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Key = "Email_SmtpPort",
                     Name = "邮件服务器端口",
                     Value = "",
-                    Group = "Email",
+                    Group = "邮件配置",
                     Remark = remark,
                     Sort = 2
                 },
@@ -62,7 +62,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Key = "Email_FromAccount",
                     Name = "发件人账号",
                     Value = "",
-                    Group = "Email",
+                    Group = "邮件配置",
                     Remark = remark,
                     Sort = 3
                 },
@@ -73,7 +73,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Key = "Email_FromAccountPwd",
                     Name = "发件人账号密码",
                     Value = "",
-                    Group = "Email",
+                    Group = "邮件配置",
                     Remark = remark,
                     Sort = 4
                 }

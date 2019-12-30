@@ -74,6 +74,11 @@ namespace Hos.ScheduleMaster.Core.Services
         public ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
         {
             model.CreateTime = DateTime.Now;
+            var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == model.CreateUserName);
+            if (user != null)
+            {
+                model.CreateUserId = user.Id;
+            }
             _repositoryFactory.Schedules.Add(model);
 
             if (_unitOfWork.Commit() > 0)
