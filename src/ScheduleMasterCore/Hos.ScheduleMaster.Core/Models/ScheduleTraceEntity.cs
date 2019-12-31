@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
@@ -33,7 +34,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public double ElapsedTime { get; set; }
 
         /// <summary>
-        /// 运行结果
+        /// 运行结果 0-无结果 1-运行成功 2-运行失败 3- 互斥取消 
         /// </summary>
         public int Result { get; set; }
 
@@ -47,21 +48,25 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 无结果
         /// </summary>
+        [Description("无结果")]
         Null = 0,
 
         /// <summary>
         /// 运行成功
         /// </summary>
+        [Description("运行成功")]
         Success = 1,
 
         /// <summary>
         /// 运行失败
         /// </summary>
+        [Description("运行失败")]
         Failed = 2,
 
         /// <summary>
         /// 互斥取消
         /// </summary>
+        [Description("互斥取消")]
         Conflict = 3
 
     }

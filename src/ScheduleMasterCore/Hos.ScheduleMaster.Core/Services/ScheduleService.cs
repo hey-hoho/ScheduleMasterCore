@@ -45,6 +45,94 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
+        /// 查看指定用户的监护任务
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="takeSize"></param>
+        /// <returns></returns>
+        public List<ScheduleEntity> QueryUserSchedule(int userId, int takeSize)
+        {
+            var keeper = _repositoryFactory.ScheduleKeepers.Table;
+            var schedule = _repositoryFactory.Schedules.Table;
+            var query = (from s in schedule
+                         join k in keeper on s.Id equals k.ScheduleId
+                         where k.UserId == userId
+                         orderby s.CreateTime descending
+                         select s).Take(takeSize);
+            return query.ToList();
+        }
+
+        /// <summary>
+        /// 查询指定状态的任务数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public int QueryScheduleCount(int? status)
+        {
+            var query = _repositoryFactory.Schedules.Where(x => x.Status != (int)ScheduleStatus.Deleted);
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+            return query.Count();
+        }
+
+        /// <summary>
+        /// 查询指定worker状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public int QueryWorkerCount(int? status)
+        {
+            var query = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker");
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+            return query.Count();
+        }
+
+        /// <summary>
+        /// 查询指定运行状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public int QueryTraceCount(int? status)
+        {
+            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty);
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Result == status.Value);
+            }
+            return query.Count();
+        }
+
+        /// <summary>
+        /// 查询运行情况周报表
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public List<KeyValuePair<int, int>> QueryTraceWeeklyReport(int? status)
+        {
+            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-6));
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Result == status.Value);
+            }
+            var list = query.GroupBy(x => x.StartTime.Date).Select(x => new KeyValuePair<int, int>(x.Key.Day, x.Count())).ToList();
+            List<KeyValuePair<int, int>> result = new List<KeyValuePair<int, int>>();
+            for (int i = 6; i >= 0; i--)
+            {
+                int day = DateTime.Today.AddDays(-i).Day;
+                int cnt = 0;
+                var dl = list.Any(x => x.Key == day);
+                if (list.Any(x => x.Key == day)) cnt = list.FirstOrDefault(x => x.Key == day).Value;
+                result.Add(new KeyValuePair<int, int>(day, cnt));
+            }
+            return result;
+        }
+
+        /// <summary>
         /// 查询任务的监护人
         /// </summary>
         /// <param name="sid"></param>
@@ -227,6 +315,14 @@ namespace Hos.ScheduleMaster.Core.Services
             Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
             var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", method, param, header);
             return result.Key == HttpStatusCode.OK;
+        }
+
+        /// <summary>
+        /// 恢复运行中的任务
+        /// </summary>
+        public  void RunningRecovery()
+        {
+            _repositoryFactory.Schedules.Where(x => x.Status == (int)ScheduleStatus.Running).ToList().ForEach(x => Start(x));
         }
 
         /// <summary>

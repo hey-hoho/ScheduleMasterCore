@@ -141,5 +141,20 @@ namespace Hos.ScheduleMaster.Core.Services
             });
             return _unitOfWork.Commit() > 0;
         }
+
+        /// <summary>
+        /// 查询指定用户状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        public int QueryUserCount(int? status)
+        {
+            var query = _repositoryFactory.SystemUsers.Where(x => x.Status != (int)SystemUserStatus.Deleted);
+            if (status.HasValue)
+            {
+                query = query.Where(x => x.Status == status.Value);
+            }
+            return query.Count();
+        }
     }
 }

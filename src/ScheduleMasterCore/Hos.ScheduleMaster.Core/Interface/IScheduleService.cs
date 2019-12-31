@@ -30,6 +30,42 @@ namespace Hos.ScheduleMaster.Core.Interface
         ScheduleEntity QueryById(Guid sid);
 
         /// <summary>
+        /// 查看指定用户的监护任务
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="takeSize"></param>
+        /// <returns></returns>
+        List<ScheduleEntity> QueryUserSchedule(int userId, int takeSize);
+
+        /// <summary>
+        /// 查询指定状态的任务数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        int QueryScheduleCount(int? status);
+
+        /// <summary>
+        /// 查询指定worker状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        int QueryWorkerCount(int? status);
+
+        /// <summary>
+        /// 查询指定运行状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        int QueryTraceCount(int? status);
+
+        /// <summary>
+        /// 查询运行情况周报表
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        List<KeyValuePair<int, int>> QueryTraceWeeklyReport(int? status);
+
+        /// <summary>
         /// 查询任务的监护人
         /// </summary>
         /// <param name="sid"></param>
@@ -58,6 +94,11 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="model"></param>
         /// <returns></returns>
         ServiceResponseMessage Edit(ScheduleInfo model);
+
+        /// <summary>
+        /// 恢复运行中的任务
+        /// </summary>
+        void RunningRecovery();
 
         /// <summary>
         /// 启动一个任务

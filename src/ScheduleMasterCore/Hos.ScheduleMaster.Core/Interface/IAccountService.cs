@@ -73,5 +73,12 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="password"></param>
         /// <returns></returns>
         bool UpdateUserPassword(int id, string password);
+
+        /// <summary>
+        /// 查询指定用户状态数量
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        int QueryUserCount(int? status);
     }
 }

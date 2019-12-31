@@ -130,6 +130,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             {
                 return ApiResponse(ResultStatus.Failed, "任务在停止状态下才能启动！");
             }
+            if (task.EndDate.HasValue && task.EndDate < DateTime.Now)
+            {
+                return ApiResponse(ResultStatus.Failed, "任务结束时间不能小于当前时间！");
+            }
             var result = _scheduleService.Start(task);
             return result;
         }

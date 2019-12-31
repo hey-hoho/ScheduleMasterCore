@@ -1,5 +1,5 @@
 
-![schedulemaster ](https://files-cdn.cnblogs.com/files/hohoa/schedulemaster.ico)
+![schedulemaster ](https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/docs/images/logo.png)
 
 ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.0平台构建，支持跨平台多节点部署运行。
 [![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/hey-hoho.ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)

@@ -1,5 +1,6 @@
 ﻿using Hos.ScheduleMaster.Base.Dto;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -62,12 +63,11 @@ namespace Hos.ScheduleMaster.Base
             }
             try
             {
-                object parseObj = null;
-                JsonConvert.DeserializeAnonymousType<object>(CustomParamsJson, parseObj);
-                var value = parseObj.GetType().GetField(name).GetValue(parseObj);
-                return (T)Convert.ChangeType(value, typeof(T));
+                dynamic parseObj = JsonConvert.DeserializeObject<dynamic>(CustomParamsJson);
+                //var value = parseObj.GetType().GetField(name).GetValue(parseObj);
+                return (T)Convert.ChangeType(parseObj[name], typeof(T));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return default;
             }

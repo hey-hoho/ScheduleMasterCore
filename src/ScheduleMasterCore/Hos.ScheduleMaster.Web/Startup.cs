@@ -115,7 +115,14 @@ namespace Hos.ScheduleMaster.Web
             //初始化系统任务
             FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
             FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job", info.Exception);
-
+            //任务恢复
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                Core.Services.ScheduleService service = new Core.Services.ScheduleService();
+                AutowiredServiceProvider provider = new AutowiredServiceProvider();
+                provider.PropertyActivate(service, scope.ServiceProvider);
+                service.RunningRecovery();
+            }
             appLifetime.ApplicationStopping.Register(OnStopping);
         }
         private void OnStopping()

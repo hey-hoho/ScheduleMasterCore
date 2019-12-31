@@ -18,6 +18,7 @@ using System.Threading;
 using Hos.ScheduleMaster.Core.Common;
 using Microsoft.EntityFrameworkCore;
 using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Dto;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -362,7 +363,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 new KeyValuePair<string, object> ("domain",lc),
                 new KeyValuePair<string, object> ("instance",instance),
                 new KeyValuePair<string, object> ("name",view.Schedule.Title),
-                new KeyValuePair<string, object> ("params",view.Schedule.CustomParamsJson),
+                new KeyValuePair<string, object> ("params",ConvertParamsJson(view.Schedule.CustomParamsJson)),
                 new KeyValuePair<string, object> ("keepers",view.Keepers),
                 new KeyValuePair<string, object> ("children",view.Children)
             };
@@ -447,6 +448,17 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                       }
                   }
               });
+        }
+
+        private static string ConvertParamsJson(string source)
+        {
+            List<ScheduleParam> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(source);
+            Dictionary<string, object> result = new Dictionary<string, object>();
+            foreach (var item in list)
+            {
+                result[item.ParamKey] = item.ParamValue;
+            }
+            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
         }
         #endregion
 
