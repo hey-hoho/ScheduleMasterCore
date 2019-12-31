@@ -1,7 +1,8 @@
 
 ![schedulemaster ](https://files-cdn.cnblogs.com/files/hohoa/schedulemaster.ico)
 
-ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.0平台构建，支持跨平台多节点部署运行。[![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/hey-hoho.ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
+ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.0平台构建，支持跨平台多节点部署运行。
+[![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/hey-hoho.ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
 
 
 ## 主要特性
@@ -29,17 +30,19 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin、Jquery...
 
 ## 系统架构图
-![](http://assets.processon.com/chart_image/5a387f01e4b0daa64fd5fd09.png "Architecture")
+![](https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/docs/images/architecture.png "Architecture")
 
 ## 如何使用
 
 > 使用前请准备好所需环境：`Visual Studio 2019`、`.Net Core3.0 SDK`、`Mysql 5.7`、`Centos(可选)`、`Docker(可选)`。
 
 下载源码到本地，然后用VS2019打开解决方案并编译通过。
+
 打开项目Hos.ScheduleMaster.Web根目录下的`appsettings.json`文件，先修改Mysql数据库连接字符串以保证数据库正常访问，再找到`NodeSetting`节点，修改`IP`字段为master将要部署的ip地址（master端口为30000不用修改），在项目上右击选择发布...，发布到本地文件夹。
+
 打开项目Hos.ScheduleMaster.QuartzHost根目录下的`appsettings.json`文件，同样先修改Mysql连接字符串，再找到`NodeSetting`节点，设置worker的名称`IdentityName`，修改`IP`字段为将要部署的ip地址，`Port`字段为要监听的地址（推荐为30001），在项目上右击选择发布...，发布到本地文件夹。如果要新增worker，按同样方式配置`IdentityName、IP、Port`即可，worker在启动后会把自己的信息注入到数据库中，在master中可以看到。
-其他发布方式亦可。
-下面以运行2个worker节点为例：
+
+其他发布方式亦可。下面以运行2个worker节点为例：
 
 #### 在Windows中运行
 * 找到master的发布目录，执行命令`dotnet Hos.ScheduleMaster.Web.dll`启动程序，首次启动会自动迁移生成数据库结构并初始化种子数据，打开浏览器输入ip和端口访问即可。
