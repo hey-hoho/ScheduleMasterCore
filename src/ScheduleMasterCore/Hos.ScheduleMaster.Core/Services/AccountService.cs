@@ -20,7 +20,7 @@ namespace Hos.ScheduleMaster.Core.Services
         public SystemUserEntity LoginCheck(string userName, string password)
         {
             string encodePwd = SecurityHelper.MD5(password);
-            var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == userName && x.Password == encodePwd);
+            var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == userName && x.Password == encodePwd && x.Status != (int)SystemUserStatus.Deleted);
             if (user == null || user.Status != (int)SystemUserStatus.Available)
             {
                 return null;
@@ -39,7 +39,17 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public SystemUserEntity GetUserById(int id)
         {
-            return _repositoryFactory.SystemUsers.FirstOrDefault(x => x.Id == id);
+            return _repositoryFactory.SystemUsers.FirstOrDefault(x => x.Id == id && x.Status != (int)SystemUserStatus.Deleted);
+        }
+
+        /// <summary>
+        /// 使用用户名查找用户
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public SystemUserEntity GetUserbyUserName(string name)
+        {
+            return _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == name && x.Status != (int)SystemUserStatus.Deleted);
         }
 
         /// <summary>

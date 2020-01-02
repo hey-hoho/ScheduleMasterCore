@@ -1,6 +1,8 @@
 ﻿using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Log;
+using Hos.ScheduleMaster.Web.Extension;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System;
 using System.Collections.Generic;
@@ -24,6 +26,25 @@ namespace Hos.ScheduleMaster.Web.Filters
 
             }
             LogHelper.Error(context.Exception.Message, context.Exception);
+            if (context.HttpContext.Request.IsAjaxRequest())
+            {
+                var accept = context.HttpContext.Request.Headers["accept"];
+                if (accept.Contains("application/json"))
+                {
+                    context.Result = new JsonNetResult()
+                    {
+                        Data = new { Success = false, Message = "服务出现异常请稍后再试！" }
+                    };
+                }
+                else
+                {
+                    context.Result = new JavaScriptResult("alert('服务出现异常请稍后再试！')");
+                }
+            }
+            else
+            {
+                context.Result = new RedirectResult("/Static/Page404");
+            }
             context.ExceptionHandled = true;
         }
     }

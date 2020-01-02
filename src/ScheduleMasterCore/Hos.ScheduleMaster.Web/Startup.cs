@@ -8,6 +8,8 @@ using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +38,7 @@ namespace Hos.ScheduleMaster.Web
             services.AddMvc(options =>
             {
                 options.Filters.Add(typeof(GlobalExceptionFilter));
+                options.Conventions.Add(new ApiControllerAuthorizeConvention());
             }).AddJsonOptions(option =>
             {
                 option.JsonSerializerOptions.PropertyNamingPolicy = null;
@@ -72,7 +75,7 @@ namespace Hos.ScheduleMaster.Web
             services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();
             //自动注册所有业务service
             services.AddAppServices();
-
+            services.AddScoped<AccessControlAttribute>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -133,4 +136,27 @@ namespace Hos.ScheduleMaster.Web
         }
 
     }
+    public class ApiControllerAuthorizeConvention : IApplicationModelConvention
+    {
+        public void Apply(ApplicationModel application)
+        {
+            foreach (var controller in application.Controllers)
+            {
+                if (controller.Filters.Any(x => x is ApiControllerAttribute) && !controller.Filters.Any(x => x is AccessControlAttribute))
+                {
+                    controller.Filters.Add(new ServiceFilterAttribute(typeof(AccessControlAttribute)));
+                }
+            }
+        }
+    }
+    //public class ApiControllerAuthorizeConvention : IControllerModelConvention
+    //{
+    //    public void Apply(ControllerModel controller)
+    //    {
+    //        if (controller.Filters.Any(x => x is ApiControllerAttribute))
+    //        {
+    //            controller.Filters.Add(new ServiceFilterAttribute(typeof(AccessControlAttribute)));
+    //        }
+    //    }
+    //}
 }

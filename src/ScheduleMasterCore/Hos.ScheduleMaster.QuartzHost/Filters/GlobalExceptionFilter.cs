@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Log;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Hos.ScheduleMaster.QuartzHost.Filters
 {
@@ -24,6 +25,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
 
             }
             LogHelper.Error(context.Exception.Message, context.Exception);
+            context.Result = new BadRequestResult();
             context.ExceptionHandled = true;
         }
     }

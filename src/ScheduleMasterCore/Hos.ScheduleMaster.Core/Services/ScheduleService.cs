@@ -14,6 +14,8 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(IScheduleService))]
     public class ScheduleService : BaseService, IScheduleService
     {
+        //private readonly System.Net.Http.IHttpClientFactory _clientFactory;
+
         /// <summary>
         /// 查询所有未删除的任务
         /// </summary>
@@ -312,6 +314,17 @@ namespace Hos.ScheduleMaster.Core.Services
 
         private bool NodeRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param)
         {
+            //var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get,
+            //$"{node.AccessProtocol}://{node.Host}/{router}");
+            //request.Headers.Add("sm_secret", node.AccessSecret);
+            //if (param != null)
+            //{
+            //    request.Content = new System.Net.Http.FormUrlEncodedContent(param.AsEnumerable());
+            //}
+            //var client = new System.Net.Http.HttpClient();
+
+            //var response = await client.SendAsync(request);
+            //if (response.IsSuccessStatusCode) { }
             Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
             var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", method, param, header);
             return result.Key == HttpStatusCode.OK;
@@ -320,7 +333,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <summary>
         /// 恢复运行中的任务
         /// </summary>
-        public  void RunningRecovery()
+        public void RunningRecovery()
         {
             _repositoryFactory.Schedules.Where(x => x.Status == (int)ScheduleStatus.Running).ToList().ForEach(x => Start(x));
         }
@@ -333,6 +346,14 @@ namespace Hos.ScheduleMaster.Core.Services
         public ServiceResponseMessage Start(ScheduleEntity model)
         {
             if (model == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
+            if (model.Status != (int)ScheduleStatus.Stop)
+            {
+                return ServiceResult(ResultStatus.Failed, "任务在停止状态下才能启动！");
+            }
+            if (model.EndDate.HasValue && model.EndDate < DateTime.Now)
+            {
+                return ServiceResult(ResultStatus.Failed, "任务结束时间不能小于当前时间！");
+            }
             //启动任务
             bool success = WorkersTraverseAction(model.Id, "api/quartz/start");
             if (success)

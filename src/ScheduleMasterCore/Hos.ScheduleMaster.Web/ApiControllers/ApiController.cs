@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace Hos.ScheduleMaster.Web.ApiControllers
 {
     [ApiController]
-    public class ApiController: ControllerBase
+    public class ApiController : ControllerBase
     {
         public int PageIndex
         {
@@ -52,5 +53,6 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         {
             return new ServiceResponseMessage(status, message, data);
         }
+
     }
 }

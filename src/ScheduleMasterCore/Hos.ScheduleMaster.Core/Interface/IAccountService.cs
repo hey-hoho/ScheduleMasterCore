@@ -24,6 +24,13 @@ namespace Hos.ScheduleMaster.Core.Interface
         SystemUserEntity GetUserById(int id);
 
         /// <summary>
+        /// 使用用户名查找用户
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        SystemUserEntity GetUserbyUserName(string name);
+
+        /// <summary>
         /// 查询用户分页数据
         /// </summary>
         /// <param name="pager"></param>

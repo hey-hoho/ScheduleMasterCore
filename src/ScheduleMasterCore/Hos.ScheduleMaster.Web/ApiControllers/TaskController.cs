@@ -126,14 +126,6 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         public ServiceResponseMessage Start([FromQuery]Guid id)
         {
             var task = _scheduleService.QueryById(id);
-            if (task == null || task.Status != (int)ScheduleStatus.Stop)
-            {
-                return ApiResponse(ResultStatus.Failed, "任务在停止状态下才能启动！");
-            }
-            if (task.EndDate.HasValue && task.EndDate < DateTime.Now)
-            {
-                return ApiResponse(ResultStatus.Failed, "任务结束时间不能小于当前时间！");
-            }
             var result = _scheduleService.Start(task);
             return result;
         }
@@ -183,18 +175,6 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         public ServiceResponseMessage Stop([FromQuery]Guid id)
         {
             var result = _scheduleService.Stop(id);
-            return result;
-        }
-
-        /// <summary>
-        /// 删除一个任务
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        [HttpPost]
-        public ServiceResponseMessage Delete([FromQuery]Guid id)
-        {
-            var result = _scheduleService.Delete(id);
             return result;
         }
     }

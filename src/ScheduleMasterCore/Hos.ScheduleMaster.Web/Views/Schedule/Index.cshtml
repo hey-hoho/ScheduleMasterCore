@@ -28,7 +28,7 @@
     <script>
         hos.ui.util.breadCrumb("任务列表");
         var grid = hos.ui.ctrl.gridView("table", {
-            url: '/api/Task/QueryList',
+            url: '/Schedule/QueryPager',
             columns: [
             {
                 field: 'Id', title: 'ID', width: '5', formatter: function (value, row, index) {
@@ -84,38 +84,27 @@
         });
         var handlers = {
             taskStart: function (value, title) {
-                this.request(title, '/Task/Start?id=' + value, "启动");
+                this.request(title, '/Schedule/Start?id=' + value, "启动");
             },
             taskDelete: function (value, title) {
-                this.request(title, '/Task/Delete?id=' + value, "删除");
+                this.request(title, '/Schedule/Delete?id=' + value, "删除");
             },
             taskPause: function (value, title) {
-                this.request(title, '/Task/Pause?id=' + value, "暂停");
+                this.request(title, '/Schedule/Pause?id=' + value, "暂停");
             },
             taskRun: function (value, title) {
-                this.request(title, '/Task/RunOnce?id=' + value, "立即运行");
+                this.request(title, '/Schedule/RunOnce?id=' + value, "立即运行");
             },
             taskResume: function (value, title) {
-                this.request(title, '/Task/Resume?id=' + value, "恢复");
+                this.request(title, '/Schedule/Resume?id=' + value, "恢复");
             },
             taskStop: function (value, title) {
-                this.request(title, '/Task/Stop?id=' + value, "停止");
+                this.request(title, '/Schedule/Stop?id=' + value, "停止");
             },
             request: function (title, url, action) {
                 hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
                     function () {
-                        $.post("/api" + url, null)
-                            .then(function (res) {
-                                if (res.Status === 1) {
-                                    hos.ui.util.successTip(res.Message);
-                                    $('#table').bootstrapTable('refresh');
-                                } else {
-                                    hos.ui.util.errorTip(res.Message);
-                                }
-                            })
-                            .fail(function (err) {
-                                hos.ui.util.errorTip(err);
-                            });
+                        hos.ui.util.postJson(url, {}, function () { grid.reload(); })
                     });
             }
         }

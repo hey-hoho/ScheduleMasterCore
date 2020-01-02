@@ -32,6 +32,35 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         /// <summary>
+        /// 查询分页数据
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult QueryPager(string name = "")
+        {
+            var pager = new ListPager<ScheduleEntity>(PageIndex, PageSize);
+            if (!string.IsNullOrEmpty(name))
+            {
+                pager.AddFilter(m => m.Title.Contains(name));
+            }
+            pager = _scheduleService.QueryPager(pager);
+            return GridData(pager.Total, pager.Rows.Select(m => new
+            {
+                m.CreateTime,
+                m.Id,
+                StartTime = m.StartDate,
+                m.LastRunTime,
+                m.NextRunTime,
+                RunMode = m.RunLoop ? "周期运行" : "一次运行",
+                m.Remark,
+                m.Status,
+                m.Title,
+                m.TotalRunCount
+            }));
+        }
+
+        /// <summary>
         /// 创建任务页面
         /// </summary>
         /// <returns></returns>
@@ -73,6 +102,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 return DangerTip("数据验证失败！");
             }
+            var admin = CurrentAdmin;
             ScheduleEntity model = new ScheduleEntity
             {
                 AssemblyName = task.AssemblyName,
@@ -86,7 +116,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 Status = (int)ScheduleStatus.Stop,
                 CustomParamsJson = task.CustomParamsJson,
                 RunLoop = task.RunLoop,
-                TotalRunCount = 0
+                TotalRunCount = 0,
+                CreateUserName = admin.UserName,
+                CreateUserId = admin.Id
             };
             var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
             if (result.Status == ResultStatus.Success)
@@ -139,9 +171,83 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         /// <summary>
+        /// 启动一个任务
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Start([FromQuery]Guid id)
+        {
+            var task = _scheduleService.QueryById(id);
+            var result = _scheduleService.Start(task);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
+        /// 暂停一个任务
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Pause([FromQuery]Guid id)
+        {
+            var result = _scheduleService.Pause(id);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
+        /// 立即运行一次
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult RunOnce([FromQuery]Guid id)
+        {
+            var result = _scheduleService.RunOnce(id);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
+        /// 恢复一个任务
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Resume([FromQuery]Guid id)
+        {
+            var result = _scheduleService.Resume(id);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
+        /// 停止一个任务
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Stop([FromQuery]Guid id)
+        {
+            var result = _scheduleService.Stop(id);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
+        /// 删除一个任务
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Delete([FromQuery]Guid id)
+        {
+            var result = _scheduleService.Delete(id);
+            return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
+        }
+
+        /// <summary>
         /// 任务运行记录页面
         /// </summary>
         /// <returns></returns>
+        [HttpGet]
         public ActionResult TraceLog()
         {
             return View();

@@ -374,7 +374,7 @@
                     nexts.push($(item).attr("data-id"));
                 })
                 data.Nexts = nexts;
-                hos.ui.util.postJson("@(Model==null?"/api/Task/Create":"/api/Task/Edit")", data);
+                hos.ui.util.postJson("@(Model==null?"/Schedule/Create":"/Schedule/Edit")", data);
             });
         });
     </script>
