@@ -75,7 +75,7 @@ namespace Hos.ScheduleMaster.Web
             services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();
             //自动注册所有业务service
             services.AddAppServices();
-            services.AddScoped<AccessControlAttribute>();
+            services.AddScoped<AccessControlFilter>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -142,9 +142,9 @@ namespace Hos.ScheduleMaster.Web
         {
             foreach (var controller in application.Controllers)
             {
-                if (controller.Filters.Any(x => x is ApiControllerAttribute) && !controller.Filters.Any(x => x is AccessControlAttribute))
+                if (controller.Filters.Any(x => x is ApiControllerAttribute) && !controller.Filters.Any(x => x is AccessControlFilter))
                 {
-                    controller.Filters.Add(new ServiceFilterAttribute(typeof(AccessControlAttribute)));
+                    controller.Filters.Add(new ServiceFilterAttribute(typeof(AccessControlFilter)));
                 }
             }
         }

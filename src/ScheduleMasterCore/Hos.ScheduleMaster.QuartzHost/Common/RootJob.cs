@@ -65,6 +65,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             tctx.TaskId = _sid;
                             tctx.TraceId = traceId;
                             tctx.CustomParamsJson = job.JobDataMap["params"]?.ToString();
+                            if (context.MergedJobDataMap["PreviousResult"] is object prev)
+                            {
+                                tctx.PreviousResult = prev;
+                            }
                             try
                             {
                                 instance.InnerRun(tctx);

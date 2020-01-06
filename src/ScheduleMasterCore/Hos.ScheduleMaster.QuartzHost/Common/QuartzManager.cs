@@ -369,7 +369,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             };
             IJobDetail job = JobBuilder.Create<RootJob>()
                 .WithIdentity(view.Schedule.Id.ToString())
-                .SetJobData(map)
+                .UsingJobData(map)
                 //.UsingJobData("assembly", task.AssemblyName)
                 //.UsingJobData("class", task.ClassName)
                 .Build();
@@ -514,15 +514,22 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 //子任务触发
                 Task.Run(async () =>
                  {
-                     var children = job.JobDataMap["children"] as Dictionary<int, string>;
+                     var children = job.JobDataMap["children"] as Dictionary<Guid, string>;
                      foreach (var item in children)
                      {
                          var jobkey = new JobKey(item.Key.ToString());
                          if (await context.Scheduler.CheckExists(jobkey))
                          {
-                             var jDetail = await context.Scheduler.GetJobDetail(jobkey);
-                             jDetail.JobDataMap["PreviousResult"] = context.Result;
-                             await context.Scheduler.TriggerJob(jobkey);
+                             JobDataMap map = new JobDataMap{
+                                 new KeyValuePair<string, object>("PreviousResult", context.Result)
+                             };
+                             //map["PreviousResult"] = context.Result;
+                             //var jDetail = await context.Scheduler.GetJobDetail(jobkey);
+                             //JobDataMap data = jDetail.JobDataMap;
+                             //data["PreviousResult"] = context.Result;
+                             //jDetail.GetJobBuilder().UsingJobData(map);
+                             //jDetail.JobDataMap.Add("PreviousResult", context.Result);
+                             await context.Scheduler.TriggerJob(jobkey, map);
                          }
                      }
                  });

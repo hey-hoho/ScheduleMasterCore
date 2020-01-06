@@ -22,7 +22,7 @@ namespace Hos.ScheduleMaster.Demo
     {
         public override void Run(TaskContext context)
         {
-            context.WriteLog($"收到了前面的结果：{JsonSerializer.Serialize(context.PreviousResult)}");
+            context.WriteLog(System.Text.RegularExpressions.Regex.Unescape($"收到了前面的结果：{JsonSerializer.Serialize(context.PreviousResult)}"));
         }
     }
 }

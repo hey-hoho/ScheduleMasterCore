@@ -11,12 +11,12 @@ using Hos.ScheduleMaster.Core.Common;
 
 namespace Hos.ScheduleMaster.Web.Filters
 {
-    public class AccessControlAttribute : IActionFilter
+    public class AccessControlFilter : IActionFilter
     {
         private IHttpContextAccessor _accessor;
         private IAccountService _account;
 
-        public AccessControlAttribute(IHttpContextAccessor accessor, IAccountService account)
+        public AccessControlFilter(IHttpContextAccessor accessor, IAccountService account)
         {
             _accessor = accessor;
             _account = account;

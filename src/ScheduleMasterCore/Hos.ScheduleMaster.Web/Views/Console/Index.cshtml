@@ -16,6 +16,7 @@
             text-align: center;
             font-size: 30px;
             position: absolute;
+            z-index: 9999;
         }
 
             .spinner > div {
@@ -68,6 +69,8 @@
                 -webkit-transform: scaleY(1.0);
             }
         }
+
+        .mask{position:absolute;left:224px;top:40px}
 
         #menu_box a {
             cursor: pointer;
@@ -264,6 +267,7 @@
             <!-- /Page Header -->
             <!-- Page Body -->
             <div id="page_body">
+                
                 <div class="spinner" id="frame_loading">
                     <div class="rect1"></div>
                     <div class="rect2"></div>
@@ -290,12 +294,12 @@
             $("#sidebar").height(h);
             $("#menu_box .menu-link").bind("click", function () {
                 $(this).parents('li').addClass("active").siblings().removeClass("active");
-                $('#frame_loading').show();
+                $('#frame_loading').before('<div class="modal-backdrop mask fade in"></div>').show();
                 $("#target_frame").attr("src", $(this).attr("data-href"));
             })
             document.getElementById("target_frame").onload = function () {
                 this.style.display = "block";
-                $('#frame_loading').hide();
+                $('#frame_loading').hide().prevAll().remove();
             }
         })
         function renderBreadcrumb(value) {
