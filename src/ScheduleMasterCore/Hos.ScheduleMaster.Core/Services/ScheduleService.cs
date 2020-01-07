@@ -2,6 +2,7 @@
 using Hos.ScheduleMaster.Core.Dto;
 using Hos.ScheduleMaster.Core.Interface;
 using Hos.ScheduleMaster.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleEntity> QueryAll()
         {
-            return _repositoryFactory.Schedules.Where(m => m.Status != (int)ScheduleStatus.Deleted).ToList();
+            return _repositoryFactory.Schedules.Where(m => m.Status != (int)ScheduleStatus.Deleted).AsNoTracking().ToList();
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace Hos.ScheduleMaster.Core.Services
                          where k.UserId == userId
                          orderby s.CreateTime descending
                          select s).Take(takeSize);
-            return query.ToList();
+            return query.AsNoTracking().ToList();
         }
 
         /// <summary>
@@ -141,7 +142,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleKeeperEntity> QueryScheduleKeepers(Guid sid)
         {
-            return _repositoryFactory.ScheduleKeepers.Where(x => x.ScheduleId == sid).ToList();
+            return _repositoryFactory.ScheduleKeepers.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
         }
 
         /// <summary>
@@ -151,7 +152,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleReferenceEntity> QueryScheduleReferences(Guid sid)
         {
-            return _repositoryFactory.ScheduleReferences.Where(x => x.ScheduleId == sid).ToList();
+            return _repositoryFactory.ScheduleReferences.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
         }
 
         /// <summary>
@@ -335,7 +336,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         public void RunningRecovery()
         {
-            _repositoryFactory.Schedules.Where(x => x.Status == (int)ScheduleStatus.Running).ToList().ForEach(x => Start(x));
+            _repositoryFactory.Schedules.Where(x => x.Status == (int)ScheduleStatus.Running).AsNoTracking().ToList().ForEach(x => InnerStart(x.Id));
         }
 
         /// <summary>
@@ -354,12 +355,16 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 return ServiceResult(ResultStatus.Failed, "任务结束时间不能小于当前时间！");
             }
+            return InnerStart(model.Id);
+        }
+        private ServiceResponseMessage InnerStart(Guid sid)
+        {
             //启动任务
-            bool success = WorkersTraverseAction(model.Id, "api/quartz/start");
+            bool success = WorkersTraverseAction(sid, "api/quartz/start");
             if (success)
             {
                 //启动成功后更新任务状态为运行中
-                _repositoryFactory.Schedules.UpdateBy(m => m.Id == model.Id, m => new ScheduleEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Running
                 });
@@ -371,7 +376,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                _repositoryFactory.Schedules.UpdateBy(m => m.Id == model.Id, m => new ScheduleEntity
+                _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
                     NextRunTime = null

@@ -439,7 +439,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                               ScheduleId = log.ScheduleId,
                               Node = log.Node,
                               StackTrace = log.StackTrace,
-                              TraceId = log.TraceId
+                              TraceId = log.TraceId,
+                              CreateTime = log.CreateTime
                           });
                       }
                       else

@@ -10,7 +10,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public SystemLogEntity()
         {
             //this.ScheduleId = Guid.NewGuid();//0表示系统运行日志
-            CreateTime = DateTime.Now;
+            //CreateTime = DateTime.Now;
         }
 
         [Key]

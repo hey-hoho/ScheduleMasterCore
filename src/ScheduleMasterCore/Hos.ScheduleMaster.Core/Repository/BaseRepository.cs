@@ -219,7 +219,7 @@ namespace Hos.ScheduleMaster.Core.Repository
                 }
             }
             var orderList = isAsc ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
-            pager.Rows = orderList.Skip(pager.SkipCount).Take(pager.PageSize).ToList();
+            pager.Rows = orderList.Skip(pager.SkipCount).Take(pager.PageSize).AsNoTracking().ToList();
             pager.Total = orderList.Count();
             return pager;
         }
