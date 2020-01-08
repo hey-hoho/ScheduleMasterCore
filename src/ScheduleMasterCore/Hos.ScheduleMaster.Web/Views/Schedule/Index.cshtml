@@ -1,6 +1,6 @@
 ﻿
 @{
-     
+
 }
 <link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
 
@@ -19,7 +19,12 @@
     </div>
     <table id="table" class="mychar1-table"></table>
 </div>
-
+<div id="detailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
 
 @section scripts{
     <!--Page Related Scripts-->
@@ -30,59 +35,69 @@
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/Schedule/QueryPager',
             columns: [
-            {
-                field: 'Id', title: 'ID', width: '5', formatter: function (value, row, index) {
-                    return '<a href="javascript:" class="tooltips" data-toggle="tooltip" data-original-title="'+value+'" onclick="hos.ui.util.copyToClip(\''+value+'\')">'+value.substring(0,8)+'</a>';
+                {
+                    field: 'Id', title: 'ID', width: '5', formatter: function (value, row, index) {
+                        return '<a href="javascript:" class="tooltips" data-toggle="tooltip" data-original-title="' + value + '" onclick="hos.ui.util.copyToClip(\'' + value + '\')">' + value.substring(0, 8) + '</a>';
+                    }
+                },
+                {
+                    field: 'Title', title: '名称', width: '18', formatter: function (value, row, index) {
+                        return '<a href="javascript:"  onclick="handlers.showDetail(\'' + row.Id + '\');" >' + value + '</a>';
+                    }
+                },
+                { field: 'RunMode', title: '运行模式', width: '5', align: 'center' },
+                { field: 'StartTime', title: '开始运行', width: '8', align: 'center' },
+                { field: 'LastRunTime', title: '上次运行时间', width: '8', align: 'center' },
+                { field: 'NextRunTime', title: '下次运行时间', width: '8', align: 'center' },
+                { field: 'TotalRunCount', title: '运行次数', width: '5', align: 'center' },
+                {
+                    field: 'Status', title: '状态', width: '5', align: 'center', formatter: function (value, row, index) {
+                        var str = '';
+                        switch (value) {
+                            case -1:
+                                str = '已删除';
+                                break;
+                            case 0:
+                                str = '<label style="color:red">已停止</label>';
+                                break;
+                            case 1:
+                                str = '<label style="color:#38b03f">运行中</label>';
+                                break;
+                            case 2:
+                                str = '<label style="color:#f1a325">已暂停</label>';
+                                break;
+                        }
+                        return str;
+                    }
+                },
+                { field: 'CreateTime', title: '创建时间', width: '8', align: 'center' },
+                {
+                    title: '操作', field: 'id', align: 'center', width: '10', formatter: function (value, row, index) {
+                        var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  ';
+                        if (row.Status == 0) {
+                            l += '<a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  <button class="btn btn-xs btn-primary" onclick="handlers.taskStart(\'' + row.Id + '\',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(\'' + row.Id + '\',\'' + row.Title + '\')">删除</button>';
+                        }
+                        if (row.Status == 1) {
+                            l += '<button class="btn btn-xs btn-warning" onclick="handlers.taskPause(\'' + row.Id + '\',\'' + row.Title + '\')">暂停</button>  <button class="btn btn-xs btn-primary" onclick="handlers.taskRun(\'' + row.Id + '\',\'' + row.Title + '\')">运行</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
+                        }
+                        if (row.Status == 2) {
+                            l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(\'' + row.Id + '\',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
+                        }
+                        return l;
+                    }
                 }
-            },
-            { field: 'Title', title: '名称', width: '18' },
-            { field: 'RunMode', title: '运行模式', width: '5', align: 'center' },
-            { field: 'StartTime', title: '开始运行', width: '8', align: 'center' },
-            { field: 'LastRunTime', title: '上次运行时间', width: '8', align: 'center'},
-            { field: 'NextRunTime', title: '下次运行时间', width: '8', align: 'center'},
-            { field: 'TotalRunCount', title: '运行次数', width: '5', align: 'center' },
-            {
-                field: 'Status', title: '状态', width: '5', align: 'center', formatter: function (value, row, index) {
-                    var str = '';
-                    switch (value) {
-                        case -1:
-                            str = '已删除';
-                            break;
-                        case 0:
-                            str = '<label style="color:red">已停止</label>';
-                            break;
-                        case 1:
-                            str = '<label style="color:#38b03f">运行中</label>';
-                            break;
-                        case 2:
-                            str = '<label style="color:#f1a325">已暂停</label>';
-                            break;
-                    }
-                    return str;
-                }
-            },
-            { field: 'CreateTime', title: '创建时间', width: '8', align: 'center'},
-            {
-                title: '操作', field: 'id', align: 'center', width: '10', formatter: function (value, row, index) {
-                    var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  ';
-                    if (row.Status == 0) {
-                        l += '<a href="/Schedule/Edit?id=' + row.Id + '" class="btn btn-xs">编辑</a>  <button class="btn btn-xs btn-primary" onclick="handlers.taskStart(\'' + row.Id + '\',\'' + row.Title + '\')">启动</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskDelete(\'' + row.Id + '\',\'' + row.Title + '\')">删除</button>';
-                    }
-                    if (row.Status == 1) {
-                        l += '<button class="btn btn-xs btn-warning" onclick="handlers.taskPause(\'' + row.Id + '\',\'' + row.Title + '\')">暂停</button>  <button class="btn btn-xs btn-primary" onclick="handlers.taskRun(\'' + row.Id + '\',\'' + row.Title + '\')">运行</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
-                    }
-                    if (row.Status == 2) {
-                        l += '<button class="btn btn-xs btn-info" onclick="handlers.taskResume(\'' + row.Id + '\',\'' + row.Title + '\')">恢复</button>  <button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.Title + '\')">停止</button>';
-                    }
-                    return l;
-                }
-            }
             ],
             onPostBody: function (data) {
-                $('[data-toggle="tooltip"]').tooltip() 
+                $('[data-toggle="tooltip"]').tooltip();
             }
         });
         var handlers = {
+            showDetail: function (id) {
+                $("#detailModal").modal({ remote: '/Schedule/Detail?sid=' + id }).on("hidden.bs.modal", function () {
+                    $(this).removeData("bs.modal");
+                    $(this).find(".modal-content").children().remove(); 
+                });
+            },
             taskStart: function (value, title) {
                 this.request(title, '/Schedule/Start?id=' + value, "启动");
             },

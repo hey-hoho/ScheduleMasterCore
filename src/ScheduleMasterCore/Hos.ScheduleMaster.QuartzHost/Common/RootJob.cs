@@ -108,7 +108,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 }
                 else
                 {
-                    LogHelper.Info($"节点{node}抢锁失败！", _sid);
+                    //LogHelper.Info($"节点{node}抢锁失败！", _sid);
                     throw new JobExecutionException("lock_failed");
                 }
             }

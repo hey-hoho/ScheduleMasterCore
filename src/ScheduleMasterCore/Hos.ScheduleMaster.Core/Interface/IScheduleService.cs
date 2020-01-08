@@ -30,6 +30,13 @@ namespace Hos.ScheduleMaster.Core.Interface
         ScheduleEntity QueryById(Guid sid);
 
         /// <summary>
+        /// 查询任务详细信息
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        ScheduleView QueryScheduleView(Guid sid);
+
+        /// <summary>
         /// 查看指定用户的监护任务
         /// </summary>
         /// <param name="userId"></param>
@@ -63,7 +70,7 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// </summary>
         /// <param name="status"></param>
         /// <returns></returns>
-        List<KeyValuePair<int, int>> QueryTraceWeeklyReport(int? status);
+        List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status);
 
         /// <summary>
         /// 查询任务的监护人

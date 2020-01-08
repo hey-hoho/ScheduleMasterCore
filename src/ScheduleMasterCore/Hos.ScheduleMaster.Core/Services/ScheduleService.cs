@@ -48,6 +48,33 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
+        /// 查询任务详细信息
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ScheduleView QueryScheduleView(Guid sid)
+        {
+            ScheduleView view = new ScheduleView()
+            {
+                Schedule = QueryById(sid)
+            };
+            if (view.Schedule != null)
+            {
+                view.Keepers = (from t in _repositoryFactory.ScheduleKeepers.Table
+                                join u in _repositoryFactory.SystemUsers.Table on t.UserId equals u.Id
+                                where t.ScheduleId == sid
+                                select new KeyValuePair<string, string>(u.UserName, u.RealName)
+                        ).ToList();
+                view.Children = (from c in _repositoryFactory.ScheduleReferences.Table
+                                 join t in _repositoryFactory.Schedules.Table on c.ChildId equals t.Id
+                                 where c.ScheduleId == sid && c.ChildId != sid
+                                 select new { t.Id, t.Title }
+                                ).ToDictionary(x => x.Id, x => x.Title);
+            }
+            return view;
+        }
+
+        /// <summary>
         /// 查看指定用户的监护任务
         /// </summary>
         /// <param name="userId"></param>
@@ -115,22 +142,22 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="status"></param>
         /// <returns></returns>
-        public List<KeyValuePair<int, int>> QueryTraceWeeklyReport(int? status)
+        public List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status)
         {
-            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-6));
+            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-9));
             if (status.HasValue)
             {
                 query = query.Where(x => x.Result == status.Value);
             }
-            var list = query.GroupBy(x => x.StartTime.Date).Select(x => new KeyValuePair<int, int>(x.Key.Day, x.Count())).ToList();
-            List<KeyValuePair<int, int>> result = new List<KeyValuePair<int, int>>();
-            for (int i = 6; i >= 0; i--)
+            var list = query.GroupBy(x => x.StartTime.Date).Select(x => new KeyValuePair<long, int>(x.Key.ToTimeStamp(), x.Count())).ToList();
+            List<KeyValuePair<long, int>> result = new List<KeyValuePair<long, int>>();
+            for (int i = 9; i >= 0; i--)
             {
-                int day = DateTime.Today.AddDays(-i).Day;
+                long day = DateTime.Today.AddDays(-i).ToTimeStamp();
                 int cnt = 0;
                 var dl = list.Any(x => x.Key == day);
                 if (list.Any(x => x.Key == day)) cnt = list.FirstOrDefault(x => x.Key == day).Value;
-                result.Add(new KeyValuePair<int, int>(day, cnt));
+                result.Add(new KeyValuePair<long, int>(day, cnt));
             }
             return result;
         }
@@ -194,12 +221,6 @@ namespace Hos.ScheduleMaster.Core.Services
                     }));
                 }
                 if (extended) _unitOfWork.Commit();
-                //创建专属目录
-                //string path = $"{AppDomain.CurrentDomain.BaseDirectory}/TaskAssembly/{model.AssemblyName}";
-                //if (!System.IO.Directory.Exists(path))
-                //{
-                //    System.IO.Directory.CreateDirectory(path);
-                //}
                 return ServiceResult(ResultStatus.Success, "任务创建成功!");
             }
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");

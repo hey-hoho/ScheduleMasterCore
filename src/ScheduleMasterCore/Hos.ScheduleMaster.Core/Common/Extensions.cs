@@ -56,5 +56,15 @@ namespace Hos.ScheduleMaster.Core.Common
             return obj.ToString("yyyy-MM-dd");
         }
 
+        /// <summary>
+        /// 毫秒时间戳
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static long ToTimeStamp(this DateTime obj)
+        {
+            TimeSpan ts = obj - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            return Convert.ToInt64(ts.TotalMilliseconds);
+        }
     }
 }

@@ -281,42 +281,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 await _scheduler.TriggerJob(jk);
                 return true;
-                //var jobDetail = await _scheduler.GetJobDetail(jk);
-                //var instance = jobDetail.JobDataMap["instance"] as TaskBase;
-                //try
-                //{
-                //    if (instance != null)
-                //    {
-                //        instance.TaskId = taskId;
-
-                //        var param = jobDetail.JobDataMap["params"];
-                //        if (param != null)
-                //        {
-                //            instance.CustomParamsJson = param.ToString();
-                //        }
-                //        instance.InnerRun();
-                //        LogHelper.Info(string.Format("任务[{0}]立即运行成功！", jobDetail.JobDataMap["name"]), taskId);
-                //        return true;
-                //    }
-                //    else
-                //    {
-                //        LogHelper.Error($"instance=null", taskId);
-                //    }
-                //}
-                //catch (Exception exp)
-                //{
-                //    LogHelper.Error($"任务[{jobDetail.JobDataMap["name"]}]运行失败！", exp, taskId);
-                //}
-                //var triggers = _scheduler.GetTriggersOfJob(jk);
-                //string taskName = JobKey;
-                //if (triggers != null && triggers.Count > 0)
-                //{
-                //    taskName = triggers[0].Description;
-                //}
-                //var type = jobDetail.JobType;
-                //var instance = type.FastNew();
-                //var method = type.GetMethod("Execute");
-                //method.Invoke(instance, new object[] { null });
             }
             else
             {
@@ -524,12 +488,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                              JobDataMap map = new JobDataMap{
                                  new KeyValuePair<string, object>("PreviousResult", context.Result)
                              };
-                             //map["PreviousResult"] = context.Result;
-                             //var jDetail = await context.Scheduler.GetJobDetail(jobkey);
-                             //JobDataMap data = jDetail.JobDataMap;
-                             //data["PreviousResult"] = context.Result;
-                             //jDetail.GetJobBuilder().UsingJobData(map);
-                             //jDetail.JobDataMap.Add("PreviousResult", context.Result);
                              await context.Scheduler.TriggerJob(jobkey, map);
                          }
                      }

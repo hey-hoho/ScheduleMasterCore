@@ -61,6 +61,21 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         /// <summary>
+        /// 详情页面
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ActionResult Detail(Guid sid)
+        {
+            var model = _scheduleService.QueryScheduleView(sid);
+            if (model == null || model.Schedule == null)
+            {
+                return PageNotFound();
+            }
+            return View(model);
+        }
+
+        /// <summary>
         /// 创建任务页面
         /// </summary>
         /// <returns></returns>

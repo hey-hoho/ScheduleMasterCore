@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hos.ScheduleMaster.Core.Dto;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -114,6 +115,14 @@ namespace Hos.ScheduleMaster.Core.Models
     public class ScheduleView
     {
         public ScheduleEntity Schedule { get; set; }
+
+        public List<ScheduleParam> Params
+        {
+            get
+            {
+                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Schedule.CustomParamsJson);
+            }
+        }
 
         public List<KeyValuePair<string, string>> Keepers { get; set; }
 

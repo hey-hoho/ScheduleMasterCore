@@ -142,7 +142,7 @@
                 <div class="col-lg-6 col-sm-6 col-xs-12">
                     <div class="databox databox-xxlg radius-bordered databox-shadowed databox-vertical margin-5">
                         <div class="databox-top bg-white">
-                            <span class="databox-header green">近一周运行成功</span>
+                            <span class="databox-header green">近10天运行成功</span>
                         </div>
                         <div class="databox-bottom bg-white no-padding">
                             <div class="row">
@@ -156,7 +156,7 @@
                 <div class="col-lg-6 col-sm-6 col-xs-12">
                     <div class="databox databox-xxlg radius-bordered databox-shadowed databox-vertical margin-5">
                         <div class="databox-top bg-white">
-                            <span class="databox-header orange">近一周运行失败</span>
+                            <span class="databox-header orange">近10天运行失败</span>
                         </div>
                         <div class="databox-bottom bg-white no-padding">
                             <div class="row">
@@ -214,10 +214,8 @@
     <script src="~/assets/js/charts/easypiechart/easypiechart-init.js"></script>
     <!--Flot Charts Needed Scripts-->
     <script src="~/assets/js/charts/flot/jquery.flot.js"></script>
-    <script src="~/assets/js/charts/flot/jquery.flot.resize.js"></script>
-    <script src="~/assets/js/charts/flot/jquery.flot.pie.js"></script>
     <script src="~/assets/js/charts/flot/jquery.flot.tooltip.js"></script>
-    <script src="~/assets/js/charts/flot/jquery.flot.orderBars.js"></script>
+    <script src="~/assets/js/charts/flot/jquery.flot.time.js"></script>
 
     <script type="text/javascript">
         hos.ui.util.breadCrumb("仪表盘");
@@ -295,21 +293,18 @@
                 for (var i = 0; i < result.Data.weekly_failed.length; i++) {
                     data2[0].data.push([result.Data.weekly_failed[i].Key, result.Data.weekly_failed[i].Value]);
                 }
-                console.log(data2)
                 var options = {
                     legend: {
                         show: false
                     },
                     xaxis: {
-                        tickDecimals: 0,
+                        mode: "time",
+                        tickLength: 5,
                         color: '#f3f3f3'
                     },
                     yaxis: {
                         min: 0,
-                        color: '#f3f3f3',
-                        tickFormatter: function (val, axis) {
-                            return "";
-                        },
+                        color: '#f3f3f3'
                     },
                     grid: {
                         hoverable: true,
@@ -321,7 +316,8 @@
                     tooltip: true,
                     tooltipOpts: {
                         defaultTheme: false,
-                        content: "<b>%s</b> : <span>%y</span>",
+                        dateFormat: "%Y-%m-%d",
+                        content: "<b>%x </b> , <b>%s</b> : <span>%y</span>",
                     }
                 };
                 var placeholder = $("#dashboard-chart-suc");
