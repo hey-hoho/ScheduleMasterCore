@@ -1,6 +1,4 @@
 ﻿using Hos.ScheduleMaster.Base.Dto;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -37,7 +35,7 @@ namespace Hos.ScheduleMaster.Base
         /// <summary>
         /// 自定义参数
         /// </summary>
-        public string CustomParamsJson { private get; set; }
+        public Dictionary<string, object> ParamsDict { private get; set; }
 
         /// <summary>
         /// 前置任务的运行结果
@@ -57,15 +55,17 @@ namespace Hos.ScheduleMaster.Base
         /// <returns></returns>
         public T GetArgument<T>(string name)
         {
-            if (string.IsNullOrEmpty(CustomParamsJson))
+            if (ParamsDict == null)
             {
                 return default;
             }
             try
             {
-                dynamic parseObj = JsonConvert.DeserializeObject<dynamic>(CustomParamsJson);
+                object value;
+                ParamsDict.TryGetValue(name, out value);
+                //dynamic parseObj = JsonConvert.DeserializeObject<dynamic>(ParamsDict);
                 //var value = parseObj.GetType().GetField(name).GetValue(parseObj);
-                return (T)Convert.ChangeType(parseObj[name], typeof(T));
+                return (T)Convert.ChangeType(value, typeof(T));
             }
             catch (Exception ex)
             {

@@ -9,15 +9,17 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 - [x] 简易的Web UI操作；
 - [x] 任务动态管理:创建、启动、停止、暂停、恢复、删除等；
 - [x] 高可用支持，跨平台多节点部署。
+- [x] 数据安全性，不会出现多实例并发调度。
 - [x] 支持自定义参数设置；
 - [x] 支持设置监护人，运行异常时邮件告警；
-- [x] 支持设置任务依赖，共享任务结果；
+- [x] 支持设置任务依赖，自动触发，共享任务结果；
 - [x] 插件式开发，任务运行环境隔离；
 - [x] 全链路日志系统，运行轨迹轻松掌控；
 - [x] 用户访问控制；
 - [x] 提供开放REST API，业务系统可以无缝集成；
 - [x] 调度报表统计；
 - [ ] 任务分组管理；
+- [ ] 计划表拆分实现复用；
 - [ ] 指定节点运行；
 - [ ] 支持http任务配置；
 - [ ] 支持延时任务；
@@ -45,7 +47,7 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 其他发布方式亦可。下面以运行2个worker节点为例：
 
 #### 在Windows中运行
-* 找到master的发布目录，执行命令`dotnet Hos.ScheduleMaster.Web.dll`启动程序，首次启动会自动迁移生成数据库结构并初始化种子数据，打开浏览器输入ip和端口访问即可。
+* 找到master的发布目录，执行命令`dotnet Hos.ScheduleMaster.Web.dll`启动程序，首次启动会自动迁移生成数据库结构并初始化种子数据，打开浏览器输入ip和端口访问即可（初始用户名`admin`，密码`111111`）。
 * 找到worker的发布目录，执行命令`dotnet Hos.ScheduleMaster.QuartzHost.dll --urls http://*:30001`启动程序，打开浏览器输入ip和端口会看到一个欢迎页面，表示worker已启动成功。
 * 修改worker下的`appsettings.json`文件为worker2的配置（如果发布前已经修改可跳过），执行命令`dotnet Hos.ScheduleMaster.QuartzHost.dll --urls http://*:30002`启动程序.
 * 登录到master中，可以看到**节点管理**菜单下各节点的运行状态。
@@ -61,3 +63,6 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 * 执行`docker ps`查看各容器运行状态。
 
 
+## 文档
+
+- [快速开始](https://github.com/hey-hoho/ScheduleMasterCore/blob/master/docs/quickstart.md)

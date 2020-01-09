@@ -415,7 +415,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
               });
         }
 
-        private static string ConvertParamsJson(string source)
+        private static Dictionary<string, object> ConvertParamsJson(string source)
         {
             List<ScheduleParam> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(source);
             Dictionary<string, object> result = new Dictionary<string, object>();
@@ -423,7 +423,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 result[item.ParamKey] = item.ParamValue;
             }
-            return Newtonsoft.Json.JsonConvert.SerializeObject(result);
+            return result;
         }
         #endregion
 

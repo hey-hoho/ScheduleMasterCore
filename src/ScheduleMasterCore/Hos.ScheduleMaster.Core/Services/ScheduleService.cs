@@ -198,6 +198,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 model.CreateUserId = user.Id;
             }
             _repositoryFactory.Schedules.Add(model);
+            _repositoryFactory.ScheduleLocks.Add(new ScheduleLockEntity { ScheduleId = model.Id, Status = 0 });
 
             if (_unitOfWork.Commit() > 0)
             {
@@ -271,6 +272,15 @@ namespace Hos.ScheduleMaster.Core.Services
                 return ServiceResult(ResultStatus.Success, "任务编辑成功!");
             }
             return ServiceResult(ResultStatus.Failed, "任务编辑失败!");
+        }
+
+        /// <summary>
+        /// 是否存在可用的work节点
+        /// </summary>
+        /// <returns></returns>
+        private bool HasAvailableWorker()
+        {
+            return _repositoryFactory.ServerNodes.Any(x => x.NodeType == "worker" && x.Status == 2);
         }
 
         /// <summary>
@@ -397,6 +407,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
+                WorkersTraverseAction(sid, "api/quartz/stop");
                 _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
@@ -434,6 +445,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
+                    WorkersTraverseAction(sid, "api/quartz/resume");
                     return ServiceResult(ResultStatus.Failed, "任务暂停失败!");
                 }
             }
@@ -466,6 +478,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
+                    WorkersTraverseAction(sid, "api/quartz/pause");
                     return ServiceResult(ResultStatus.Failed, "任务恢复失败!");
                 }
             }
@@ -515,7 +528,8 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
-                bool success = WorkersTraverseAction(task.Id, "api/quartz/stop");
+                bool success = !HasAvailableWorker();
+                if (!success) success = WorkersTraverseAction(task.Id, "api/quartz/stop");
                 if (success)
                 {
                     //更新任务状态为已停止

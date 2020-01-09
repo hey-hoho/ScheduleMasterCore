@@ -1,12 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.0</TargetFramework>
+    <PackageId>ScheduleMaster</PackageId>
+    <Authors>HOHO</Authors>
+    <Product>ScheduleMaster</Product>
+    <Description>ScheduleMaster task entry.</Description>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.2</Version>
+    <RepositoryUrl>https://github.com/hey-hoho/ScheduleMasterCore</RepositoryUrl>
+    <RepositoryType>github</RepositoryType>
+    <PackageIconUrl>https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/docs/images/icon.png</PackageIconUrl>
+    <PackageTags>netcore, schedule, quartz, task</PackageTags>
+    <PackageProjectUrl>https://github.com/hey-hoho/ScheduleMasterCore</PackageProjectUrl>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Utility\" />

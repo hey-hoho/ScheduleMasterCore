@@ -32,7 +32,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         {
             _sid = Guid.Parse(context.JobDetail.Key.Name);
 
-            bool getLocked = false;
             using (var scope = new ScopeDbContext())
             {
                 _db = scope.GetDbContext();
@@ -41,14 +40,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     LogHelper.Warn("不存在或没有启动的任务", _sid);
                     throw new JobExecutionException("不存在或没有启动的任务");
                 }
-                try
-                {
-                    getLocked = _db.Database.ExecuteSqlRaw($"INSERT INTO schedulelocks(ScheduleId,Status) values('{_sid.ToString()}',1)") > 0;
-                }
-                catch (Exception)
-                {
-                    getLocked = _db.Database.ExecuteSqlRaw($"UPDATE schedulelocks SET Status=1 WHERE ScheduleId='{_sid.ToString()}' and Status=0") > 0;
-                }
+                bool getLocked = _db.Database.ExecuteSqlRaw($"UPDATE schedulelocks SET Status=1 WHERE ScheduleId='{_sid.ToString()}' and Status=0") > 0;
                 if (getLocked)
                 {
                     LogHelper.Info($"节点{node}抢锁成功！准备执行任务....", _sid);
@@ -59,22 +51,22 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         {
                             Guid traceId = GreateRunTrace();
                             Stopwatch stopwatch = new Stopwatch();
-                            stopwatch.Restart();
                             TaskContext tctx = new TaskContext(instance);
                             tctx.Node = node;
                             tctx.TaskId = _sid;
                             tctx.TraceId = traceId;
-                            tctx.CustomParamsJson = job.JobDataMap["params"]?.ToString();
+                            tctx.ParamsDict = job.JobDataMap["params"] as Dictionary<string, object>;
                             if (context.MergedJobDataMap["PreviousResult"] is object prev)
                             {
                                 tctx.PreviousResult = prev;
                             }
                             try
                             {
+                                stopwatch.Restart();
                                 instance.InnerRun(tctx);
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
-                                LogHelper.Info($"任务[{job.JobDataMap["name"]}]运行成功！用时{stopwatch.Elapsed.Milliseconds.ToString()}ms", _sid, traceId);
+                                LogHelper.Info($"任务[{job.JobDataMap["name"]}]运行成功！用时{stopwatch.Elapsed.TotalMilliseconds.ToString()}ms", _sid, traceId);
                                 //保存运行结果用于子任务触发
                                 context.Result = tctx.Result;
                             }
@@ -89,16 +81,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
                                 LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", e, _sid, traceId);
+                                //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
+                                //如果吃掉异常会导致程序误以为本次任务执行成功
                                 throw new BusinessRunException(e);
                             }
                         }
                     }
-                    //catch (Exception exp)
-                    //{
-                    //    //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
-                    //    //如果吃掉异常会导致程序误以为本次任务执行成功
-                    //    throw new JobExecutionException(exp);
-                    //}
                     finally
                     {
                         //为了避免各节点之间的时间差，延迟1秒释放锁
@@ -109,7 +97,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 else
                 {
                     //LogHelper.Info($"节点{node}抢锁失败！", _sid);
-                    throw new JobExecutionException("lock_failed");
+                    //throw new JobExecutionException("lock_failed");
                 }
             }
             return Task.FromResult(0);
