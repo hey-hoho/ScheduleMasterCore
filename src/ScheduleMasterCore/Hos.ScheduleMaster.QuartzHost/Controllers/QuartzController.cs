@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Start([FromBody]Guid sid)
+        public async Task<IActionResult> Start([FromQuery]Guid sid)
         {
             var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status == (int)ScheduleStatus.Stop);
             if (model != null)
@@ -87,7 +87,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Stop([FromBody]Guid sid)
+        public async Task<IActionResult> Stop([FromQuery]Guid sid)
         {
             bool success = await QuartzManager.Stop(sid);
             if (success) return Ok();
@@ -95,7 +95,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Pause([FromBody]Guid sid)
+        public async Task<IActionResult> Pause([FromQuery]Guid sid)
         {
             bool success = await QuartzManager.Pause(sid);
             if (success) return Ok();
@@ -103,7 +103,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Resume([FromBody]Guid sid)
+        public async Task<IActionResult> Resume([FromQuery]Guid sid)
         {
             bool success = await QuartzManager.Resume(sid);
             if (success) return Ok();
@@ -111,7 +111,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RunOnce([FromBody]Guid sid)
+        public async Task<IActionResult> RunOnce([FromQuery]Guid sid)
         {
             bool success = await QuartzManager.RunOnce(sid);
             if (success) return Ok();

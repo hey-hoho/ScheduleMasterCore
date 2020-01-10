@@ -298,7 +298,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 Dictionary<string, string> param = new Dictionary<string, string>();
                 if (sid != Guid.Empty)
                 {
-                    param.Add("sid", sid.ToString());
+                    //param.Add("sid", sid.ToString());
                 }
                 var result = nodeList.AsParallel().Select(n =>
                   {
@@ -391,7 +391,7 @@ namespace Hos.ScheduleMaster.Core.Services
         private ServiceResponseMessage InnerStart(Guid sid)
         {
             //启动任务
-            bool success = WorkersTraverseAction(sid, "api/quartz/start");
+            bool success = WorkersTraverseAction(sid, "api/quartz/start?sid=" + sid);
             if (success)
             {
                 //启动成功后更新任务状态为运行中
@@ -407,7 +407,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                WorkersTraverseAction(sid, "api/quartz/stop");
+                WorkersTraverseAction(sid, "api/quartz/stop?sid=" + sid);
                 _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
@@ -428,7 +428,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = WorkersTraverseAction(task.Id, "api/quartz/pause");
+                bool success = WorkersTraverseAction(task.Id, "api/quartz/pause?sid=" + sid);
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -445,7 +445,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    WorkersTraverseAction(sid, "api/quartz/resume");
+                    WorkersTraverseAction(sid, "api/quartz/resume?sid=" + sid);
                     return ServiceResult(ResultStatus.Failed, "任务暂停失败!");
                 }
             }
@@ -462,7 +462,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
-                bool success = WorkersTraverseAction(task.Id, "api/quartz/resume");
+                bool success = WorkersTraverseAction(task.Id, "api/quartz/resume?sid=" + sid);
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -478,7 +478,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    WorkersTraverseAction(sid, "api/quartz/pause");
+                    WorkersTraverseAction(sid, "api/quartz/pause?sid=" + sid);
                     return ServiceResult(ResultStatus.Failed, "任务恢复失败!");
                 }
             }
@@ -495,7 +495,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = WorkerSelectOne(sid, "api/quartz/runonce");
+                bool success = WorkerSelectOne(sid, "api/quartz/runonce?sid=" + sid);
                 if (success)
                 {
                     //运行成功后更新信息
@@ -529,7 +529,7 @@ namespace Hos.ScheduleMaster.Core.Services
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
                 bool success = !HasAvailableWorker();
-                if (!success) success = WorkersTraverseAction(task.Id, "api/quartz/stop");
+                if (!success) success = WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
                 if (success)
                 {
                     //更新任务状态为已停止
