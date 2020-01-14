@@ -66,13 +66,16 @@ create table servernodes
 (
   NodeName       varchar(255) charset utf8mb4 not null
     primary key,
+  NodeType       longtext charset utf8mb4     not null,
+  MachineName    longtext charset utf8mb4     null,
+  AccessProtocol longtext charset utf8mb4     not null,
   Host           longtext charset utf8mb4     not null,
+  AccessSecret   longtext charset utf8mb4     null,
   LastUpdateTime datetime(6)                  null,
   Status         int                          not null,
-  Priority       int                          not null,
-  AccessProtocol longtext charset utf8mb4     null,
-  AccessSecret   longtext charset utf8mb4     null
+  Priority       int                          not null
 );
+
 
 create table systemconfigs
 (
