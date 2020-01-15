@@ -65,4 +65,4 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 ## 文档
 
-- [快速开始](https://github.com/hey-hoho/ScheduleMasterCore/blob/master/docs/quickstart.md)
+- [快速开始](https://www.cnblogs.com/hohoa/p/12197518.html)
