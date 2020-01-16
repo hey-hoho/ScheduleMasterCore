@@ -9,7 +9,7 @@ WORKDIR /app
 COPY . /app
  
 #设置Docker容器对外暴露的端口
-EXPOSE 30001
+EXPOSE 80 5000
 
 #容器中使用 ["dotnet","系统启动的dll"] 来运行应用程序
-ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.QuartzHost.dll --server.urls http://*:30001"]
+ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.QuartzHost.dll"]

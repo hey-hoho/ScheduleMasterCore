@@ -59,7 +59,7 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 #### 在Docker中运行
 * 在master的发布目录中执行`docker build -t ms_master .`命令生成master镜像，再执行`docker run -d -p 30000:30000 --name="mymaster" ms_master`运行容器。
-* 在worker的发布目录中执行`docker build -t ms_worker .`命令生成worker镜像，再执行`docker run -d -p 30001:30001 --name="myworker1" ms_worker`运行容器启动worker1，在执行`docker run -d -p 30002:30001 --name="myworker2" ms_worker`运行容器启动worker2。
+* 在worker的发布目录中执行`docker build -t ms_worker .`命令生成worker镜像，再执行`docker run -d -p 30001:80 --name="myworker1" ms_worker`运行容器启动worker1，在执行`docker run -d -p 30002:80 --name="myworker2" ms_worker`运行容器启动worker2。
 * 执行`docker ps`查看各容器运行状态。
 
 
