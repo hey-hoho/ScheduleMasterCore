@@ -70,6 +70,7 @@ namespace Hos.ScheduleMaster.Core.Services
                                  where c.ScheduleId == sid && c.ChildId != sid
                                  select new { t.Id, t.Title }
                                 ).ToDictionary(x => x.Id, x => x.Title);
+                view.Executors = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
             }
             return view;
         }
@@ -120,6 +121,16 @@ namespace Hos.ScheduleMaster.Core.Services
                 query = query.Where(x => x.Status == status.Value);
             }
             return query.Count();
+        }
+
+        /// <summary>
+        /// 查询所有worker列表
+        /// </summary>
+        /// <returns></returns>
+        public List<ServerNodeEntity> QueryWorkerList()
+        {
+            var query = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker").OrderByDescending(x => x.LastUpdateTime);
+            return query.ToList();
         }
 
         /// <summary>
@@ -188,8 +199,9 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="model"></param>
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
+        /// <param name="executors"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts)
+        public ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts, List<string> executors = null)
         {
             model.CreateTime = DateTime.Now;
             var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == model.CreateUserName);
@@ -199,6 +211,21 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             _repositoryFactory.Schedules.Add(model);
             _repositoryFactory.ScheduleLocks.Add(new ScheduleLockEntity { ScheduleId = model.Id, Status = 0 });
+
+            if (executors == null || !executors.Any())
+            {
+                //没有指定worker就根据权重选择2个
+                executors = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2)
+                    .OrderByDescending(x => x.Priority).Take(2).Select(x => x.NodeName).ToList();
+            }
+            if (executors.Any())
+            {
+                _repositoryFactory.ScheduleExecutors.AddRange(executors.Select(x => new ScheduleExecutorEntity
+                {
+                    ScheduleId = model.Id,
+                    WorkerName = x
+                }));
+            }
 
             if (_unitOfWork.Commit() > 0)
             {
@@ -293,6 +320,11 @@ namespace Hos.ScheduleMaster.Core.Services
         private bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
         {
             var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2).ToList();
+            var executor = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
+            if (executor.Any())
+            {
+                nodeList = nodeList.Where(x => executor.Contains(x.NodeName)).ToList();
+            }
             if (nodeList.Any())
             {
                 Dictionary<string, string> param = new Dictionary<string, string>();

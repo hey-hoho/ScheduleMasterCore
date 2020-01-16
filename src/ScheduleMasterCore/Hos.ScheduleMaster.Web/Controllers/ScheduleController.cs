@@ -83,6 +83,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             return View();
         }
 
@@ -162,6 +163,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
             viewer.Keepers = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();

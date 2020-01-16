@@ -127,6 +127,8 @@ namespace Hos.ScheduleMaster.Core.Models
         public List<KeyValuePair<string, string>> Keepers { get; set; }
 
         public Dictionary<Guid, string> Children { get; set; }
+
+        public List<string> Executors { get; set; }
     }
 
     /// <summary>

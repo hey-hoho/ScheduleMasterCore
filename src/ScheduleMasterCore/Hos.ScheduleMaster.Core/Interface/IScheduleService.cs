@@ -59,6 +59,12 @@ namespace Hos.ScheduleMaster.Core.Interface
         int QueryWorkerCount(int? status);
 
         /// <summary>
+        /// 查询所有worker列表
+        /// </summary>
+        /// <returns></returns>
+        List<ServerNodeEntity> QueryWorkerList();
+
+        /// <summary>
         /// 查询指定运行状态数量
         /// </summary>
         /// <param name="status"></param>
@@ -92,8 +98,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="model"></param>
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
+        /// <param name="executors"></param>
         /// <returns></returns>
-        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts);
+        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts, List<string> executors = null);
 
         /// <summary>
         /// 编辑任务信息
