@@ -140,6 +140,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <returns></returns>
         public static async Task<bool> StartWithRetry(ScheduleView view, Action<Guid, DateTime?> callBack)
         {
+            var jk = new JobKey(view.Schedule.Id.ToString().ToLower());
+            if (await _scheduler.CheckExists(jk))
+            {
+                return true;
+            }
             PluginLoadContext lc = null;
             try
             {

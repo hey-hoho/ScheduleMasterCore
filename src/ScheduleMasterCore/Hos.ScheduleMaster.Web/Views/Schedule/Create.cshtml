@@ -120,7 +120,7 @@
                                 <div class="form-group">
                                     <label for="" class="col-sm-2 control-label no-padding-right">执行节点</label>
                                     <div class="col-sm-6">
-                                        <select id="Executor" name="executor" multiple="multiple" style="width: 100%;" required="required">
+                                        <select id="Executor" name="executors" multiple="multiple" style="width: 100%;" required="required">
                                             @{
                                                 var workerList = ViewBag.WorkerList as List<Hos.ScheduleMaster.Core.Models.ServerNodeEntity>;
                                                 foreach (var item in workerList)
@@ -146,7 +146,6 @@
                                             <span class="text">全选</span>
                                         </label>
                                     </div>
-                                    @*<label for="" class="col-sm-2 ">执行节点</label>*@
                                 </div>
                                 <div class="form-group">
                                     <label for="" class="col-sm-2 control-label no-padding-right">程序包</label>
@@ -320,8 +319,6 @@
 </script>
 
 @section scripts{
-    @*https://www.cnblogs.com/landeanfen/p/5035608.html*@
-    @*http://blog.csdn.net/u013938465/article/details/53507109*@
     <script src="~/js/jquery.validate.min.js"></script>
     <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
     <script src="~/assets/js/select2/select2.js"></script>

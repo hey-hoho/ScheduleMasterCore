@@ -30,7 +30,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         [HttpPost]
         public async Task<IActionResult> Start([FromQuery]Guid sid)
         {
-            var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status == (int)ScheduleStatus.Stop);
+            var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status != (int)ScheduleStatus.Deleted);
             if (model != null)
             {
                 await LoadPluginFile(model);

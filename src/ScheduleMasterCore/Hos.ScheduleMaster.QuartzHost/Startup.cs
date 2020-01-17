@@ -65,7 +65,7 @@ namespace Hos.ScheduleMaster.QuartzHost
 
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             //加载全局缓存
-            ConfigurationCache.SetNode(Configuration.GetSection("NodeSetting").Get<NodeSetting>());
+            ConfigurationCache.SetNode(InitNodeSetting());
             ConfigurationCache.Reload();
             //初始化日志管理器
             Core.Log.LogManager.Init();
@@ -75,6 +75,33 @@ namespace Hos.ScheduleMaster.QuartzHost
             Common.QuartzManager.Start<AppStart.TaskClearJob>("task-clear", "0 0/1 * * * ? *").Wait();
 
             appLifetime.ApplicationStopping.Register(OnStopping);
+        }
+
+        private NodeSetting InitNodeSetting()
+        {
+            NodeSetting node = Configuration.GetSection("NodeSetting").Get<NodeSetting>();
+            var ev = Environment.GetEnvironmentVariables();
+            if (ev.Contains("IdentityName"))
+            {
+                node.IdentityName = ev["IdentityName"].ToString();
+            }
+            if (ev.Contains("Protocol"))
+            {
+                node.Protocol = ev["Protocol"].ToString();
+            }
+            if (ev.Contains("IP"))
+            {
+                node.IP = ev["IP"].ToString();
+            }
+            if (ev.Contains("Port"))
+            {
+                node.Port = Convert.ToInt32(ev["Port"].ToString());
+            }
+            if (ev.Contains("Priority"))
+            {
+                node.Priority = Convert.ToInt32(ev["Priority"].ToString());
+            }
+            return node;
         }
 
         private void OnStopping()

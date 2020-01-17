@@ -184,6 +184,16 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
+        /// 查询任务指派的运行节点
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public List<ScheduleExecutorEntity> QueryScheduleExecutors(Guid sid)
+        {
+            return _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
+        }
+
+        /// <summary>
         /// 查询任务的子级任务
         /// </summary>
         /// <param name="sid"></param>
@@ -293,6 +303,12 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 ScheduleId = model.Id,
                 ChildId = x
+            }));
+            _repositoryFactory.ScheduleExecutors.DeleteBy(x => x.ScheduleId == model.Id);
+            _repositoryFactory.ScheduleExecutors.AddRange(model.Executors.Select(x => new ScheduleExecutorEntity
+            {
+                ScheduleId = model.Id,
+                WorkerName = x
             }));
             if (_unitOfWork.Commit() > 0)
             {

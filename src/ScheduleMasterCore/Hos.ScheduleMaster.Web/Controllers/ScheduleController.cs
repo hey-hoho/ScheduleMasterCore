@@ -136,7 +136,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 CreateUserName = admin.UserName,
                 CreateUserId = admin.Id
             };
-            var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
+            var result = _scheduleService.Add(model, task.Keepers, task.Nexts, task.Executors);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
@@ -167,6 +167,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
             viewer.Keepers = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();
+            viewer.Executors = _scheduleService.QueryScheduleExecutors(id).Select(x => x.WorkerName).ToList();
             return View("Create", viewer);
         }
 

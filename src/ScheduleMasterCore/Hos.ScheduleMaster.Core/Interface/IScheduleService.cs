@@ -86,6 +86,13 @@ namespace Hos.ScheduleMaster.Core.Interface
         List<ScheduleKeeperEntity> QueryScheduleKeepers(Guid sid);
 
         /// <summary>
+        /// 查询任务指派的运行节点
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        List<ScheduleExecutorEntity> QueryScheduleExecutors(Guid sid);
+
+        /// <summary>
         /// 查询任务的子级任务
         /// </summary>
         /// <param name="sid"></param>
