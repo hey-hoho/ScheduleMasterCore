@@ -20,7 +20,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 - [x] 调度报表统计；
 - [ ] 任务分组管理；
 - [ ] 计划表拆分实现复用；
-- [ ] 指定节点运行；
+- [x] 指定节点运行；
 - [ ] 支持http任务配置；
 - [ ] 支持延时任务；
 - [ ] 支持异常策略配置（失败重试、超时控制等）；
@@ -59,10 +59,11 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 #### 在Docker中运行
 * 在master的发布目录中执行`docker build -t ms_master .`命令生成master镜像，再执行`docker run -d -p 30000:30000 --name="mymaster" ms_master`运行容器。
-* 在worker的发布目录中执行`docker build -t ms_worker .`命令生成worker镜像，再执行`docker run -d -p 30001:80 --name="myworker1" ms_worker`运行容器启动worker1，在执行`docker run -d -p 30002:80 --name="myworker2" ms_worker`运行容器启动worker2。
+* 在worker的发布目录中执行`docker build -t ms_worker .`命令生成worker镜像，再执行`docker run --env identity=docker-worker1 --env port=30001 -d -p 30001:80 --name="myworker1" ms_worker`运行容器启动worker1。
+* 继续执行`docker run --env identity=docker-worker2 --env port=30002 -d -p 30002:80 --name="myworker2" ms_worker`运行容器启动worker2。
 * 执行`docker ps`查看各容器运行状态。
 
 
 ## 文档
 
-- [快速开始](https://github.com/hey-hoho/ScheduleMasterCore/blob/master/docs/quickstart.md)
+- [快速开始](https://www.cnblogs.com/hohoa/p/12197518.html)

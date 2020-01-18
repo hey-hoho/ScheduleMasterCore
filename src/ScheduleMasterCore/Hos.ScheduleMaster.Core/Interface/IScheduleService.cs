@@ -59,6 +59,12 @@ namespace Hos.ScheduleMaster.Core.Interface
         int QueryWorkerCount(int? status);
 
         /// <summary>
+        /// 查询所有worker列表
+        /// </summary>
+        /// <returns></returns>
+        List<ServerNodeEntity> QueryWorkerList();
+
+        /// <summary>
         /// 查询指定运行状态数量
         /// </summary>
         /// <param name="status"></param>
@@ -80,6 +86,13 @@ namespace Hos.ScheduleMaster.Core.Interface
         List<ScheduleKeeperEntity> QueryScheduleKeepers(Guid sid);
 
         /// <summary>
+        /// 查询任务指派的运行节点
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        List<ScheduleExecutorEntity> QueryScheduleExecutors(Guid sid);
+
+        /// <summary>
         /// 查询任务的子级任务
         /// </summary>
         /// <param name="sid"></param>
@@ -92,8 +105,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="model"></param>
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
+        /// <param name="executors"></param>
         /// <returns></returns>
-        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts);
+        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts, List<string> executors = null);
 
         /// <summary>
         /// 编辑任务信息
@@ -101,11 +115,6 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="model"></param>
         /// <returns></returns>
         ServiceResponseMessage Edit(ScheduleInfo model);
-
-        /// <summary>
-        /// 恢复运行中的任务
-        /// </summary>
-        void RunningRecovery();
 
         /// <summary>
         /// 启动一个任务

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -27,7 +28,8 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public IActionResult DownloadPluginFile(string pluginName)
         {
-            var stream = System.IO.File.OpenRead($"{System.IO.Directory.GetCurrentDirectory()}\\Plugins\\{pluginName}.zip");
+            var path = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{pluginName}.zip".Replace('\\', Path.DirectorySeparatorChar);
+            var stream = System.IO.File.OpenRead(path);
             return File(stream, "application/octet-stream", $"{pluginName}.zip");
         }
     }

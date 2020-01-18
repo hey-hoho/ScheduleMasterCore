@@ -25,6 +25,8 @@ namespace Hos.ScheduleMaster.Core.Repository
 
         public IQueryable<TModel> Table => this.DbSet;
 
+        public IQueryable<TModel> TableNoTracking => this.DbSet.AsNoTracking();
+
         public void Add(TModel entity)
         {
             DbSet.Add(entity);

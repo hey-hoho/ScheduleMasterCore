@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
 
             }
             LogHelper.Error(context.Exception.Message, context.Exception);
-            context.Result = new BadRequestResult();
+            context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.ServiceUnavailable);
             context.ExceptionHandled = true;
         }
     }

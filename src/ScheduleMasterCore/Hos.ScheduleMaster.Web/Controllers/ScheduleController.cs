@@ -83,6 +83,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             return View();
         }
 
@@ -96,7 +97,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             IFormFile file = Request.Form.Files["file"];
             if (file != null && file.Length > 0)
             {
-                var filePath = Directory.GetCurrentDirectory() + "/Plugins/" + file.FileName;
+                var filePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{file.FileName}.zip".Replace('\\', Path.DirectorySeparatorChar);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);
@@ -135,7 +136,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 CreateUserName = admin.UserName,
                 CreateUserId = admin.Id
             };
-            var result = _scheduleService.Add(model, task.Keepers, task.Nexts);
+            var result = _scheduleService.Add(model, task.Keepers, task.Nexts, task.Executors);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
@@ -162,9 +163,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
+            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
             viewer.Keepers = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();
+            viewer.Executors = _scheduleService.QueryScheduleExecutors(id).Select(x => x.WorkerName).ToList();
             return View("Create", viewer);
         }
 

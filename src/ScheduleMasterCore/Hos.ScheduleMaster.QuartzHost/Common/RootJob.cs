@@ -35,11 +35,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             using (var scope = new ScopeDbContext())
             {
                 _db = scope.GetDbContext();
-                if (!_db.Schedules.Any(x => x.Id == _sid && x.Status == (int)ScheduleStatus.Running))
-                {
-                    LogHelper.Warn("不存在或没有启动的任务", _sid);
-                    throw new JobExecutionException("不存在或没有启动的任务");
-                }
                 bool getLocked = _db.Database.ExecuteSqlRaw($"UPDATE schedulelocks SET Status=1 WHERE ScheduleId='{_sid.ToString()}' and Status=0") > 0;
                 if (getLocked)
                 {

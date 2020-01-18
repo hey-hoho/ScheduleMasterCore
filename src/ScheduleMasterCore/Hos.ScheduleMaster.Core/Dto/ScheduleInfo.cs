@@ -55,6 +55,11 @@ namespace Hos.ScheduleMaster.Core.Dto
         public List<Guid> Nexts { get; set; }
 
         /// <summary>
+        /// 执行worker
+        /// </summary>
+        public List<string> Executors { get; set; }
+
+        /// <summary>
         /// 自定义参数
         /// </summary>
         public List<ScheduleParam> Params

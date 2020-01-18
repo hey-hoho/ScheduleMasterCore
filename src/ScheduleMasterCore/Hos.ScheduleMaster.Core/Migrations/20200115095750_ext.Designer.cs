@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Hos.ScheduleMaster.Core.Migrations
 {
     [DbContext(typeof(SmDbContext))]
-    [Migration("20191129084208_update")]
-    partial class update
+    [Migration("20200115095750_ext")]
+    partial class ext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -65,7 +65,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         .HasColumnType("varchar(500) CHARACTER SET utf8mb4")
                         .HasMaxLength(500);
 
-                    b.Property<bool>("RunMoreTimes")
+                    b.Property<bool>("RunLoop")
                         .HasColumnType("tinyint(1)");
 
                     b.Property<DateTime?>("StartDate")
@@ -85,6 +85,23 @@ namespace Hos.ScheduleMaster.Core.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Schedules");
+                });
+
+            modelBuilder.Entity("Hos.ScheduleMaster.Core.Models.ScheduleExecutorEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("ScheduleId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("WorkerName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduleExecutors");
                 });
 
             modelBuilder.Entity("Hos.ScheduleMaster.Core.Models.ScheduleKeeperEntity", b =>
@@ -170,6 +187,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         .HasColumnType("varchar(255) CHARACTER SET utf8mb4");
 
                     b.Property<string>("AccessProtocol")
+                        .IsRequired()
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("AccessSecret")
@@ -181,6 +199,13 @@ namespace Hos.ScheduleMaster.Core.Migrations
 
                     b.Property<DateTime?>("LastUpdateTime")
                         .HasColumnType("datetime(6)");
+
+                    b.Property<string>("MachineName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<string>("NodeType")
+                        .IsRequired()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -240,8 +265,8 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_SmtpServer",
-                            CreateTime = new DateTime(2019, 11, 29, 16, 42, 7, 939, DateTimeKind.Local).AddTicks(136),
-                            Group = "Email",
+                            CreateTime = new DateTime(2020, 1, 15, 17, 57, 50, 572, DateTimeKind.Local).AddTicks(4179),
+                            Group = "邮件配置",
                             IsReuired = true,
                             Name = "邮件服务器",
                             Remark = "seed by efcore auto migration",
@@ -251,8 +276,8 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_SmtpPort",
-                            CreateTime = new DateTime(2019, 11, 29, 16, 42, 7, 939, DateTimeKind.Local).AddTicks(3492),
-                            Group = "Email",
+                            CreateTime = new DateTime(2020, 1, 15, 17, 57, 50, 572, DateTimeKind.Local).AddTicks(5986),
+                            Group = "邮件配置",
                             IsReuired = true,
                             Name = "邮件服务器端口",
                             Remark = "seed by efcore auto migration",
@@ -262,8 +287,8 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_FromAccount",
-                            CreateTime = new DateTime(2019, 11, 29, 16, 42, 7, 939, DateTimeKind.Local).AddTicks(3558),
-                            Group = "Email",
+                            CreateTime = new DateTime(2020, 1, 15, 17, 57, 50, 572, DateTimeKind.Local).AddTicks(6059),
+                            Group = "邮件配置",
                             IsReuired = true,
                             Name = "发件人账号",
                             Remark = "seed by efcore auto migration",
@@ -273,8 +298,8 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_FromAccountPwd",
-                            CreateTime = new DateTime(2019, 11, 29, 16, 42, 7, 939, DateTimeKind.Local).AddTicks(3560),
-                            Group = "Email",
+                            CreateTime = new DateTime(2020, 1, 15, 17, 57, 50, 572, DateTimeKind.Local).AddTicks(6061),
+                            Group = "邮件配置",
                             IsReuired = true,
                             Name = "发件人账号密码",
                             Remark = "seed by efcore auto migration",
@@ -359,7 +384,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Id = 1,
-                            CreateTime = new DateTime(2019, 11, 29, 16, 42, 7, 933, DateTimeKind.Local).AddTicks(812),
+                            CreateTime = new DateTime(2020, 1, 15, 17, 57, 50, 562, DateTimeKind.Local).AddTicks(5886),
                             Password = "96e79218965eb72c92a549dd5a330112",
                             RealName = "admin",
                             Status = 1,

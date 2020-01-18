@@ -13,6 +13,14 @@ create table schedulekeepers
   UserId     int      not null
 );
 
+create table scheduleexecutors
+(
+  Id         int auto_increment
+    primary key,
+  ScheduleId char(36)                 not null,
+  WorkerName longtext charset utf8mb4 null
+);
+
 create table schedulelocks
 (
   ScheduleId char(36) not null
@@ -34,7 +42,7 @@ create table schedules
     primary key,
   Title            varchar(50) charset utf8mb4   not null,
   Remark           varchar(500) charset utf8mb4  null,
-  RunMoreTimes     tinyint(1)                    not null,
+  RunLoop          tinyint(1)                    not null,
   CronExpression   varchar(50) charset utf8mb4   null,
   AssemblyName     varchar(200) charset utf8mb4  not null,
   ClassName        varchar(200) charset utf8mb4  not null,
@@ -50,16 +58,17 @@ create table schedules
   TotalRunCount    int                           not null
 );
 
+
 create table scheduletraces
 (
   TraceId     char(36)                 not null
     primary key,
   ScheduleId  char(36)                 not null,
+  Node        longtext charset utf8mb4 null,
   StartTime   datetime(6)              not null,
   EndTime     datetime(6)              not null,
-  Result      int                      not null,
-  ElapsedTime double default '0'       not null,
-  Node        longtext charset utf8mb4 null
+  ElapsedTime double                   not null,
+  Result      int                      not null
 );
 
 create table servernodes
@@ -100,9 +109,9 @@ create table systemlogs
   Message    longtext charset utf8mb4 not null,
   StackTrace longtext charset utf8mb4 null,
   ScheduleId char(36)                 null,
+  Node       longtext charset utf8mb4 null,
   TraceId    char(36)                 null,
-  CreateTime datetime(6)              not null,
-  Node       longtext charset utf8mb4 null
+  CreateTime datetime(6)              not null
 );
 
 create table systemusers
