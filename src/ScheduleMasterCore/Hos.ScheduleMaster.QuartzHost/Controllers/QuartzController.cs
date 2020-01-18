@@ -30,61 +30,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         [HttpPost]
         public async Task<IActionResult> Start([FromQuery]Guid sid)
         {
-            var model = _db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status != (int)ScheduleStatus.Deleted);
-            if (model != null)
-            {
-                await LoadPluginFile(model);
-                ScheduleView view = new ScheduleView() { Schedule = model };
-                view.Keepers = (from t in _db.ScheduleKeepers
-                                join u in _db.SystemUsers on t.UserId equals u.Id
-                                where t.ScheduleId == model.Id && !string.IsNullOrEmpty(u.Email)
-                                select new KeyValuePair<string, string>(u.RealName, u.Email)
-                        ).ToList();
-                view.Children = (from c in _db.ScheduleReferences
-                                 join t in _db.Schedules on c.ChildId equals t.Id
-                                 where c.ScheduleId == model.Id && c.ChildId != model.Id
-                                 select new { t.Id, t.Title }
-                                ).ToDictionary(x => x.Id, x => x.Title);
-                bool success = await QuartzManager.StartWithRetry(view, StartedEvent);
-                if (success) return Ok();
-            }
+            bool success = await QuartzManager.StartWithRetry(sid);
+            if (success) return Ok();
             return BadRequest();
         }
 
-        private void StartedEvent(Guid sid, DateTime? nextRunTime)
-        {
-            using (var scope = new Core.ScopeDbContext())
-            {
-                var db = scope.GetDbContext();
-                //每次运行成功后更新任务的运行情况
-                var task = db.Schedules.FirstOrDefault(x => x.Id == sid);
-                if (task == null) return;
-                task.LastRunTime = DateTime.Now;
-                task.NextRunTime = nextRunTime;
-                task.TotalRunCount += 1;
-                db.SaveChanges();
-            }
-            //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
-        }
-
-        private async Task LoadPluginFile(ScheduleEntity model)
-        {
-            var master = _db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
-            if (master == null)
-            {
-                throw new InvalidOperationException("cannot find master.");
-            }
-            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + model.AssemblyName;
-            var zipPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.AssemblyName}.zip";
-            var pluginPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.Id}";
-            using (WebClient client = new WebClient())
-            {
-                await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
-            }
-            //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
-            ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
-            System.IO.File.Delete(zipPath);
-        }
 
         [HttpPost]
         public async Task<IActionResult> Stop([FromQuery]Guid sid)

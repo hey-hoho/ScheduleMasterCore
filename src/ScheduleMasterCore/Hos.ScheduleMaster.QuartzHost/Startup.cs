@@ -81,23 +81,23 @@ namespace Hos.ScheduleMaster.QuartzHost
         {
             NodeSetting node = Configuration.GetSection("NodeSetting").Get<NodeSetting>();
             var ev = Environment.GetEnvironmentVariables();
-            if (ev.Contains("IdentityName"))
+            if (ev.Contains("identity"))
             {
-                node.IdentityName = ev["IdentityName"].ToString();
+                node.IdentityName = ev["identity"].ToString();
             }
-            if (ev.Contains("Protocol"))
+            if (ev.Contains("protocol"))
             {
                 node.Protocol = ev["Protocol"].ToString();
             }
-            if (ev.Contains("IP"))
+            if (ev.Contains("ip"))
             {
-                node.IP = ev["IP"].ToString();
+                node.IP = ev["ip"].ToString();
             }
-            if (ev.Contains("Port"))
+            if (ev.Contains("port"))
             {
-                node.Port = Convert.ToInt32(ev["Port"].ToString());
+                node.Port = Convert.ToInt32(ev["port"].ToString());
             }
-            if (ev.Contains("Priority"))
+            if (ev.Contains("priority"))
             {
                 node.Priority = Convert.ToInt32(ev["Priority"].ToString());
             }

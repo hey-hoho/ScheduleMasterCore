@@ -97,7 +97,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             IFormFile file = Request.Form.Files["file"];
             if (file != null && file.Length > 0)
             {
-                var filePath = Directory.GetCurrentDirectory() + "/Plugins/" + file.FileName;
+                var filePath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{file.FileName}.zip".Replace('\\', Path.DirectorySeparatorChar);
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await file.CopyToAsync(stream);

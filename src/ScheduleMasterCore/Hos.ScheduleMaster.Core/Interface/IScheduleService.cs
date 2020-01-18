@@ -117,11 +117,6 @@ namespace Hos.ScheduleMaster.Core.Interface
         ServiceResponseMessage Edit(ScheduleInfo model);
 
         /// <summary>
-        /// 恢复运行中的任务
-        /// </summary>
-        void RunningRecovery();
-
-        /// <summary>
         /// 启动一个任务
         /// </summary>
         /// <param name="model"></param>
