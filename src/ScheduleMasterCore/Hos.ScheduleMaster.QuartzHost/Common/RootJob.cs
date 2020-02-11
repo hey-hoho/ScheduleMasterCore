@@ -35,7 +35,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             using (var scope = new ScopeDbContext())
             {
                 _db = scope.GetDbContext();
-                bool getLocked = _db.Database.ExecuteSqlRaw($"UPDATE schedulelocks SET Status=1 WHERE ScheduleId='{_sid.ToString()}' and Status=0") > 0;
+                bool getLocked = _db.Database.ExecuteSqlRaw($"update schedulelocks set status=1 where scheduleid='{_sid.ToString()}' and status=0") > 0;
                 if (getLocked)
                 {
                     LogHelper.Info($"节点{node}抢锁成功！准备执行任务....", _sid);
@@ -86,7 +86,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     {
                         //为了避免各节点之间的时间差，延迟1秒释放锁
                         System.Threading.Thread.Sleep(1000);
-                        _db.Database.ExecuteSqlRaw($"UPDATE schedulelocks SET Status=0 WHERE ScheduleId='{_sid.ToString()}'");
+                        _db.Database.ExecuteSqlRaw($"update schedulelocks set status=0 where scheduleid='{_sid.ToString()}'");
                     }
                 }
                 else

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
+    [Table("systemlogs")]
     public class SystemLogEntity : IEntity
     {
         public SystemLogEntity()
@@ -14,43 +16,51 @@ namespace Hos.ScheduleMaster.Core.Models
         }
 
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
         /// <summary>
         /// 日志类型
         /// </summary>
         [Required]
+        [Column("category")]
         public int Category { get; set; }
 
         /// <summary>
         /// 日志内容
         /// </summary>
         [Required]
+        [Column("message")]
         public string Message { get; set; }
 
         /// <summary>
         /// 堆栈信息
         /// </summary>
+        [Column("stacktrace")]
         public string StackTrace { get; set; }
 
         /// <summary>
         /// 任务id
         /// </summary>
+        [Column("scheduleid")]
         public Guid? ScheduleId { get; set; }
 
         /// <summary>
         /// 产生节点
         /// </summary>
+        [Column("node")]
         public string Node { get; set; }
 
         /// <summary>
         /// 任务运行轨迹
         /// </summary>
+        [Column("traceid")]
         public Guid? TraceId { get; set; }
 
         /// <summary>
         /// 创建时间
         /// </summary>
+        [Column("createtime")]
         public DateTime CreateTime { get; set; }
     }
 

@@ -2,35 +2,46 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
+    [Table("systemusers")]
     public class SystemUserEntity : IEntity
     {
         [Key]
+        [Column("id")]
         public int Id { get; set; }
 
         [Required]
+        [Column("username")]
         public string UserName { get; set; }
 
         [Required]
+        [Column("password")]
         public string Password { get; set; }
 
         [Required]
+        [Column("realname")]
         public string RealName { get; set; }
 
         [MaxLength(15)]
+        [Column("phone")]
         public string Phone { get; set; }
 
         [MaxLength(500), EmailAddress(ErrorMessage = "邮箱格式错误")]
+        [Column("email")]
         public string Email { get; set; }
 
         [Required]
+        [Column("status")]
         public int Status { get; set; }
 
+        [Column("createtime")]
         public DateTime CreateTime { get; set; }
 
+        [Column("lastlogintime")]
         public DateTime? LastLoginTime { get; set; }
     }
 
