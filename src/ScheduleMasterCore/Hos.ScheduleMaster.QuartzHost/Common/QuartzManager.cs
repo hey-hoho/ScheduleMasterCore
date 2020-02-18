@@ -464,8 +464,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 throw new InvalidOperationException("cannot find master.");
             }
             var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + model.AssemblyName;
-            var zipPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.AssemblyName}.zip".Replace('\\', Path.DirectorySeparatorChar);
-            var pluginPath = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{model.Id}".Replace('\\', Path.DirectorySeparatorChar);
+            string rootPath = Directory.GetCurrentDirectory();
+            var zipPath = $"{rootPath}\\wwwroot\\plugins\\{model.AssemblyName}.zip".Replace('\\', Path.DirectorySeparatorChar);
+            var pluginPath = $"{rootPath}\\wwwroot\\plugins\\{model.Id}".Replace('\\', Path.DirectorySeparatorChar);
             using (WebClient client = new WebClient())
             {
                 await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
