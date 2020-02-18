@@ -615,6 +615,11 @@ namespace Hos.ScheduleMaster.Core.Services
                         Status = (int)ScheduleStatus.Deleted,
                         NextRunTime = null
                     });
+                    //删除关联数据
+                    _repositoryFactory.ScheduleExecutors.DeleteBy(x => x.ScheduleId == sid);
+                    _repositoryFactory.ScheduleKeepers.DeleteBy(x => x.ScheduleId == sid);
+                    _repositoryFactory.ScheduleLocks.DeleteBy(x => x.ScheduleId == sid);
+                    _repositoryFactory.ScheduleReferences.DeleteBy(x => x.ScheduleId == sid || x.ChildId == sid);
                     if (_unitOfWork.Commit() > 0)
                     {
                         return ServiceResult(ResultStatus.Success, "任务已删除!");
