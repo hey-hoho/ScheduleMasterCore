@@ -64,13 +64,13 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 * 执行`docker ps`查看各容器运行状态。
 
 ## 效果图
-![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104415838-1462547468.png)
+![ ](https://imgkr.cn-bj.ufileos.com/6ef440e9-b790-4b2c-b18e-2a2437994f53.png)
 
-![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104439878-1360894303.png)
+![ ](https://imgkr.cn-bj.ufileos.com/4da7a2c9-28ad-4ff5-b05e-c98ecb9e622c.png)
 
-![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104451529-2102319140.png)
+![ ](https://imgkr.cn-bj.ufileos.com/7acd35ed-b634-4ab8-a919-3a43a0f43f87.png)
 
-![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104532040-1279197451.png)
+![ ](https://imgkr.cn-bj.ufileos.com/9bffa355-aad2-4a20-99de-72767b3a3b47.png)
 
 ## 文档
 
