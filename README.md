@@ -1,8 +1,8 @@
 
-![schedulemaster ](https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/docs/images/logo.png)
+![schedulemaster ](https://imgkr.cn-bj.ufileos.com/3e2e493c-8813-4f4a-8b42-0a4882929ccd.png)
 
 ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.0平台构建，支持跨平台多节点部署运行。
-[![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/hey-hoho.ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
+[![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
 
 
 ## 主要特性
@@ -32,7 +32,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin、Jquery...
 
 ## 系统架构图
-![](https://raw.githubusercontent.com/hey-hoho/ScheduleMasterCore/master/docs/images/architecture.png "Architecture")
+![Architecture ](https://imgkr.cn-bj.ufileos.com/9b61a8f3-fabf-4a87-ad60-1d25bf92fc12.png)
 
 ## 如何使用
 
@@ -63,6 +63,14 @@ Asp.Net Core3.0、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 * 继续执行`docker run --env identity=docker-worker2 --env port=30002 -d -p 30002:80 --name="myworker2" ms_worker`运行容器启动worker2。
 * 执行`docker ps`查看各容器运行状态。
 
+## 效果图
+![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104415838-1462547468.png)
+
+![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104439878-1360894303.png)
+
+![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104451529-2102319140.png)
+
+![Architecture ](https://img2018.cnblogs.com/blog/614524/202001/614524-20200109104532040-1279197451.png)
 
 ## 文档
 
