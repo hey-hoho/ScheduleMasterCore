@@ -7,9 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Log;
-using System.Net;
-using System.IO.Compression;
-using System.IO;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Hos.ScheduleMaster.QuartzHost.Controllers

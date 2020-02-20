@@ -109,7 +109,7 @@ namespace Hos.ScheduleMaster.Web
             });
             //加载全局缓存
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
-            ConfigurationCache.SetNode(Configuration.GetSection("NodeSetting").Get<NodeSetting>());
+            ConfigurationCache.SetNode(Configuration);
             ConfigurationCache.Reload();
             //初始化日志管理器
             Core.Log.LogManager.Init();

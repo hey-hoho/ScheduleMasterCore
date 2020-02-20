@@ -154,6 +154,11 @@ namespace Hos.ScheduleMaster.Core.Repository
             return DbSet.Where(where);
         }
 
+        public IQueryable<TModel> WhereNoTracking(Expression<Func<TModel, bool>> where)
+        {
+            return this.Where(where).AsNoTracking();
+        }
+
         public int Count(Expression<Func<TModel, bool>> where)
         {
             return DbSet.Count(where);

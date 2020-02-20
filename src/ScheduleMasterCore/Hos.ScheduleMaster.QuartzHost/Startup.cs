@@ -65,7 +65,7 @@ namespace Hos.ScheduleMaster.QuartzHost
 
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             //加载全局缓存
-            ConfigurationCache.SetNode(InitNodeSetting());
+            ConfigurationCache.SetNode(Configuration);
             ConfigurationCache.Reload();
             //初始化日志管理器
             Core.Log.LogManager.Init();
@@ -77,32 +77,6 @@ namespace Hos.ScheduleMaster.QuartzHost
             appLifetime.ApplicationStopping.Register(OnStopping);
         }
 
-        private NodeSetting InitNodeSetting()
-        {
-            NodeSetting node = Configuration.GetSection("NodeSetting").Get<NodeSetting>();
-            var ev = Environment.GetEnvironmentVariables();
-            if (ev.Contains("identity"))
-            {
-                node.IdentityName = ev["identity"].ToString();
-            }
-            if (ev.Contains("protocol"))
-            {
-                node.Protocol = ev["Protocol"].ToString();
-            }
-            if (ev.Contains("ip"))
-            {
-                node.IP = ev["ip"].ToString();
-            }
-            if (ev.Contains("port"))
-            {
-                node.Port = Convert.ToInt32(ev["port"].ToString());
-            }
-            if (ev.Contains("priority"))
-            {
-                node.Priority = Convert.ToInt32(ev["Priority"].ToString());
-            }
-            return node;
-        }
 
         private void OnStopping()
         {

@@ -23,7 +23,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleEntity> QueryAll()
         {
-            return _repositoryFactory.Schedules.Where(m => m.Status != (int)ScheduleStatus.Deleted).AsNoTracking().ToList();
+            return _repositoryFactory.Schedules.WhereNoTracking(m => m.Status != (int)ScheduleStatus.Deleted).ToList();
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ServerNodeEntity> QueryWorkerList()
         {
-            var query = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker").OrderByDescending(x => x.LastUpdateTime);
+            var query = _repositoryFactory.ServerNodes.WhereNoTracking(x => x.NodeType == "worker").OrderByDescending(x => x.LastUpdateTime);
             return query.ToList();
         }
 
@@ -155,7 +155,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status)
         {
-            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-9));
+            var query = _repositoryFactory.ScheduleTraces.WhereNoTracking(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-9));
             if (status.HasValue)
             {
                 query = query.Where(x => x.Result == status.Value);
@@ -180,7 +180,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleKeeperEntity> QueryScheduleKeepers(Guid sid)
         {
-            return _repositoryFactory.ScheduleKeepers.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
+            return _repositoryFactory.ScheduleKeepers.WhereNoTracking(x => x.ScheduleId == sid).ToList();
         }
 
         /// <summary>
@@ -190,7 +190,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleExecutorEntity> QueryScheduleExecutors(Guid sid)
         {
-            return _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
+            return _repositoryFactory.ScheduleExecutors.WhereNoTracking(x => x.ScheduleId == sid).ToList();
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public List<ScheduleReferenceEntity> QueryScheduleReferences(Guid sid)
         {
-            return _repositoryFactory.ScheduleReferences.Where(x => x.ScheduleId == sid).AsNoTracking().ToList();
+            return _repositoryFactory.ScheduleReferences.WhereNoTracking(x => x.ScheduleId == sid).ToList();
         }
 
         /// <summary>
@@ -225,7 +225,7 @@ namespace Hos.ScheduleMaster.Core.Services
             if (executors == null || !executors.Any())
             {
                 //没有指定worker就根据权重选择2个
-                executors = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2)
+                executors = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status != 0)
                     .OrderByDescending(x => x.Priority).Take(2).Select(x => x.NodeName).ToList();
             }
             if (executors.Any())
@@ -406,8 +406,14 @@ namespace Hos.ScheduleMaster.Core.Services
             //var response = await client.SendAsync(request);
             //if (response.IsSuccessStatusCode) { }
             Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
-            var result = HttpRequest.Send($"{node.AccessProtocol}://{node.Host}/{router}", method, param, header);
-            return result.Key == HttpStatusCode.OK;
+            string url = $"{node.AccessProtocol}://{node.Host}/{router}";
+            var result = HttpRequest.Send(url, method, param, header);
+            var success = result.Key == HttpStatusCode.OK;
+            if (!success)
+            {
+                Log.LogHelper.Warn($"响应码：{result.Key.GetHashCode()}，请求地址：{url}，响应消息：{result.Value}");
+            }
+            return success;
         }
 
         /// <summary>
@@ -415,7 +421,8 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         public void RunningRecovery()
         {
-            _repositoryFactory.Schedules.Where(x => x.Status == (int)ScheduleStatus.Running).AsNoTracking().ToList().ForEach(x => InnerStart(x.Id));
+            _repositoryFactory.Schedules.WhereNoTracking(x => x.Status == (int)ScheduleStatus.Running).ToList()
+                .ForEach(x => InnerStart(x.Id));
         }
 
         /// <summary>
