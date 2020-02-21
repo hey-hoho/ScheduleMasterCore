@@ -30,12 +30,34 @@ namespace Hos.ScheduleMaster.Core.Services
         /// 查询任务列表
         /// </summary>
         /// <param name="pager"></param>
+        /// <param name="userId"></param>
         /// <returns></returns>
-        public ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager)
+        public ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager, int? userId)
         {
+            if (userId.HasValue && userId.Value > 0)
+            {
+                return QueryUserSchedule(userId.Value, pager);
+            }
             return _repositoryFactory.Schedules.WherePager(pager, m => m.Status != (int)ScheduleStatus.Deleted, m => m.CreateTime, false);
         }
 
+        /// <summary>
+        /// 查看指定用户的监护任务
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="pager"></param>
+        /// <returns></returns>
+        private ListPager<ScheduleEntity> QueryUserSchedule(int userId, ListPager<ScheduleEntity> pager)
+        {
+            var keeper = _repositoryFactory.ScheduleKeepers.Table;
+            var schedule = _repositoryFactory.Schedules.Table;
+            var query = (from s in schedule
+                         join k in keeper on s.Id equals k.ScheduleId
+                         where k.UserId == userId
+                         orderby s.CreateTime descending
+                         select s);
+            return query.WherePager(pager, x => x.Status != (int)ScheduleStatus.Deleted, x => x.CreateTime, false);
+        }
 
         /// <summary>
         /// id查询任务
@@ -73,24 +95,6 @@ namespace Hos.ScheduleMaster.Core.Services
                 view.Executors = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
             }
             return view;
-        }
-
-        /// <summary>
-        /// 查看指定用户的监护任务
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="takeSize"></param>
-        /// <returns></returns>
-        public List<ScheduleEntity> QueryUserSchedule(int userId, int takeSize)
-        {
-            var keeper = _repositoryFactory.ScheduleKeepers.Table;
-            var schedule = _repositoryFactory.Schedules.Table;
-            var query = (from s in schedule
-                         join k in keeper on s.Id equals k.ScheduleId
-                         where k.UserId == userId
-                         orderby s.CreateTime descending
-                         select s).Take(takeSize);
-            return query.AsNoTracking().ToList();
         }
 
         /// <summary>

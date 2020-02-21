@@ -28,6 +28,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public ActionResult Index()
         {
+            ViewBag.PagerQueryUrl = Url.Action("QueryPager", "Schedule");
             return View();
         }
 
@@ -39,25 +40,29 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpGet]
         public ActionResult QueryPager(string name = "")
         {
+            return QueryList(null, name);
+        }
+
+        /// <summary>
+        /// 我负责监护的任务列表
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpGet]
+        public ActionResult QueryCurrentUserPager(string name)
+        {
+            return QueryList(CurrentAdmin.Id, name);
+        }
+
+        private ActionResult QueryList(int? userId, string name)
+        {
             var pager = new ListPager<ScheduleEntity>(PageIndex, PageSize);
             if (!string.IsNullOrEmpty(name))
             {
                 pager.AddFilter(m => m.Title.Contains(name));
             }
-            pager = _scheduleService.QueryPager(pager);
-            return GridData(pager.Total, pager.Rows.Select(m => new
-            {
-                m.CreateTime,
-                m.Id,
-                StartTime = m.StartDate,
-                m.LastRunTime,
-                m.NextRunTime,
-                RunMode = m.RunLoop ? "周期运行" : "一次运行",
-                m.Remark,
-                m.Status,
-                m.Title,
-                m.TotalRunCount
-            }));
+            pager = _scheduleService.QueryPager(pager, userId);
+            return GridData(pager.Total, pager.Rows);
         }
 
         /// <summary>
