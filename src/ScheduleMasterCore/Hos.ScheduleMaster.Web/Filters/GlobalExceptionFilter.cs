@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.Web.Filters
             {
 
             }
-            LogHelper.Error(context.Exception.Message, context.Exception);
+            LogHelper.Error(context.HttpContext.Request.Path, context.Exception);
             if (context.HttpContext.Request.IsAjaxRequest())
             {
                 var accept = context.HttpContext.Request.Headers["accept"];

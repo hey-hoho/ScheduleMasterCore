@@ -19,8 +19,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// 查询任务列表
         /// </summary>
         /// <param name="pager"></param>
+        ///  <param name="userId"></param>
         /// <returns></returns>
-        ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager);
+        ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager, int? userId);
 
         /// <summary>
         /// id查询任务
@@ -35,14 +36,6 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="sid"></param>
         /// <returns></returns>
         ScheduleView QueryScheduleView(Guid sid);
-
-        /// <summary>
-        /// 查看指定用户的监护任务
-        /// </summary>
-        /// <param name="userId"></param>
-        /// <param name="takeSize"></param>
-        /// <returns></returns>
-        List<ScheduleEntity> QueryUserSchedule(int userId, int takeSize);
 
         /// <summary>
         /// 查询指定状态的任务数量

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 
@@ -19,9 +20,34 @@ namespace Hos.ScheduleMaster.Core
             _cacheContainer = new ConcurrentDictionary<string, string>(1, 100);
         }
 
-        public static void SetNode(NodeSetting setting)
+        /// <summary>
+        /// 配置节点信息
+        /// </summary>
+        /// <param name="configuration"></param>
+        public static void SetNode(IConfiguration configuration)
         {
-            NodeSetting = setting;
+            NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>(); ;
+            var ev = Environment.GetEnvironmentVariables();
+            if (ev.Contains("identity"))
+            {
+                NodeSetting.IdentityName = ev["identity"].ToString();
+            }
+            if (ev.Contains("protocol"))
+            {
+                NodeSetting.Protocol = ev["Protocol"].ToString();
+            }
+            if (ev.Contains("ip"))
+            {
+                NodeSetting.IP = ev["ip"].ToString();
+            }
+            if (ev.Contains("port"))
+            {
+                NodeSetting.Port = Convert.ToInt32(ev["port"].ToString());
+            }
+            if (ev.Contains("priority"))
+            {
+                NodeSetting.Priority = Convert.ToInt32(ev["Priority"].ToString());
+            }
         }
 
         public static void Reload()

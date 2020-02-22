@@ -33,23 +33,11 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             {
                 pager.AddFilter(m => m.Title.Contains(name));
             }
-            pager = _scheduleService.QueryPager(pager);
+            pager = _scheduleService.QueryPager(pager, null);
             var result = new
             {
                 total = pager.Total,
-                rows = pager.Rows.Select(m => new
-                {
-                    m.CreateTime,
-                    m.Id,
-                    StartTime = m.StartDate,
-                    m.LastRunTime,
-                    m.NextRunTime,
-                    RunMode = m.RunLoop ? "周期运行" : "一次运行",
-                    m.Remark,
-                    m.Status,
-                    m.Title,
-                    m.TotalRunCount
-                })
+                rows = pager.Rows
             };
             return result;
         }
