@@ -1,5 +1,6 @@
 ﻿using Hos.ScheduleMaster.Base;
 using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Log;
 using System;
 using System.Collections.Generic;
@@ -56,7 +57,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         public static string GetTaskAssemblyPath(Guid sid, string assemblyName)
         {
-            return $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{sid}\\{assemblyName}.dll".Replace('\\', Path.DirectorySeparatorChar);
+            return $"{ConfigurationCache.PluginPathPrefix}\\{sid}\\{assemblyName}.dll".ToPhysicalPath();
         }
 
         /// <summary>

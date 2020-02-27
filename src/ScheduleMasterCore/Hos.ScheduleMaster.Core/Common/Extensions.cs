@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
@@ -9,6 +10,16 @@ namespace Hos.ScheduleMaster.Core.Common
 {
     public static class Extensions
     {
+        /// <summary>
+        /// 转换成完整的物理路径
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string ToPhysicalPath(this string path)
+        {
+            return $"{Directory.GetCurrentDirectory()}{path}".Replace('\\', Path.DirectorySeparatorChar);
+        }
+
         /// <summary>
         /// 格式化为yyyy-MM-dd HH:mm:ss
         /// </summary>
