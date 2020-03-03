@@ -93,11 +93,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             }
         }
 
-        [HttpGet]
-        public IActionResult HealthCheck()
-        {
-            return Ok("i am ok");
-        }
+        //[HttpGet]
+        //public IActionResult HealthCheck()
+        //{
+        //    return Ok("i am ok");
+        //}
 
         [HttpGet, AllowAnonymous]
         public IActionResult Get()
