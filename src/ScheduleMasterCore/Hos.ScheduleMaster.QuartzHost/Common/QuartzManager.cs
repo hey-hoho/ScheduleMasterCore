@@ -461,15 +461,22 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             var master = db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
             if (master == null)
             {
-                throw new InvalidOperationException("cannot find master.");
+                throw new InvalidOperationException("master not found.");
             }
-            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname=" + model.AssemblyName;
-            string rootPath = Directory.GetCurrentDirectory();
-            var zipPath = $"{rootPath}\\wwwroot\\plugins\\{model.AssemblyName}.zip".Replace('\\', Path.DirectorySeparatorChar);
-            var pluginPath = $"{rootPath}\\wwwroot\\plugins\\{model.Id}".Replace('\\', Path.DirectorySeparatorChar);
+            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
+            var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.AssemblyName}.zip".ToPhysicalPath();
+            var pluginPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id}".ToPhysicalPath();
             using (WebClient client = new WebClient())
             {
-                await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
+                try
+                {
+                    await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
+                }
+                catch (Exception ex)
+                {
+                    LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
+                    throw ex;
+                }
             }
             //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
             ZipFile.ExtractToDirectory(zipPath, pluginPath, true);

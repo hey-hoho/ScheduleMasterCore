@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Hos.ScheduleMaster.Web.Controllers
@@ -28,9 +30,12 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public IActionResult DownloadPluginFile(string pluginName)
         {
-            var path = $"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{pluginName}.zip".Replace('\\', Path.DirectorySeparatorChar);
-            var stream = System.IO.File.OpenRead(path);
-            return File(stream, "application/octet-stream", $"{pluginName}.zip");
+            var path = $"{ConfigurationCache.PluginPathPrefix}\\{pluginName}.zip".ToPhysicalPath();
+            //using (var stream = System.IO.File.OpenRead(path))
+            {
+                var stream = System.IO.File.OpenRead(path);
+                return File(stream, "application/octet-stream", $"{pluginName}.zip");
+            }
         }
     }
 }

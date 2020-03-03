@@ -653,7 +653,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             workers.ForEach((w) =>
             {
-                var success = NodeRequest(w, "api/quartz/healthcheck", "get", null);
+                var success = NodeRequest(w, "health", "get", null);
                 if (!success)
                 {
                     w.Status = 0;

@@ -7,6 +7,8 @@ namespace Hos.ScheduleMaster.Core
 {
     public static class ConfigurationCache
     {
+        public const string PluginPathPrefix = "\\wwwroot\\plugins";
+
         public static NodeSetting NodeSetting { get; private set; }
 
         public static IServiceProvider RootServiceProvider { get; set; }
