@@ -1,6 +1,6 @@
 
 # 添加基础镜像
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.0-buster-slim
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 
 #容器中系统的工作空间
 WORKDIR /app
