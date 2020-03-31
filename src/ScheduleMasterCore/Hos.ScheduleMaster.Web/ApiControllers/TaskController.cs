@@ -64,10 +64,9 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         // [ApiParamValidation]
         public ServiceResponseMessage Create([FromForm]ScheduleInfo task)
         {
-            ScheduleEntity model = new ScheduleEntity
+            ScheduleEntity main = new ScheduleEntity
             {
-                AssemblyName = task.AssemblyName,
-                ClassName = task.ClassName,
+                MetaType = 1,
                 CreateTime = DateTime.Now,
                 CronExpression = task.CronExpression,
                 EndDate = task.EndDate,
@@ -80,13 +79,30 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 TotalRunCount = 0,
                 CreateUserName = task.CreateUserName
             };
-            var result = _scheduleService.Add(model, task.Keepers, task.Nexts, task.Executors);
+            if (task.MetaType == 1)
+            {
+                main.AssemblyName = task.AssemblyName;
+                main.ClassName = task.ClassName;
+            }
+            ScheduleHttpOptionEntity httpOption = null;
+            if (task.MetaType == 2)
+            {
+                httpOption = new ScheduleHttpOptionEntity
+                {
+                    RequestUrl = task.HttpRequestUrl,
+                    Method = task.HttpMethod,
+                    ContentType = task.HttpContentType,
+                    Headers = task.HttpHeaders,
+                    Body = task.HttpBody
+                };
+            }
+            var result = _scheduleService.Add(main, httpOption, task.Keepers, task.Nexts, task.Executors);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _scheduleService.Start(model);
-                    return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), model.Id);
+                    var start = _scheduleService.Start(main);
+                    return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), main.Id);
                 }
             }
             return result;

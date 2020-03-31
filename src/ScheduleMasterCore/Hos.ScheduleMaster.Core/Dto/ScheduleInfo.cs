@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hos.ScheduleMaster.Core.Common;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -19,6 +20,8 @@ namespace Hos.ScheduleMaster.Core.Dto
         [Required, MaxLength(50)]
         public string Title { get; set; }
 
+        public int MetaType { get; set; }
+
         public bool RunLoop { get; set; }
 
         [MaxLength(500)]
@@ -27,10 +30,10 @@ namespace Hos.ScheduleMaster.Core.Dto
         [MaxLength(50)]
         public string CronExpression { get; set; }
 
-        [Required, MaxLength(200)]
+        [MaxLength(200)]
         public string AssemblyName { get; set; }
 
-        [Required, MaxLength(200)]
+        [MaxLength(200)]
         public string ClassName { get; set; }
 
         public DateTime? StartDate { get; set; }
@@ -43,6 +46,21 @@ namespace Hos.ScheduleMaster.Core.Dto
         public bool RunNow { get; set; }
 
         public string CreateUserName { get; set; }
+
+        [MaxLength(500)]
+        public string HttpRequestUrl { get; set; }
+
+        [MaxLength(10)]
+        public string HttpMethod { get; set; }
+
+        [MaxLength(50)]
+        public string HttpContentType { get; set; }
+
+        [MaxLength(2000)]
+        public string HttpHeaders { get; set; }
+
+        [MaxLength(2000)]
+        public string HttpBody { get; set; }
 
         /// <summary>
         /// 报警联系人id

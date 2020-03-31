@@ -132,7 +132,7 @@
 
     //表单验证
     Util.prototype.formValidate = function (form, rule, message) {
-        $("#" + form).validate({
+        var validator = $("#" + form).validate({
             onfocusout: false,
             rules: rule,
             messages: message,
@@ -159,12 +159,13 @@
                 }
             }
         });
+        return validator;
     };
 
     //提交表单
     Util.prototype.formSubmit = function (form, requset) {
         var $form = $("#" + form);
-        $form.find(".submit").bind("click",function (e) {
+        $("#sbtn_" + form).bind("click", function (e) {
             if (!$form.valid()) { return false; }
             var data = $form.getFormData();
             requset(data);
@@ -223,7 +224,7 @@
         aux.select();
         document.execCommand("copy");
         document.body.removeChild(aux);
-        this.messager("复制成功","success");
+        this.messager("复制成功", "success");
     }
 
     //获取cookie项

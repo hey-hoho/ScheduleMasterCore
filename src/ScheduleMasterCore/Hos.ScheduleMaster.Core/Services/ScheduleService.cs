@@ -78,7 +78,8 @@ namespace Hos.ScheduleMaster.Core.Services
         {
             ScheduleView view = new ScheduleView()
             {
-                Schedule = QueryById(sid)
+                Schedule = QueryById(sid),
+                HttpOption = QueryScheduleHttpOptions(sid)
             };
             if (view.Schedule != null)
             {
@@ -178,6 +179,16 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
+        /// 查询任务的http配置
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ScheduleHttpOptionEntity QueryScheduleHttpOptions(Guid sid)
+        {
+            return _repositoryFactory.ScheduleHttpOptions.FirstOrDefault(x => x.ScheduleId == sid);
+        }
+
+        /// <summary>
         /// 查询任务的监护人
         /// </summary>
         /// <param name="sid"></param>
@@ -211,11 +222,12 @@ namespace Hos.ScheduleMaster.Core.Services
         /// 添加一个任务
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="httpOption"></param>
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
         /// <param name="executors"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts, List<string> executors = null)
+        public ServiceResponseMessage Add(ScheduleEntity model, ScheduleHttpOptionEntity httpOption, List<int> keepers, List<Guid> nexts, List<string> executors = null)
         {
             model.CreateTime = DateTime.Now;
             var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == model.CreateUserName);
@@ -223,9 +235,17 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 model.CreateUserId = user.Id;
             }
+            //保存主信息
             _repositoryFactory.Schedules.Add(model);
+            //创建并保存任务锁
             _repositoryFactory.ScheduleLocks.Add(new ScheduleLockEntity { ScheduleId = model.Id, Status = 0 });
-
+            //保存http数据
+            if (httpOption != null)
+            {
+                httpOption.ScheduleId = model.Id;
+                _repositoryFactory.ScheduleHttpOptions.Add(httpOption);
+            }
+            //保存运行节点
             if (executors == null || !executors.Any())
             {
                 //没有指定worker就根据权重选择2个
@@ -240,29 +260,27 @@ namespace Hos.ScheduleMaster.Core.Services
                     WorkerName = x
                 }));
             }
-
+            //保存监护人
+            if (keepers != null && keepers.Count > 0)
+            {
+                _repositoryFactory.ScheduleKeepers.AddRange(keepers.Select(x => new ScheduleKeeperEntity
+                {
+                    ScheduleId = model.Id,
+                    UserId = x
+                }));
+            }
+            //保存子任务
+            if (nexts != null && nexts.Count > 0)
+            {
+                _repositoryFactory.ScheduleReferences.AddRange(nexts.Select(x => new ScheduleReferenceEntity
+                {
+                    ScheduleId = model.Id,
+                    ChildId = x
+                }));
+            }
+            //事务提交
             if (_unitOfWork.Commit() > 0)
             {
-                bool extended = false;
-                if (keepers != null && keepers.Count > 0)
-                {
-                    extended = true;
-                    _repositoryFactory.ScheduleKeepers.AddRange(keepers.Select(x => new ScheduleKeeperEntity
-                    {
-                        ScheduleId = model.Id,
-                        UserId = x
-                    }));
-                }
-                if (nexts != null && nexts.Count > 0)
-                {
-                    extended = true;
-                    _repositoryFactory.ScheduleReferences.AddRange(nexts.Select(x => new ScheduleReferenceEntity
-                    {
-                        ScheduleId = model.Id,
-                        ChildId = x
-                    }));
-                }
-                if (extended) _unitOfWork.Commit();
                 return ServiceResult(ResultStatus.Success, "任务创建成功!");
             }
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
@@ -286,6 +304,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
             {
+                MetaType = model.MetaType,
                 AssemblyName = model.AssemblyName,
                 ClassName = model.ClassName,
                 CronExpression = model.CronExpression,
@@ -296,6 +315,19 @@ namespace Hos.ScheduleMaster.Core.Services
                 StartDate = model.StartDate,
                 Title = model.Title
             });
+            if (model.MetaType == 2)
+            {
+                _repositoryFactory.ScheduleHttpOptions.DeleteBy(x => x.ScheduleId == model.Id);
+                _repositoryFactory.ScheduleHttpOptions.Add(new ScheduleHttpOptionEntity
+                {
+                    ScheduleId = model.Id,
+                    Body = model.HttpBody,
+                    ContentType = model.HttpContentType,
+                    Headers = model.HttpHeaders,
+                    Method = model.HttpMethod,
+                    RequestUrl = model.HttpRequestUrl
+                });
+            }
             _repositoryFactory.ScheduleKeepers.DeleteBy(x => x.ScheduleId == model.Id);
             _repositoryFactory.ScheduleKeepers.AddRange(model.Keepers.Select(x => new ScheduleKeeperEntity
             {

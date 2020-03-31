@@ -1,24 +1,109 @@
-﻿@model Hos.ScheduleMaster.Core.Models.ScheduleView
+﻿@using Hos.ScheduleMaster.Core.Dto;
+
+@model Hos.ScheduleMaster.Core.Models.ScheduleView
 
 @{
     Layout = null;
 }
 
 <div class="well well-lg">
-    <h4 class="block">@Model.Schedule.Title</h4>
+    <h4 class="block">[@(Model.Schedule.MetaType == 1 ? "程序集任务" : "HTTP任务")] <b>@Model.Schedule.Title</b></h4>
     <div class="row">
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>是否周期运行：</strong>@Model.Schedule.RunLoop </p>
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>cron模式：</strong>@Model.Schedule.CronExpression </p>
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>开始时间：</strong>@Model.Schedule.StartDate </p>
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>停止时间：</strong>@Model.Schedule.EndDate </p>
-        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>程序集名称：</strong>@Model.Schedule.AssemblyName </p>
-        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>执行类名称：</strong>@Model.Schedule.ClassName </p>
-        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>备注：</strong>@Model.Schedule.Remark </p>
+        @if (Model.Schedule.MetaType == 1)
+        {
+            <p class="col-lg-6 col-sm-6 col-xs-12"><strong>程序集名称：</strong>@Model.Schedule.AssemblyName </p>
+            <p class="col-lg-6 col-sm-6 col-xs-12"><strong>执行类名称：</strong>@Model.Schedule.ClassName </p>
+        }
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>创建时间：</strong>@Model.Schedule.CreateTime </p>
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>创建人：</strong>@Model.Schedule.CreateUserName </p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>备注：</strong>@Model.Schedule.Remark </p>
         <p class="col-lg-6 col-sm-6 col-xs-12"><strong>运行次数：</strong>@Model.Schedule.TotalRunCount </p>
     </div>
     <hr />
+    @if (Model.Schedule.MetaType == 2)
+    {
+        <div class="row">
+            <p class="col-lg-12 col-sm-12 col-xs-12">
+                <strong>HTTP参数：</strong>
+            </p>
+            <p class="col-lg-12 col-sm-12 col-xs-12"><strong>请求地址：</strong>@Model.HttpOption.RequestUrl </p>
+            <p class="col-lg-6 col-sm-6 col-xs-12"><strong>请求方式：</strong>@Model.HttpOption.Method </p>
+            <p class="col-lg-6 col-sm-6 col-xs-12"><strong>数据格式：</strong>@Model.HttpOption.ContentType </p>
+            <div class="col-lg-12 col-sm-12 col-xs-12">
+                <div class="panel-group accordion no-margin-bottom" id="accordions" style="border-top-width: 1px;">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordions" href="#collapseOnes">
+                                    自定义请求头
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseOnes" class="panel-collapse collapse" style="height: 0px;">
+                            <div class="panel-body border-red">
+                                @if (!string.IsNullOrEmpty(Model.HttpOption.Headers))
+                                {
+                                    var headers = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpOption.Headers);
+                                    <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
+                                        <thead>
+                                            <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                foreach (var item in headers)
+                                                {
+                                                    <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title">
+                                <a class="accordion-toggle collapsed" data-toggle="collapse" data-parent="#accordions" href="#collapseTwos">
+                                    数据内容
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwos" class="panel-collapse collapse" style="height: 0px;">
+                            <div class="panel-body border-red">
+                                @if (Model.HttpOption.ContentType == "application/json")
+                                {
+                                    @Html.Raw(Model.HttpOption.Body)
+                                }
+                                else if (!string.IsNullOrEmpty(Model.HttpOption.Body))
+                                {
+                                    var headers = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpOption.Body);
+                                    <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
+                                        <thead>
+                                            <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            @{
+                                                foreach (var item in headers)
+                                                {
+                                                    <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                                }
+                                            }
+                                        </tbody>
+                                    </table>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <hr />
+    }
     <div class="row">
         <p class="col-lg-12 col-sm-12 col-xs-12">
             <strong>运行节点：</strong>
@@ -37,9 +122,9 @@
         </p>
         @if (Model.Params.Count > 0)
         {
-            <table class="col-lg-12 col-sm-12 col-xs-12 table table-hover table-striped table-bordered table-condensed">
+            <table class="table table-hover table-striped table-bordered table-condensed margin-left-10" style="width:95%">
                 <thead>
-                    <tr> <th>参数名称</th> <th>参数值</th> <th>备注</th></tr>
+                    <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
                 </thead>
                 <tbody>
                     @{
@@ -77,4 +162,3 @@
         </p>
     </div>
 </div>
-

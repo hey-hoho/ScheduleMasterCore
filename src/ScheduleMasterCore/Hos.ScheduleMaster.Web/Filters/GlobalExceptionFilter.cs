@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.Web.Filters
             LogHelper.Error(context.HttpContext.Request.Path, context.Exception);
             if (context.HttpContext.Request.IsAjaxRequest())
             {
-                var accept = context.HttpContext.Request.Headers["accept"];
+                var accept = context.HttpContext.Request.Headers["Accept"].FirstOrDefault();
                 if (accept.Contains("application/json"))
                 {
                     context.Result = new JsonNetResult()

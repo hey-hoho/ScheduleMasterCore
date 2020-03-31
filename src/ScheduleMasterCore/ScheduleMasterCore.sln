@@ -3,15 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29318.209
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.Base", "Hos.ScheduleMaster.Base\Hos.ScheduleMaster.Base.csproj", "{A9D22421-B06B-48E4-8F7D-6A9B4B58A743}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hos.ScheduleMaster.Base", "Hos.ScheduleMaster.Base\Hos.ScheduleMaster.Base.csproj", "{A9D22421-B06B-48E4-8F7D-6A9B4B58A743}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.Core", "Hos.ScheduleMaster.Core\Hos.ScheduleMaster.Core.csproj", "{2C11D277-655E-4522-9D62-EE09F605BC61}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hos.ScheduleMaster.Core", "Hos.ScheduleMaster.Core\Hos.ScheduleMaster.Core.csproj", "{2C11D277-655E-4522-9D62-EE09F605BC61}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.QuartzHost", "Hos.ScheduleMaster.QuartzHost\Hos.ScheduleMaster.QuartzHost.csproj", "{1DDE3357-1931-431A-AE76-BB96CF2C6662}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hos.ScheduleMaster.QuartzHost", "Hos.ScheduleMaster.QuartzHost\Hos.ScheduleMaster.QuartzHost.csproj", "{1DDE3357-1931-431A-AE76-BB96CF2C6662}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.Web", "Hos.ScheduleMaster.Web\Hos.ScheduleMaster.Web.csproj", "{651B44A7-1007-494E-A354-FCC95C54E018}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hos.ScheduleMaster.Web", "Hos.ScheduleMaster.Web\Hos.ScheduleMaster.Web.csproj", "{651B44A7-1007-494E-A354-FCC95C54E018}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.Demo", "Hos.ScheduleMaster.Demo\Hos.ScheduleMaster.Demo.csproj", "{1D368C84-B853-4A6E-9423-DC3C0A5AE420}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hos.ScheduleMaster.Demo", "Hos.ScheduleMaster.Demo\Hos.ScheduleMaster.Demo.csproj", "{1D368C84-B853-4A6E-9423-DC3C0A5AE420}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hos.ScheduleMaster.xUnitTest", "Hos.ScheduleMaster.xUnitTest\Hos.ScheduleMaster.xUnitTest.csproj", "{F9CA374E-468A-45D9-92D4-D907C45537CA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{1D368C84-B853-4A6E-9423-DC3C0A5AE420}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D368C84-B853-4A6E-9423-DC3C0A5AE420}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D368C84-B853-4A6E-9423-DC3C0A5AE420}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F9CA374E-468A-45D9-92D4-D907C45537CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F9CA374E-468A-45D9-92D4-D907C45537CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F9CA374E-468A-45D9-92D4-D907C45537CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F9CA374E-468A-45D9-92D4-D907C45537CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

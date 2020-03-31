@@ -72,6 +72,7 @@ namespace Hos.ScheduleMaster.Core.Common
 
         public static T2 Convert(T1 t1, T2 t2)
         {
+            if (t1 == null) return t2;
             var dtoProperList = t1.GetType().GetProperties().Where(p => p.PropertyType.IsPublic == true).ToList();
             var entityProperList = t2.GetType().GetProperties().Where(p => p.PropertyType.IsPublic == true).ToList();
             foreach (System.Reflection.PropertyInfo pi in dtoProperList)

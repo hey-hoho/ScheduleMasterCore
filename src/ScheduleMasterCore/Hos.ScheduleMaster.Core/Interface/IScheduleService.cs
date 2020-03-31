@@ -72,6 +72,13 @@ namespace Hos.ScheduleMaster.Core.Interface
         List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status);
 
         /// <summary>
+        /// 查询任务的http配置
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        ScheduleHttpOptionEntity QueryScheduleHttpOptions(Guid sid);
+
+        /// <summary>
         /// 查询任务的监护人
         /// </summary>
         /// <param name="sid"></param>
@@ -96,11 +103,12 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// 添加一个任务
         /// </summary>
         /// <param name="model"></param>
+        /// <param name="httpOption"></param>
         /// <param name="keepers"></param>
         /// <param name="nexts"></param>
         /// <param name="executors"></param>
         /// <returns></returns>
-        ServiceResponseMessage Add(ScheduleEntity model, List<int> keepers, List<Guid> nexts, List<string> executors = null);
+        ServiceResponseMessage Add(ScheduleEntity model, ScheduleHttpOptionEntity httpOption, List<int> keepers, List<Guid> nexts, List<string> executors = null);
 
         /// <summary>
         /// 编辑任务信息

@@ -31,6 +31,13 @@ namespace Hos.ScheduleMaster.Core.Models
         public string Title { get; set; }
 
         /// <summary>
+        /// 任务类型
+        /// </summary>
+        [Required]
+        [Column("metatype")]
+        public int MetaType { get; set; }
+
+        /// <summary>
         /// 任务描述
         /// </summary>
         [MaxLength(500)]
@@ -54,21 +61,20 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 任务所在程序集
         /// </summary>
-        [Required, MaxLength(200)]
+        [MaxLength(200)]
         [Column("assemblyname")]
         public string AssemblyName { get; set; }
 
         /// <summary>
         /// 任务的类型
         /// </summary>
-        [Required, MaxLength(200)]
+        [MaxLength(200)]
         [Column("classname")]
         public string ClassName { get; set; }
 
         /// <summary>
         /// 自定义参数（json格式）
         /// </summary>
-        [MaxLength(2000)]
         [Column("customparamsjson")]
         public string CustomParamsJson { get; set; }
 
@@ -107,6 +113,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 创建人账号
         /// </summary>
         [Column("createusername")]
+        [MaxLength(50)]
         public string CreateUserName { get; set; }
 
         /// <summary>
@@ -133,6 +140,8 @@ namespace Hos.ScheduleMaster.Core.Models
     public class ScheduleView
     {
         public ScheduleEntity Schedule { get; set; }
+
+        public ScheduleHttpOptionEntity HttpOption { get; set; }
 
         public List<ScheduleParam> Params
         {

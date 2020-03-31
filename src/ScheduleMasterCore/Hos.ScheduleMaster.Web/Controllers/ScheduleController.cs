@@ -121,14 +121,12 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return DangerTip("数据验证失败！");
+                return this.JsonNet(false, "数据验证失败！");
             }
             var admin = CurrentAdmin;
-            ScheduleEntity model = new ScheduleEntity
+            ScheduleEntity main = new ScheduleEntity
             {
-                AssemblyName = task.AssemblyName,
-                ClassName = task.ClassName,
-                CreateTime = DateTime.Now,
+                MetaType = task.MetaType,
                 CronExpression = task.CronExpression,
                 EndDate = task.EndDate,
                 Remark = task.Remark,
@@ -138,15 +136,31 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 CustomParamsJson = task.CustomParamsJson,
                 RunLoop = task.RunLoop,
                 TotalRunCount = 0,
-                CreateUserName = admin.UserName,
-                CreateUserId = admin.Id
+                CreateUserName = admin.UserName
             };
-            var result = _scheduleService.Add(model, task.Keepers, task.Nexts, task.Executors);
+            if (task.MetaType == 1)
+            {
+                main.AssemblyName = task.AssemblyName;
+                main.ClassName = task.ClassName;
+            }
+            ScheduleHttpOptionEntity httpOption = null;
+            if (task.MetaType == 2)
+            {
+                httpOption = new ScheduleHttpOptionEntity
+                {
+                    RequestUrl = task.HttpRequestUrl,
+                    Method = task.HttpMethod,
+                    ContentType = task.HttpContentType,
+                    Headers = task.HttpHeaders,
+                    Body = task.HttpBody
+                };
+            }
+            var result = _scheduleService.Add(main, httpOption, task.Keepers, task.Nexts, task.Executors);
             if (result.Status == ResultStatus.Success)
             {
                 if (task.RunNow)
                 {
-                    var start = _scheduleService.Start(model);
+                    var start = _scheduleService.Start(main);
                     return this.JsonNet(true, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
                 }
                 return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
@@ -170,6 +184,10 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
+            if (model.MetaType == 2)
+            {
+                ObjectMapper<ScheduleHttpOptionEntity, ScheduleInfo>.Convert(_scheduleService.QueryScheduleHttpOptions(id), viewer);
+            }
             viewer.Keepers = _scheduleService.QueryScheduleKeepers(id).Select(x => x.UserId).ToList();
             viewer.Nexts = _scheduleService.QueryScheduleReferences(id).Select(x => x.ChildId).ToList();
             viewer.Executors = _scheduleService.QueryScheduleExecutors(id).Select(x => x.WorkerName).ToList();
@@ -185,6 +203,10 @@ namespace Hos.ScheduleMaster.Web.Controllers
         //[ApiParamValidation]
         public ActionResult Edit(ScheduleInfo task)
         {
+            if (!ModelState.IsValid)
+            {
+                return this.JsonNet(false, "数据验证失败！");
+            }
             var result = _scheduleService.Edit(task);
             if (result.Status == ResultStatus.Success)
             {
