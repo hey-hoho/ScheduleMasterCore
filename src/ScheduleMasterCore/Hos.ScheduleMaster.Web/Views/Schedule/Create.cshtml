@@ -274,7 +274,7 @@
                                                     <a class="btn btn-default purple" id="btn_formdata_add"><i class="fa fa-plus"></i> 新增</a>
                                                 </div>
                                                 <div class="col-lg-12 col-sm-12 col-xs-12 margin-top-10" id="formdata_list">
-                                                    @if (Model != null && !string.IsNullOrEmpty(Model.HttpBody) && Model.MetaType == 1)
+                                                    @if (Model != null && !string.IsNullOrEmpty(Model.HttpBody) && Model.MetaType == 2)
                                                     {
                                                         var body = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpBody);
                                                         foreach (var item in body)

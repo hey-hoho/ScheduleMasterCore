@@ -1,5 +1,4 @@
 ﻿
-using Hos.ScheduleMaster.Core.EntityFramework;
 using Hos.ScheduleMaster.Core.Log;
 using Quartz;
 using Quartz.Impl;
@@ -10,17 +9,16 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using Hos.ScheduleMaster.Core.Models;
-using Hos.ScheduleMaster.Base;
 using System.Threading.Tasks;
 using System.Threading;
 using Hos.ScheduleMaster.Core.Common;
-using Microsoft.EntityFrameworkCore;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Dto;
 using System.IO.Compression;
 using System.Net;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Hos.ScheduleMaster.QuartzHost.HosSchedule;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -149,15 +147,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 return true;
             }
             ScheduleView view = await GetScheduleView(sid);
-            PluginLoadContext lc = null;
+            IHosSchedule schedule = HosScheduleFactory.GetHosSchedule(view);
             try
             {
-                lc = AssemblyHelper.LoadAssemblyContext(view.Schedule.Id, view.Schedule.AssemblyName);
                 for (int i = 0; i < 3; i++)
                 {
                     try
                     {
-                        await Start(view, lc);
+                        await Start(schedule);
                         return true;
                     }
                     catch (SchedulerException sexp)
@@ -166,18 +163,16 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     }
                 }
                 //最后一次尝试
-                await Start(view, lc);
+                await Start(schedule);
                 return true;
             }
             catch (SchedulerException sexp)
             {
-                AssemblyHelper.UnLoadAssemblyLoadContext(lc);
                 LogHelper.Error($"任务所有重试都失败了，已放弃启动！", sexp, view.Schedule.Id);
                 return false;
             }
             catch (Exception exp)
             {
-                AssemblyHelper.UnLoadAssemblyLoadContext(lc);
                 LogHelper.Error($"任务启动失败！", exp, view.Schedule.Id);
                 return false;
             }
@@ -253,15 +248,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 var job = await _scheduler.GetJobDetail(jk);
                 if (job != null)
                 {
-                    var instance = job.JobDataMap["instance"] as TaskBase;
+                    var instance = job.JobDataMap["instance"] as IHosSchedule;
                     //释放资源
                     if (instance != null)
                     {
                         instance.Dispose();
+                        instance.RunnableInstance.Dispose();
                     }
-                    //卸载应用程序域
-                    var domain = job.JobDataMap["domain"] as PluginLoadContext;
-                    AssemblyHelper.UnLoadAssemblyLoadContext(domain);
                     //删除quartz有关设置
                     var trigger = new TriggerKey(sid.ToString());
                     await _scheduler.PauseTrigger(trigger);
@@ -320,95 +313,36 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         #region 私有方法
 
-        private static async Task Start(ScheduleView view, PluginLoadContext lc)
+        private static async Task Start(IHosSchedule schedule)
         {
-            //throw 
-
-            //在应用程序域中创建实例返回并保存在job中，这是最终调用任务执行的实例
-            TaskBase instance = AssemblyHelper.CreateTaskInstance(lc, view.Schedule.Id, view.Schedule.AssemblyName, view.Schedule.ClassName);
-            if (instance == null)
-            {
-                throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
-            }
-            // instance.logger = new LogWriter(); ;
             JobDataMap map = new JobDataMap
             {
-                new KeyValuePair<string, object> ("domain",lc),
-                new KeyValuePair<string, object> ("instance",instance),
-                new KeyValuePair<string, object> ("name",view.Schedule.Title),
-                new KeyValuePair<string, object> ("params",ConvertParamsJson(view.Schedule.CustomParamsJson)),
-                new KeyValuePair<string, object> ("keepers",view.Keepers),
-                new KeyValuePair<string, object> ("children",view.Children)
+                new KeyValuePair<string, object> ("instance",schedule),
             };
-
+            string jobKey = schedule.Main.Id.ToString();
             try
             {
-                IJobDetail job = JobBuilder.Create<RootJob>()
-                    .WithIdentity(view.Schedule.Id.ToString())
-                    .UsingJobData(map)
-                    .Build();
+                IJobDetail job = JobBuilder.Create().OfType(schedule.GetQuartzJobType()).WithIdentity(jobKey).UsingJobData(map).Build();
 
-                //添加触发器
-                var listener = new JobRunListener(view.Schedule.Id.ToString());
+                //添加监听器
+                var listener = new JobRunListener(jobKey);
                 listener.OnSuccess += StartedEvent;
-                _scheduler.ListenerManager.AddJobListener(listener, KeyMatcher<JobKey>.KeyEquals(new JobKey(view.Schedule.Id.ToString())));
+                _scheduler.ListenerManager.AddJobListener(listener, KeyMatcher<JobKey>.KeyEquals(new JobKey(jobKey)));
 
-                if (view.Schedule.RunLoop)
-                {
-                    if (!CronExpression.IsValidExpression(view.Schedule.CronExpression))
-                    {
-                        throw new Exception("cron表达式验证失败");
-                    }
-                    CronTriggerImpl trigger = new CronTriggerImpl
-                    {
-                        CronExpressionString = view.Schedule.CronExpression,
-                        Name = view.Schedule.Title,
-                        Key = new TriggerKey(view.Schedule.Id.ToString()),
-                        Description = view.Schedule.Remark
-                    };
-                    if (view.Schedule.StartDate.HasValue)
-                    {
-                        trigger.StartTimeUtc = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.StartDate.Value);
-                    }
-                    if (view.Schedule.EndDate.HasValue)
-                    {
-                        trigger.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.EndDate.Value);
-                    }
-                    await _scheduler.ScheduleJob(job, trigger);
-                }
-                else
-                {
-                    DateTimeOffset start = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now);
-                    if (view.Schedule.StartDate.HasValue)
-                    {
-                        start = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.StartDate.Value);
-                    }
-                    DateTimeOffset end = start.AddMinutes(1);
-                    if (view.Schedule.EndDate.HasValue)
-                    {
-                        end = TimeZoneInfo.ConvertTimeToUtc(view.Schedule.EndDate.Value);
-                    }
-                    ITrigger trigger = TriggerBuilder.Create()
-                        .WithIdentity(view.Schedule.Id.ToString())
-                        .StartAt(start)
-                        .WithSimpleSchedule(x => x
-                        .WithRepeatCount(1).WithIntervalInMinutes(1))
-                        .EndAt(end)
-                        .Build();
-                    await _scheduler.ScheduleJob(job, trigger);
-                }
+                await _scheduler.ScheduleJob(job, GetTrigger(schedule.Main));
             }
             catch (Exception ex)
             {
                 throw new SchedulerException(ex);
             }
-            LogHelper.Info($"任务[{view.Schedule.Title}]启动成功！", view.Schedule.Id);
+            LogHelper.Info($"任务[{schedule.Main.Title}]启动成功！", schedule.Main.Id);
 
             _ = Task.Run(() =>
               {
                   while (true)
                   {
-                      var log = instance.ReadLog();
+                      if (schedule.RunnableInstance == null) break;
+                      var log = schedule.RunnableInstance.ReadLog();
                       if (log != null)
                       {
                           LogManager.Queue.Write(new SystemLogEntity
@@ -430,6 +364,55 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
               });
         }
 
+        private static ITrigger GetTrigger(ScheduleEntity model)
+        {
+            string jobKey = model.Id.ToString();
+            if (model.RunLoop)
+            {
+                if (!CronExpression.IsValidExpression(model.CronExpression))
+                {
+                    throw new Exception("cron表达式验证失败");
+                }
+                CronTriggerImpl trigger = new CronTriggerImpl
+                {
+                    CronExpressionString = model.CronExpression,
+                    Name = model.Title,
+                    Key = new TriggerKey(jobKey),
+                    Description = model.Remark
+                };
+                if (model.StartDate.HasValue)
+                {
+                    trigger.StartTimeUtc = TimeZoneInfo.ConvertTimeToUtc(model.StartDate.Value);
+                }
+                if (model.EndDate.HasValue)
+                {
+                    trigger.EndTimeUtc = TimeZoneInfo.ConvertTimeToUtc(model.EndDate.Value);
+                }
+                return trigger;
+            }
+            else
+            {
+                DateTimeOffset start = TimeZoneInfo.ConvertTimeToUtc(DateTime.Now);
+                if (model.StartDate.HasValue)
+                {
+                    start = TimeZoneInfo.ConvertTimeToUtc(model.StartDate.Value);
+                }
+                DateTimeOffset end = start.AddMinutes(1);
+                if (model.EndDate.HasValue)
+                {
+                    end = TimeZoneInfo.ConvertTimeToUtc(model.EndDate.Value);
+                }
+                ITrigger trigger = TriggerBuilder.Create()
+                    .WithIdentity(jobKey)
+                    .StartAt(start)
+                    .WithSimpleSchedule(x => x
+                    .WithRepeatCount(1).WithIntervalInMinutes(1))
+                    .EndAt(end)
+                    .Build();
+                return trigger;
+            }
+        }
+
         private static async Task<ScheduleView> GetScheduleView(Guid sid)
         {
             using (var scope = new Core.ScopeDbContext())
@@ -439,7 +422,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 if (model != null)
                 {
                     ScheduleView view = new ScheduleView() { Schedule = model };
-                    if (model.MetaType == 2)
+                    if (model.MetaType == (int)ScheduleMetaType.Http)
                     {
                         view.HttpOption = db.ScheduleHttpOptions.FirstOrDefault(x => x.ScheduleId == sid);
                     }
@@ -453,7 +436,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                                      where c.ScheduleId == model.Id && c.ChildId != model.Id
                                      select new { t.Id, t.Title }
                                     ).ToDictionary(x => x.Id, x => x.Title);
-                    await LoadPluginFile(db, model);
+                    //如果是程序集任务，那就从master下载最新的文件包
+                    if (model.MetaType == (int)ScheduleMetaType.Assembly)
+                    {
+                        await LoadPluginFile(db, model);
+                    }
                     return view;
                 }
                 throw new InvalidOperationException($"不存在的任务id：{sid}");
@@ -517,16 +504,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
-        private static Dictionary<string, object> ConvertParamsJson(string source)
-        {
-            List<ScheduleParam> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(source);
-            Dictionary<string, object> result = new Dictionary<string, object>();
-            foreach (var item in list)
-            {
-                result[item.ParamKey] = item.ParamValue;
-            }
-            return result;
-        }
+
         #endregion
 
         #region 邮件模板
@@ -573,6 +551,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         public Task JobWasExecuted(IJobExecutionContext context, JobExecutionException jobException, CancellationToken cancellationToken)
         {
             IJobDetail job = context.JobDetail;
+            var instance = job.JobDataMap["instance"] as IHosSchedule;
 
             if (jobException == null)
             {
@@ -583,8 +562,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 //子任务触发
                 Task.Run(async () =>
                  {
-                     var children = job.JobDataMap["children"] as Dictionary<Guid, string>;
-                     foreach (var item in children)
+                     foreach (var item in instance.Children)
                      {
                          var jobkey = new JobKey(item.Key.ToString());
                          if (await context.Scheduler.CheckExists(jobkey))
@@ -601,11 +579,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 Task.Run(() =>
                  {
-                     var name = job.JobDataMap["name"] as string;
-                     var users = job.JobDataMap["keepers"] as List<KeyValuePair<string, string>>;
-                     if (users != null && users.Any())
+                     if (instance.Keepers != null && instance.Keepers.Any())
                      {
-                         MailKitHelper.SendMail(users, $"任务运行异常 — {name}", QuartzManager.GetErrorEmailContent(name, (jobException as BusinessRunException).Detail));
+                         MailKitHelper.SendMail(
+                             instance.Keepers,
+                             $"任务运行异常 — {instance.Main.Title}",
+                             QuartzManager.GetErrorEmailContent(instance.Main.Title, (jobException as BusinessRunException).Detail)
+                          );
                      }
                  });
             }

@@ -188,4 +188,22 @@ namespace Hos.ScheduleMaster.Core.Models
         Paused = 2
 
     }
+
+    /// <summary>
+    /// 任务类型
+    /// </summary>
+    public enum ScheduleMetaType
+    {
+        /// <summary>
+        /// 程序集任务
+        /// </summary>
+        [Description("程序集任务")]
+        Assembly =1,
+
+        /// <summary>
+        /// HTTP任务
+        /// </summary>
+        [Description("HTTP任务")]
+        Http =2
+    }
 }

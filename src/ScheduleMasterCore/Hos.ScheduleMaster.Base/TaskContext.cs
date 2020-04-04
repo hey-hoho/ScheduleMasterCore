@@ -10,7 +10,7 @@ namespace Hos.ScheduleMaster.Base
     /// </summary>
     public class TaskContext
     {
-        private TaskBase _instance;
+        private readonly TaskBase _instance;
 
         public TaskContext(TaskBase instance)
         {
@@ -63,14 +63,20 @@ namespace Hos.ScheduleMaster.Base
             {
                 object value;
                 ParamsDict.TryGetValue(name, out value);
-                //dynamic parseObj = JsonConvert.DeserializeObject<dynamic>(ParamsDict);
-                //var value = parseObj.GetType().GetField(name).GetValue(parseObj);
                 return (T)Convert.ChangeType(value, typeof(T));
             }
             catch (Exception ex)
             {
                 return default;
             }
+        }
+
+        /// <summary>
+        /// 执行任务
+        /// </summary>
+        public void InstanceRun()
+        {
+            _instance.InnerRun(this);
         }
 
         /// <summary>

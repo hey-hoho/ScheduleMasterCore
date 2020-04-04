@@ -138,13 +138,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 TotalRunCount = 0,
                 CreateUserName = admin.UserName
             };
-            if (task.MetaType == 1)
+            if (task.MetaType == (int)ScheduleMetaType.Assembly)
             {
                 main.AssemblyName = task.AssemblyName;
                 main.ClassName = task.ClassName;
             }
             ScheduleHttpOptionEntity httpOption = null;
-            if (task.MetaType == 2)
+            if (task.MetaType == (int)ScheduleMetaType.Http)
             {
                 httpOption = new ScheduleHttpOptionEntity
                 {
@@ -184,7 +184,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
             ViewBag.WorkerList = _scheduleService.QueryWorkerList();
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
-            if (model.MetaType == 2)
+            if (model.MetaType == (int)ScheduleMetaType.Http)
             {
                 ObjectMapper<ScheduleHttpOptionEntity, ScheduleInfo>.Convert(_scheduleService.QueryScheduleHttpOptions(id), viewer);
             }

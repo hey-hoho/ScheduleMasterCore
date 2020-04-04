@@ -13,6 +13,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System.Diagnostics;
 using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.QuartzHost.HosSchedule;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -22,7 +23,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
     /// </summary>
     //禁止多实例并发执行
     [DisallowConcurrentExecution]
-    public class RootJob : IJob
+    public abstract class RootJob : IJob
     {
         Guid _sid;
         SmDbContext _db;
@@ -42,15 +43,15 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     IJobDetail job = context.JobDetail;
                     try
                     {
-                        if (job.JobDataMap["instance"] is TaskBase instance)
+                        if (job.JobDataMap["instance"] is IHosSchedule instance)
                         {
                             Guid traceId = GreateRunTrace();
                             Stopwatch stopwatch = new Stopwatch();
-                            TaskContext tctx = new TaskContext(instance);
+                            TaskContext tctx = new TaskContext(instance.RunnableInstance);
                             tctx.Node = node;
                             tctx.TaskId = _sid;
                             tctx.TraceId = traceId;
-                            tctx.ParamsDict = job.JobDataMap["params"] as Dictionary<string, object>;
+                            tctx.ParamsDict = instance.CustomParams;
                             if (context.MergedJobDataMap["PreviousResult"] is object prev)
                             {
                                 tctx.PreviousResult = prev;
@@ -58,10 +59,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             try
                             {
                                 stopwatch.Restart();
-                                instance.InnerRun(tctx);
+                                //执行
+                                OnExecuting(tctx);
                                 stopwatch.Stop();
+                                //更新执行结果
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
-                                LogHelper.Info($"任务[{job.JobDataMap["name"]}]运行成功！用时{Math.Round(stopwatch.Elapsed.TotalMilliseconds, 3).ToString()}ms", _sid, traceId);
+                                LogHelper.Info($"任务[{instance.Main.Title}]运行成功！用时{Math.Round(stopwatch.Elapsed.TotalMilliseconds, 3).ToString()}ms", _sid, traceId);
                                 //保存运行结果用于子任务触发
                                 context.Result = tctx.Result;
                             }
@@ -75,10 +78,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             {
                                 stopwatch.Stop();
                                 UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
-                                LogHelper.Error($"任务\"{job.JobDataMap["name"]}\"运行失败！", e, _sid, traceId);
+                                LogHelper.Error($"任务\"{instance.Main.Title}\"运行失败！", e, _sid, traceId);
                                 //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
                                 //如果吃掉异常会导致程序误以为本次任务执行成功
                                 throw new BusinessRunException(e);
+                            }
+                            finally
+                            {
+                                OnExecuted(tctx);
                             }
                         }
                     }
@@ -97,6 +104,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
             return Task.FromResult(0);
         }
+
+        public abstract void OnExecuting(TaskContext context);
+
+        public abstract void OnExecuted(TaskContext context);
 
         private Guid GreateRunTrace()
         {

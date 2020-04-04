@@ -30,7 +30,7 @@ namespace Hos.ScheduleMaster.Base
         /// <summary>
         /// 保证前一次运行完才开始下一次，否则就跳过本次执行
         /// </summary>
-        public void InnerRun(TaskContext context)
+        internal void InnerRun(TaskContext context)
         {
             if (!_isRunning)
             {
