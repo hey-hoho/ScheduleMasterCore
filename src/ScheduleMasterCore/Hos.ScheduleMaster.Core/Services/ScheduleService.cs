@@ -371,7 +371,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         private bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
         {
-            var nodeList = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status == 2).ToList();
+            var nodeList = _repositoryFactory.ServerNodes.WhereNoTracking(x => x.NodeType == "worker" && x.Status == 2).ToList();
             var executor = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
             if (executor.Any())
             {
@@ -386,11 +386,11 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 var result = nodeList.AsParallel().Select(n =>
                   {
-                      return NodeRequest(n, router, "post", param);
+                      return NodeRequest(n, router, verb, param);
                   }).ToArray();
                 return result.All(x => x == true);
             }
-            return false;
+            throw new InvalidOperationException("running worker not found.");
         }
 
         /// <summary>

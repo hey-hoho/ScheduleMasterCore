@@ -439,6 +439,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 if (model != null)
                 {
                     ScheduleView view = new ScheduleView() { Schedule = model };
+                    if (model.MetaType == 2)
+                    {
+                        view.HttpOption = db.ScheduleHttpOptions.FirstOrDefault(x => x.ScheduleId == sid);
+                    }
                     view.Keepers = (from t in db.ScheduleKeepers
                                     join u in db.SystemUsers on t.UserId equals u.Id
                                     where t.ScheduleId == model.Id && !string.IsNullOrEmpty(u.Email)

@@ -105,12 +105,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             if (context != null)
             {
                 context.Unload();
-                //for (int i = 0; context.weakReference.IsAlive && (i < 10); i++)
-                {
-                    GC.Collect();
-                    GC.WaitForPendingFinalizers();
-                }
 
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
             }
         }
     }
