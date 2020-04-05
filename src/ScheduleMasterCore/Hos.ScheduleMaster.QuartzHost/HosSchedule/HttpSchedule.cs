@@ -29,7 +29,8 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         public void Dispose()
         {
-
+            RunnableInstance.Dispose();
+            RunnableInstance = null;
         }
     }
     public class HttpTask : TaskBase
@@ -62,7 +63,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
 
-            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{response.Content}");
+            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
         }
 
         private Method GetRestSharpMethod(string method)

@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Name = "邮件服务器",
                     Value = "",
                     Group = "邮件配置",
-                    Remark = remark,
+                    Remark = "smtp服务器地址",
                     Sort = 1
                 },
                 new SystemConfigEntity()
@@ -52,7 +52,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Name = "邮件服务器端口",
                     Value = "",
                     Group = "邮件配置",
-                    Remark = remark,
+                    Remark = "smtp端口号",
                     Sort = 2
                 },
                 new SystemConfigEntity()
@@ -63,7 +63,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Name = "发件人账号",
                     Value = "",
                     Group = "邮件配置",
-                    Remark = remark,
+                    Remark = "邮箱账号",
                     Sort = 3
                 },
                 new SystemConfigEntity()
@@ -74,8 +74,19 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Name = "发件人账号密码",
                     Value = "",
                     Group = "邮件配置",
-                    Remark = remark,
+                    Remark = "登录密码或授权码等",
                     Sort = 4
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "Assembly_ImagePullPolicy",
+                    Name = "文件包拉取策略",
+                    Value = "Always",
+                    Group = "程序集配置",
+                    Remark = "Always-总是拉取，IfNotPresent-本地没有时拉取",
+                    Sort = 1
                 }
                 );
             return builder;

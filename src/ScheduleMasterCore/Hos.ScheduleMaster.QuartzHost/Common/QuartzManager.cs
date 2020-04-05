@@ -257,7 +257,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     if (instance != null)
                     {
                         instance.Dispose();
-                        instance.RunnableInstance.Dispose();
+                        instance.RunnableInstance?.Dispose();
                     }
                     //删除quartz有关设置
                     var trigger = new TriggerKey(sid.ToString());
@@ -453,29 +453,39 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         private static async Task LoadPluginFile(SmDbContext db, ScheduleEntity model)
         {
-            var master = db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
-            if (master == null)
-            {
-                throw new InvalidOperationException("master not found.");
-            }
-            var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
-            var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.AssemblyName}.zip".ToPhysicalPath();
+            bool pull = true;
             var pluginPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id}".ToPhysicalPath();
-            using (WebClient client = new WebClient())
+            //看一下拉取策略
+            string policy = ConfigurationCache.GetField<string>("Assembly_ImagePullPolicy");
+            if (policy == "IfNotPresent" && Directory.Exists(pluginPath))
             {
-                try
-                {
-                    await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
-                }
-                catch (Exception ex)
-                {
-                    LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
-                    throw ex;
-                }
+                pull = false;
             }
-            //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
-            ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
-            System.IO.File.Delete(zipPath);
+            if (pull)
+            {
+                var master = db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
+                if (master == null)
+                {
+                    throw new InvalidOperationException("master not found.");
+                }
+                var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
+                var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.AssemblyName}.zip".ToPhysicalPath();
+                using (WebClient client = new WebClient())
+                {
+                    try
+                    {
+                        await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
+                        throw ex;
+                    }
+                }
+                //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
+                ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
+                System.IO.File.Delete(zipPath);
+            }
         }
 
         private static void StartedEvent(Guid sid, DateTime? nextRunTime)

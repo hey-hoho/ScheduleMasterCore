@@ -458,7 +458,10 @@ namespace Hos.ScheduleMaster.Core.Services
         public void RunningRecovery()
         {
             _repositoryFactory.Schedules.WhereNoTracking(x => x.Status == (int)ScheduleStatus.Running).ToList()
-                .ForEach(x => InnerStart(x.Id));
+                .ForEach(x =>
+                {
+                    try { InnerStart(x.Id); } catch { }
+                });
         }
 
         /// <summary>
