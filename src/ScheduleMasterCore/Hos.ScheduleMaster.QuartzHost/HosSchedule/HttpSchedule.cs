@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using RestSharp;
+using Hos.ScheduleMaster.QuartzHost.Common;
 
 namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 {
@@ -37,7 +39,41 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         public override void Run(TaskContext context)
         {
             if (HttpOption == null) return;
-            context.WriteLog(HttpOption.RequestUrl);
+            context.WriteLog("即将请求：" + HttpOption.RequestUrl);
+
+            var client = new RestClient(HttpOption.RequestUrl);
+            var request = new RestRequest(GetRestSharpMethod(HttpOption.Method));
+            var headers = HosScheduleFactory.ConvertParamsJson(HttpOption.Headers);
+            foreach (var item in headers)
+            {
+                request.AddHeader(item.Key, item.Value.ToString());
+            }
+            request.AddHeader("content-type", HttpOption.ContentType);
+            string requestBody = string.Empty;
+            if (HttpOption.ContentType == "application/json")
+            {
+                requestBody = HttpOption.Body.Replace("\r\n", "");
+            }
+            else if (HttpOption.ContentType == "application/x-www-form-urlencoded")
+            {
+                var formData = HosScheduleFactory.ConvertParamsJson(HttpOption.Body);
+                requestBody = string.Join('&', formData.Select(x => $"{x.Key}={System.Net.WebUtility.UrlEncode(x.Value.ToString())}"));
+            }
+            request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
+            IRestResponse response = client.Execute(request);
+
+            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{response.Content}");
+        }
+
+        private Method GetRestSharpMethod(string method)
+        {
+            switch (method)
+            {
+                case "POST": return Method.POST;
+                case "PUT": return Method.PUT;
+                case "DELETE": return Method.DELETE;
+            }
+            return Method.GET;
         }
     }
 }

@@ -49,19 +49,22 @@
                                 @if (!string.IsNullOrEmpty(Model.HttpOption.Headers))
                                 {
                                     var headers = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpOption.Headers);
-                                    <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
-                                        <thead>
-                                            <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            @{
-                                                foreach (var item in headers)
-                                                {
-                                                    <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                    if (headers.Any())
+                                    {
+                                        <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
+                                            <thead>
+                                                <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    foreach (var item in headers)
+                                                    {
+                                                        <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                                    }
                                                 }
-                                            }
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    }
                                 }
                             </div>
                         </div>
@@ -82,20 +85,24 @@
                                 }
                                 else if (!string.IsNullOrEmpty(Model.HttpOption.Body))
                                 {
-                                    var headers = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpOption.Body);
-                                    <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
-                                        <thead>
-                                            <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
-                                        </thead>
-                                        <tbody>
-                                            @{
-                                                foreach (var item in headers)
-                                                {
-                                                    <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                    var datas = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Model.HttpOption.Body);
+                                    if (datas.Any())
+                                    {
+                                        <table class="table table-hover table-striped table-bordered table-condensed margin-left-10">
+                                            <thead>
+                                                <tr> <th width="30%">参数名称</th> <th width="30%">参数值</th> <th width="40%">备注</th></tr>
+                                            </thead>
+                                            <tbody>
+                                                @{
+                                                    foreach (var item in datas)
+                                                    {
+                                                        <tr><td>@item.ParamKey</td><td>@item.ParamValue</td><td>@item.ParamRemark</td></tr>
+                                                    }
                                                 }
-                                            }
-                                        </tbody>
-                                    </table>
+                                            </tbody>
+                                        </table>
+                                    }
+
                                 }
                             </div>
                         </div>

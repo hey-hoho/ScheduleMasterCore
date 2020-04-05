@@ -589,17 +589,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 bool success = WorkerSelectOne(sid, "api/quartz/runonce?sid=" + sid);
                 if (success)
                 {
-                    //运行成功后更新信息
-                    _repositoryFactory.Schedules.UpdateBy(m => m.Id == task.Id, m => new ScheduleEntity
-                    {
-                        LastRunTime = DateTime.Now,
-                        TotalRunCount = task.TotalRunCount + 1
-                    });
-                    if (_unitOfWork.Commit() > 0)
-                    {
-                        return ServiceResult(ResultStatus.Success, "任务运行成功!");
-                    }
-                    return ServiceResult(ResultStatus.Failed, "更新任务运行时间失败!");
+                    return ServiceResult(ResultStatus.Success, "任务运行成功!");
                 }
                 else
                 {

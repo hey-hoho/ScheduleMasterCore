@@ -57,7 +57,9 @@ namespace Hos.ScheduleMaster.Core.Migrations
                 columns: table => new
                 {
                     scheduleid = table.Column<Guid>(nullable: false),
-                    status = table.Column<int>(nullable: false)
+                    status = table.Column<int>(nullable: false),
+                    lockedtime = table.Column<DateTime>(nullable: true),
+                    lockednode = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -206,16 +208,16 @@ namespace Hos.ScheduleMaster.Core.Migrations
                 columns: new[] { "key", "createtime", "group", "isreuired", "name", "remark", "sort", "updatetime", "updateusername", "value" },
                 values: new object[,]
                 {
-                    { "Email_SmtpServer", new DateTime(2020, 3, 31, 15, 25, 48, 228, DateTimeKind.Local).AddTicks(7239), "邮件配置", true, "邮件服务器", "seed by efcore auto migration", 1, null, null, "" },
-                    { "Email_SmtpPort", new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(129), "邮件配置", true, "邮件服务器端口", "seed by efcore auto migration", 2, null, null, "" },
-                    { "Email_FromAccount", new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(196), "邮件配置", true, "发件人账号", "seed by efcore auto migration", 3, null, null, "" },
-                    { "Email_FromAccountPwd", new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(199), "邮件配置", true, "发件人账号密码", "seed by efcore auto migration", 4, null, null, "" }
+                    { "Email_SmtpServer", new DateTime(2020, 4, 5, 15, 38, 14, 582, DateTimeKind.Local).AddTicks(8634), "邮件配置", true, "邮件服务器", "seed by efcore auto migration", 1, null, null, "" },
+                    { "Email_SmtpPort", new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(535), "邮件配置", true, "邮件服务器端口", "seed by efcore auto migration", 2, null, null, "" },
+                    { "Email_FromAccount", new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(606), "邮件配置", true, "发件人账号", "seed by efcore auto migration", 3, null, null, "" },
+                    { "Email_FromAccountPwd", new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(608), "邮件配置", true, "发件人账号密码", "seed by efcore auto migration", 4, null, null, "" }
                 });
 
             migrationBuilder.InsertData(
                 table: "systemusers",
                 columns: new[] { "id", "createtime", "email", "lastlogintime", "password", "phone", "realname", "status", "username" },
-                values: new object[] { 1, new DateTime(2020, 3, 31, 15, 25, 48, 223, DateTimeKind.Local).AddTicks(3102), null, null, "96e79218965eb72c92a549dd5a330112", null, "admin", 1, "admin" });
+                values: new object[] { 1, new DateTime(2020, 4, 5, 15, 38, 14, 577, DateTimeKind.Local).AddTicks(8843), null, null, "96e79218965eb72c92a549dd5a330112", null, "admin", 1, "admin" });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

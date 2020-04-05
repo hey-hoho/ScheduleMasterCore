@@ -19,7 +19,11 @@ namespace Hos.ScheduleMaster.QuartzHost.AppStart
             using (var scope = new ScopeDbContext())
             {
                 var _db = scope.GetDbContext();
-                var stoppedList = _db.Schedules.Where(x => x.Status == (int)ScheduleStatus.Stop).Select(x => x.Id).ToList();
+                var stoppedList = (from s in _db.Schedules
+                                   join n in _db.ScheduleExecutors on s.Id equals n.ScheduleId
+                                   where s.Status == (int)ScheduleStatus.Stop && n.WorkerName == ConfigurationCache.NodeSetting.IdentityName
+                                   select n.ScheduleId
+                                   ).ToList();
                 foreach (var sid in stoppedList)
                 {
                     JobKey jk = new JobKey(sid.ToString().ToLower());

@@ -19,6 +19,7 @@ using System.Net;
 using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Hos.ScheduleMaster.QuartzHost.HosSchedule;
+using Microsoft.EntityFrameworkCore;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -103,6 +104,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         node.Status = isOnStop ? 0 : 1;
                         if (isOnStop) node.AccessSecret = null;
                     }
+                    //释放锁
+                    db.Database.ExecuteSqlRaw(
+                        $"update schedulelocks set status=0,lockedtime=null,lockednode=null where status=1 and lockednode='{setting.IdentityName}'");
                 }
                 if (db.SaveChanges() > 0)
                 {
@@ -500,7 +504,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                                    join t in db.Schedules on e.ScheduleId equals t.Id
                                    where e.WorkerName == ConfigurationCache.NodeSetting.IdentityName && t.Status == (int)ScheduleStatus.Running
                                    select e.ScheduleId).ToList();
-                list.AsParallel().ForAll(async sid => await StartWithRetry(sid));
+                list.AsParallel().ForAll(async sid =>
+                {
+                    try { await StartWithRetry(sid); } catch { }
+                });
             }
         }
 

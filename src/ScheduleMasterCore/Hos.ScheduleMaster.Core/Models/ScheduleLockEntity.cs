@@ -16,6 +16,12 @@ namespace Hos.ScheduleMaster.Core.Models
         [Required]
         [Column("status")]
         public int Status { get; set; }
+
+        [Column("lockedtime")]
+        public  DateTime? LockedTime { get; set; }
+
+        [Column("lockednode")]
+        public string LockedNode { get; set; }
     }
 
 }

@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core.Dto;
+using Hos.ScheduleMaster.Core.Log;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.QuartzHost.HosSchedule;
 using System;
@@ -27,13 +28,20 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             return result;
         }
 
-        private static Dictionary<string, object> ConvertParamsJson(string source)
+        public static Dictionary<string, object> ConvertParamsJson(string source)
         {
-            List<ScheduleParam> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(source);
             Dictionary<string, object> result = new Dictionary<string, object>();
-            foreach (var item in list)
+            try
             {
-                result[item.ParamKey] = item.ParamValue;
+                List<ScheduleParam> list = Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(source);
+                foreach (var item in list)
+                {
+                    result[item.ParamKey] = item.ParamValue;
+                }
+            }
+            catch (Exception ex)
+            {
+                LogHelper.Error(ex);
             }
             return result;
         }

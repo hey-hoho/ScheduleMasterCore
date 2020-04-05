@@ -189,6 +189,14 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         .HasColumnName("scheduleid")
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("LockedNode")
+                        .HasColumnName("lockednode")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
+
+                    b.Property<DateTime?>("LockedTime")
+                        .HasColumnName("lockedtime")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<int>("Status")
                         .HasColumnName("status")
                         .HasColumnType("int");
@@ -357,7 +365,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_SmtpServer",
-                            CreateTime = new DateTime(2020, 3, 31, 15, 25, 48, 228, DateTimeKind.Local).AddTicks(7239),
+                            CreateTime = new DateTime(2020, 4, 5, 15, 38, 14, 582, DateTimeKind.Local).AddTicks(8634),
                             Group = "邮件配置",
                             IsReuired = true,
                             Name = "邮件服务器",
@@ -368,7 +376,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_SmtpPort",
-                            CreateTime = new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(129),
+                            CreateTime = new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(535),
                             Group = "邮件配置",
                             IsReuired = true,
                             Name = "邮件服务器端口",
@@ -379,7 +387,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_FromAccount",
-                            CreateTime = new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(196),
+                            CreateTime = new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(606),
                             Group = "邮件配置",
                             IsReuired = true,
                             Name = "发件人账号",
@@ -390,7 +398,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Key = "Email_FromAccountPwd",
-                            CreateTime = new DateTime(2020, 3, 31, 15, 25, 48, 229, DateTimeKind.Local).AddTicks(199),
+                            CreateTime = new DateTime(2020, 4, 5, 15, 38, 14, 583, DateTimeKind.Local).AddTicks(608),
                             Group = "邮件配置",
                             IsReuired = true,
                             Name = "发件人账号密码",
@@ -493,7 +501,7 @@ namespace Hos.ScheduleMaster.Core.Migrations
                         new
                         {
                             Id = 1,
-                            CreateTime = new DateTime(2020, 3, 31, 15, 25, 48, 223, DateTimeKind.Local).AddTicks(3102),
+                            CreateTime = new DateTime(2020, 4, 5, 15, 38, 14, 577, DateTimeKind.Local).AddTicks(8843),
                             Password = "96e79218965eb72c92a549dd5a330112",
                             RealName = "admin",
                             Status = 1,
