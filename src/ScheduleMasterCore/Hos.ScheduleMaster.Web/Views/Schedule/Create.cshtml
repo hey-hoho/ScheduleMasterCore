@@ -405,7 +405,7 @@
                                         <input type="text" class="ignore form-control input-sm task-search">
                                         <i class="glyphicon glyphicon-search blue circular"></i>
                                     </span>
-                                    <div class="dd" style="max-height:500px;overflow:auto">
+                                    <div class="dd" style="max-height:500px;overflow:auto" id="task-all">
                                         @{
                                             if (Model != null)
                                             {
@@ -592,11 +592,7 @@
                 }
                 data.CustomParamsJson = JSON.stringify(getTemplateData("params-list"));
                 data.Keepers = $("#form5").getFormData().Keepers.split(',');
-                var nexts = [];
-                $("#nexts-list .dd-item").each(function (index, item) {
-                    nexts.push($(item).attr("data-id"));
-                })
-                data.Nexts = nexts;
+                data.Nexts = $('#nexts-list').nestable('serialize').map(obj => { return obj.id; });
                 hos.ui.util.postJson("@(Model==null?"/Schedule/Create":"/Schedule/Edit")", data);
             });
         });
@@ -608,8 +604,8 @@
                 var value = ctrl.find("input[name='ParamValue']").val();
                 if (key && value) {
                     params.push({
-                        ParamKey: ctrl.find("input[name='ParamKey']").val(),
-                        ParamValue: ctrl.find("input[name='ParamValue']").val(),
+                        ParamKey: key,
+                        ParamValue: value,
                         ParamRemark: ctrl.find("input[name='ParamRemark']").val(),
                     });
                 }
@@ -618,8 +614,7 @@
         }
         function executorCheckAll(obj) {
             if (obj.checked == true) {
-                var val = [];
-                $("#Executor").children().each(function () { val.push(this.value) })
+                var val = $("#Executor").children().map((i, obj) => { return obj.value; });
                 $('#Executor').val(val).trigger('change');
             }
             else {

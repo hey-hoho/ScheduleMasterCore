@@ -5,14 +5,6 @@ create table `__efmigrationshistory`
   ProductVersion varchar(32) not null
 );
 
-create table schedulekeepers
-(
-  id         int auto_increment
-    primary key,
-  scheduleid char(36) not null,
-  userId     int      not null
-);
-
 create table scheduleexecutors
 (
   id         int auto_increment
@@ -21,11 +13,32 @@ create table scheduleexecutors
   workername longtext charset utf8mb4 null
 );
 
+create table schedulehttpoptions
+(
+  scheduleid  char(36)                     not null
+    primary key,
+  requesturl  varchar(500) charset utf8mb4 not null,
+  method      varchar(10) charset utf8mb4  not null,
+  contenttype varchar(50) charset utf8mb4  not null,
+  headers     longtext charset utf8mb4     null,
+  body        longtext charset utf8mb4     null
+);
+
+create table schedulekeepers
+(
+  id         int auto_increment
+    primary key,
+  scheduleid char(36) not null,
+  userid     int      not null
+);
+
 create table schedulelocks
 (
-  scheduleid char(36) not null
+  scheduleid char(36)                 not null
     primary key,
-  status     int      not null
+  status     int                      not null,
+  lockedtime datetime(6)              null,
+  lockednode longtext charset utf8mb4 null
 );
 
 create table schedulereferences
@@ -33,31 +46,31 @@ create table schedulereferences
   id         int auto_increment
     primary key,
   scheduleid char(36) not null,
-  childId    char(36) not null
+  childid    char(36) not null
 );
 
 create table schedules
 (
-  id               char(36)                      not null
+  id               char(36)                     not null
     primary key,
-  title            varchar(50) charset utf8mb4   not null,
-  remark           varchar(500) charset utf8mb4  null,
-  runloop          tinyint(1)                    not null,
-  cronexpression   varchar(50) charset utf8mb4   null,
-  assemblyname     varchar(200) charset utf8mb4  not null,
-  classname        varchar(200) charset utf8mb4  not null,
-  customparamsjson varchar(2000) charset utf8mb4 null,
-  status           int                           not null,
-  startdate        datetime(6)                   null,
-  enddate          datetime(6)                   null,
-  createtime       datetime(6)                   not null,
-  createuserid     int                           not null,
-  createusername   longtext charset utf8mb4      null,
-  lastruntime      datetime(6)                   null,
-  nextruntime      datetime(6)                   null,
-  totalruncount    int                           not null
+  title            varchar(50) charset utf8mb4  not null,
+  metatype         int                          not null,
+  remark           varchar(500) charset utf8mb4 null,
+  runloop          tinyint(1)                   not null,
+  cronexpression   varchar(50) charset utf8mb4  null,
+  assemblyname     varchar(200) charset utf8mb4 null,
+  classname        varchar(200) charset utf8mb4 null,
+  customparamsjson longtext charset utf8mb4     null,
+  status           int                          not null,
+  startdate        datetime(6)                  null,
+  enddate          datetime(6)                  null,
+  createtime       datetime(6)                  not null,
+  createuserid     int                          not null,
+  createusername   varchar(50) charset utf8mb4  null,
+  lastruntime      datetime(6)                  null,
+  nextruntime      datetime(6)                  null,
+  totalruncount    int                          not null
 );
-
 
 create table scheduletraces
 (
@@ -84,7 +97,6 @@ create table servernodes
   status         int                          not null,
   priority       int                          not null
 );
-
 
 create table systemconfigs
 (
@@ -128,9 +140,11 @@ create table systemusers
   lastlogintime datetime(6)                  null
 );
 
-insert into schedule_master.systemusers (id, username, password, realname, phone, email, status, createtime, lastlogintime) values (1, 'admin', '96e79218965eb72c92a549dd5a330112', 'admin', null, null, 1, '2019-12-25 16:45:24.538263', '2020-01-06 09:47:26.077974');
-insert into schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) values ('Email_FromAccount', '邮件配置', '发件人账号', '', 3, 1, 'seed by efcore auto migration', '2019-12-25 16:45:24.543845', '2019-12-27 16:18:30.085219', null);
-insert into schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) values ('Email_FromAccountPwd', '邮件配置', '发件人账号密码', 'h', 4, 1, 'seed by efcore auto migration', '2019-12-25 16:45:24.543845', '2019-12-27 16:18:30.085779', null);
-insert into schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) values ('Email_SmtpPort', '邮件配置', '邮件服务器端口', '', 2, 1, 'seed by efcore auto migration', '2019-12-25 16:45:24.543839', '2019-12-27 16:18:30.084619', null);
-insert into schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) values ('Email_SmtpServer', '邮件配置', '邮件服务器', '', 1, 1, 'seed by efcore auto migration', '2019-12-25 16:45:24.543653', '2019-12-27 16:18:30.080192', null);
+
+
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Assembly_ImagePullPolicy', '程序集配置', '文件包拉取策略', 'IfNotPresent', 1, 1, 'Always-总是拉取，IfNotPresent-本地没有时拉取', '2020-04-05 08:57:18.417000', '2020-04-05 17:12:09.487020', 'admin');
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_FromAccount', '邮件配置', '发件人账号', '', 3, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583060', '2020-04-05 17:12:09.492483', 'admin');
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_FromAccountPwd', '邮件配置', '发件人账号密码', '', 4, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583060', '2020-04-05 17:12:09.493020', 'admin');
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_SmtpPort', '邮件配置', '邮件服务器端口', '25', 2, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583053', '2020-04-05 17:12:09.491849', 'admin');
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_SmtpServer', '邮件配置', '邮件服务器', '', 1, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.582863', '2020-04-05 17:12:09.491180', 'admin');
 
