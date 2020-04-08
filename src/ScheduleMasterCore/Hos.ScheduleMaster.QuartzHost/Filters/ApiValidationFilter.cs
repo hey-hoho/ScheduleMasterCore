@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Hos.ScheduleMaster.Core.Log;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -23,6 +24,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
                 return;
             }
             var secret = context.HttpContext.Request.Headers["sm_secret"].FirstOrDefault();
+            LogHelper.Info($"w:{Common.QuartzManager.AccessSecret} m:{secret}");
             if (!Common.QuartzManager.AccessSecret.Equals(secret))
             {
                 context.Result = new UnauthorizedResult();

@@ -47,7 +47,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 if (_scheduler == null)
                 {
                     NameValueCollection properties = new NameValueCollection();
-                    properties["quartz.scheduler.instanceName"] = "Hos.SchefuleMaster";
+                    properties["quartz.scheduler.instanceName"] = "Hos.ScheduleMaster";
                     properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
                     properties["quartz.threadPool.threadCount"] = "50";
                     properties["quartz.threadPool.threadPriority"] = "Normal";
@@ -87,6 +87,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         isCreate = true;
                         node = new ServerNodeEntity();
                     }
+                    string secret = Guid.NewGuid().ToString("n");
                     node.NodeName = setting.IdentityName;
                     node.NodeType = setting.Role;
                     node.MachineName = Environment.MachineName;
@@ -94,8 +95,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     node.Host = $"{setting.IP}:{setting.Port}";
                     node.Priority = setting.Priority;
                     node.Status = 2;
-                    node.AccessSecret = Guid.NewGuid().ToString("n");
+                    node.AccessSecret = secret;
                     if (isCreate) db.ServerNodes.Add(node);
+                    else db.ServerNodes.Update(node);
+                    db.SaveChanges();
+                    AccessSecret = secret;
                 }
                 else
                 {
@@ -103,14 +107,13 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     {
                         node.Status = isOnStop ? 0 : 1;
                         if (isOnStop) node.AccessSecret = null;
+                        db.ServerNodes.Update(node);
+                        db.SaveChanges();
+                        AccessSecret = null;
                     }
                     //释放锁
                     db.Database.ExecuteSqlRaw(
                         $"update schedulelocks set status=0,lockedtime=null,lockednode=null where status=1 and lockednode='{setting.IdentityName}'");
-                }
-                if (db.SaveChanges() > 0)
-                {
-                    AccessSecret = node.AccessSecret;
                 }
             }
         }
@@ -469,7 +472,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     throw new InvalidOperationException("master not found.");
                 }
                 var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
-                var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.AssemblyName}.zip".ToPhysicalPath();
+                var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id.ToString("n")}.zip".ToPhysicalPath();
                 using (WebClient client = new WebClient())
                 {
                     try

@@ -75,7 +75,14 @@ namespace Hos.ScheduleMaster.Core
                 return default(T);
             }
             string value = _cacheContainer[key];
-            return (T)Convert.ChangeType(value, typeof(T));
+            try
+            {
+                return (T)Convert.ChangeType(value, typeof(T));
+            }
+            catch (Exception)
+            {
+                return default(T);
+            }
         }
 
         #region 配置项key

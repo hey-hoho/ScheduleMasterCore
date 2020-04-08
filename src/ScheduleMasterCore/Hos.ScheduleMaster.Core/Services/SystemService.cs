@@ -49,7 +49,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public ListPager<SystemLogEntity> QueryLogPager(ListPager<SystemLogEntity> pager)
         {
-            return _repositoryFactory.SystemLogs.WherePager(pager, m => true, m => m.Id, false);
+            return _repositoryFactory.SystemLogs.WherePager(pager, m => true, m => m.CreateTime, false);
         }
 
         /// <summary>

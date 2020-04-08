@@ -87,6 +87,17 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Group = "程序集配置",
                     Remark = "Always-总是拉取，IfNotPresent-本地没有时拉取",
                     Sort = 1
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "Http_RequestTimeout",
+                    Name = "请求超时时间",
+                    Value = "10",
+                    Group = "HTTP配置",
+                    Remark = "单位是秒，默认值是10",
+                    Sort = 1
                 }
                 );
             return builder;

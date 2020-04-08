@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RestSharp;
 using Hos.ScheduleMaster.QuartzHost.Common;
+using Hos.ScheduleMaster.Core;
 
 namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 {
@@ -42,6 +43,16 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             if (HttpOption == null) return;
             context.WriteLog("即将请求：" + HttpOption.RequestUrl);
 
+            var response = DoRequest();
+            if (response == null)
+            {
+                context.WriteLog("无响应：" + HttpOption.RequestUrl);
+            }
+            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
+        }
+
+        private IRestResponse DoRequest()
+        {
             var client = new RestClient(HttpOption.RequestUrl);
             var request = new RestRequest(GetRestSharpMethod(HttpOption.Method));
             var headers = HosScheduleFactory.ConvertParamsJson(HttpOption.Headers);
@@ -50,6 +61,12 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
                 request.AddHeader(item.Key, item.Value.ToString());
             }
             request.AddHeader("content-type", HttpOption.ContentType);
+            request.Timeout = 10000;
+            int config = ConfigurationCache.GetField<int>("Http_RequestTimeout");
+            if (config > 0)
+            {
+                request.Timeout = config * 1000;
+            }
             string requestBody = string.Empty;
             if (HttpOption.ContentType == "application/json")
             {
@@ -62,8 +79,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             }
             request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
             IRestResponse response = client.Execute(request);
-
-            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
+            return response;
         }
 
         private Method GetRestSharpMethod(string method)
