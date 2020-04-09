@@ -106,10 +106,10 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     if (node != null)
                     {
                         node.Status = isOnStop ? 0 : 1;
-                        if (isOnStop) node.AccessSecret = null;
+                        node.AccessSecret = null;
                         db.ServerNodes.Update(node);
                         db.SaveChanges();
-                        AccessSecret = null;
+                        AccessSecret = string.Empty;
                     }
                     //释放锁
                     db.Database.ExecuteSqlRaw(
