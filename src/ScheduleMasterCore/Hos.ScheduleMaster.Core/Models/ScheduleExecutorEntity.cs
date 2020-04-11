@@ -23,6 +23,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// worker名称
         /// </summary>
         [Column("workername")]
+        [MaxLength(100)]
         public string WorkerName { get; set; }
     }
 }

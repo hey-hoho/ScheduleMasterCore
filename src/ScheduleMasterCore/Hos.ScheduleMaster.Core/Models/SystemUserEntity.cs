@@ -14,15 +14,15 @@ namespace Hos.ScheduleMaster.Core.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Required]
+        [Required, MaxLength(50)]
         [Column("username")]
         public string UserName { get; set; }
 
-        [Required]
+        [Required, MaxLength(50)]
         [Column("password")]
         public string Password { get; set; }
 
-        [Required]
+        [Required, MaxLength(50)]
         [Column("realname")]
         public string RealName { get; set; }
 

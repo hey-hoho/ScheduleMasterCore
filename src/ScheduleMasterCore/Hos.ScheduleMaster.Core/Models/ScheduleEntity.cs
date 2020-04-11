@@ -26,7 +26,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 任务名称
         /// </summary>
-        [Required, MaxLength(50)]
+        [Required, MaxLength(100)]
         [Column("title")]
         public string Title { get; set; }
 

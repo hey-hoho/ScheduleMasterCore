@@ -27,7 +27,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
             //LogHelper.Info($"w:{Common.QuartzManager.AccessSecret} m:{secret}");
             if (!Common.QuartzManager.AccessSecret.Equals(secret))
             {
-                context.Result = new UnauthorizedResult();
+                context.Result = new UnauthorizedObjectResult($"w:{Common.QuartzManager.AccessSecret} m:{secret}");
             }
         }
     }

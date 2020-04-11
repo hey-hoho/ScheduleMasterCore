@@ -21,6 +21,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public  DateTime? LockedTime { get; set; }
 
         [Column("lockednode")]
+        [MaxLength(100)]
         public string LockedNode { get; set; }
     }
 

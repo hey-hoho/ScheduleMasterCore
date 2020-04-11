@@ -48,9 +48,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     NameValueCollection properties = new NameValueCollection();
                     properties["quartz.scheduler.instanceName"] = "Hos.ScheduleMaster";
-                    properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
-                    properties["quartz.threadPool.threadCount"] = "50";
-                    properties["quartz.threadPool.threadPriority"] = "Normal";
+                    //3.0版本已经不支持SimpleThreadPool了，直接使用CLR的线程池。
+                    //详情见https://www.quartz-scheduler.net/documentation/quartz-3.x/migration-guide.html
+                    //properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
+                    //properties["quartz.threadPool.threadCount"] = "50";
+                    //properties["quartz.threadPool.threadPriority"] = "Normal";
                     ISchedulerFactory factory = new StdSchedulerFactory(properties);
                     _scheduler = await factory.GetScheduler();
                 }
@@ -98,8 +100,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     node.AccessSecret = secret;
                     if (isCreate) db.ServerNodes.Add(node);
                     else db.ServerNodes.Update(node);
-                    db.SaveChanges();
-                    AccessSecret = secret;
+                    if (db.SaveChanges() > 0) AccessSecret = secret;
                 }
                 else
                 {
@@ -108,8 +109,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                         node.Status = isOnStop ? 0 : 1;
                         node.AccessSecret = null;
                         db.ServerNodes.Update(node);
-                        db.SaveChanges();
-                        AccessSecret = string.Empty;
+                        if (db.SaveChanges() > 0) AccessSecret = string.Empty;
                     }
                     //释放锁
                     db.Database.ExecuteSqlRaw(

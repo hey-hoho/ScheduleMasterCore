@@ -42,6 +42,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public DateTime? UpdateTime { get; set; }
 
         [Column("updateusername")]
+        [MaxLength(50)]
         public string UpdateUserName { get; set; }
     }
 }

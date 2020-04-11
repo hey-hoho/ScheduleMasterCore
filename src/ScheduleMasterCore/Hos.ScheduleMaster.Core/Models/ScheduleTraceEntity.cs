@@ -21,6 +21,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 所在节点
         /// </summary>
         [Column("node")]
+        [MaxLength(100)]
         public string Node { get; set; }
 
         /// <summary>

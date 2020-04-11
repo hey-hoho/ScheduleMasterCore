@@ -1,144 +1,158 @@
+
 create table `__efmigrationshistory`
 (
-  MigrationId    varchar(95) not null
-    primary key,
-  ProductVersion varchar(32) not null
-);
+	MigrationId varchar(95) not null
+		primary key,
+	ProductVersion varchar(32) not null
+)
+;
 
 create table scheduleexecutors
 (
-  id         int auto_increment
-    primary key,
-  scheduleid char(36)                 not null,
-  workername longtext charset utf8mb4 null
-);
+	id int auto_increment
+		primary key,
+	scheduleid char(36) not null,
+	workername varchar(100) charset utf8mb4 null
+)
+;
 
 create table schedulehttpoptions
 (
-  scheduleid  char(36)                     not null
-    primary key,
-  requesturl  varchar(500) charset utf8mb4 not null,
-  method      varchar(10) charset utf8mb4  not null,
-  contenttype varchar(50) charset utf8mb4  not null,
-  headers     longtext charset utf8mb4     null,
-  body        longtext charset utf8mb4     null
-);
+	scheduleid char(36) not null
+		primary key,
+	requesturl varchar(500) charset utf8mb4 not null,
+	method varchar(10) charset utf8mb4 not null,
+	contenttype varchar(50) charset utf8mb4 not null,
+	headers longtext charset utf8mb4 null,
+	body longtext charset utf8mb4 null
+)
+;
 
 create table schedulekeepers
 (
-  id         int auto_increment
-    primary key,
-  scheduleid char(36) not null,
-  userid     int      not null
-);
+	id int auto_increment
+		primary key,
+	scheduleid char(36) not null,
+	userid int not null
+)
+;
 
 create table schedulelocks
 (
-  scheduleid char(36)                 not null
-    primary key,
-  status     int                      not null,
-  lockedtime datetime(6)              null,
-  lockednode longtext charset utf8mb4 null
-);
+	scheduleid char(36) not null
+		primary key,
+	status int not null,
+	lockedtime datetime(6) null,
+	lockednode varchar(100) charset utf8mb4 null
+)
+;
 
 create table schedulereferences
 (
-  id         int auto_increment
-    primary key,
-  scheduleid char(36) not null,
-  childid    char(36) not null
-);
+	id int auto_increment
+		primary key,
+	scheduleid char(36) not null,
+	childid char(36) not null
+)
+;
 
 create table schedules
 (
-  id               char(36)                     not null
-    primary key,
-  title            varchar(50) charset utf8mb4  not null,
-  metatype         int                          not null,
-  remark           varchar(500) charset utf8mb4 null,
-  runloop          tinyint(1)                   not null,
-  cronexpression   varchar(50) charset utf8mb4  null,
-  assemblyname     varchar(200) charset utf8mb4 null,
-  classname        varchar(200) charset utf8mb4 null,
-  customparamsjson longtext charset utf8mb4     null,
-  status           int                          not null,
-  startdate        datetime(6)                  null,
-  enddate          datetime(6)                  null,
-  createtime       datetime(6)                  not null,
-  createuserid     int                          not null,
-  createusername   varchar(50) charset utf8mb4  null,
-  lastruntime      datetime(6)                  null,
-  nextruntime      datetime(6)                  null,
-  totalruncount    int                          not null
-);
+	id char(36) not null
+		primary key,
+	title varchar(100) charset utf8mb4 not null,
+	metatype int not null,
+	remark varchar(500) charset utf8mb4 null,
+	runloop tinyint(1) not null,
+	cronexpression varchar(50) charset utf8mb4 null,
+	assemblyname varchar(200) charset utf8mb4 null,
+	classname varchar(200) charset utf8mb4 null,
+	customparamsjson longtext charset utf8mb4 null,
+	status int not null,
+	startdate datetime(6) null,
+	enddate datetime(6) null,
+	createtime datetime(6) not null,
+	createuserid int not null,
+	createusername varchar(50) charset utf8mb4 null,
+	lastruntime datetime(6) null,
+	nextruntime datetime(6) null,
+	totalruncount int not null
+)
+;
 
 create table scheduletraces
 (
-  traceid     char(36)                 not null
-    primary key,
-  scheduleid  char(36)                 not null,
-  node        longtext charset utf8mb4 null,
-  starttime   datetime(6)              not null,
-  endtime     datetime(6)              not null,
-  elapsedtime double                   not null,
-  result      int                      not null
-);
+	traceid char(36) not null
+		primary key,
+	scheduleid char(36) not null,
+	node varchar(100) charset utf8mb4 null,
+	starttime datetime(6) not null,
+	endtime datetime(6) not null,
+	elapsedtime double not null,
+	result int not null
+)
+;
 
 create table servernodes
 (
-  nodename       varchar(255) charset utf8mb4 not null
-    primary key,
-  nodetype       longtext charset utf8mb4     not null,
-  machinename    longtext charset utf8mb4     null,
-  accessprotocol longtext charset utf8mb4     not null,
-  host           longtext charset utf8mb4     not null,
-  accesssecret   longtext charset utf8mb4     null,
-  lastupdatetime datetime(6)                  null,
-  status         int                          not null,
-  priority       int                          not null
-);
+	nodename varchar(255) charset utf8mb4 not null
+		primary key,
+	nodetype varchar(20) charset utf8mb4 not null,
+	machinename varchar(100) charset utf8mb4 null,
+	accessprotocol varchar(20) charset utf8mb4 not null,
+	host varchar(100) charset utf8mb4 not null,
+	accesssecret varchar(50) charset utf8mb4 null,
+	lastupdatetime datetime(6) null,
+	status int not null,
+	priority int not null
+)
+;
 
 create table systemconfigs
 (
-  `key`          varchar(50) charset utf8mb4   not null
-    primary key,
-  `group`        varchar(50) charset utf8mb4   not null,
-  name           varchar(100) charset utf8mb4  not null,
-  value          varchar(1000) charset utf8mb4 null,
-  sort           int                           not null,
-  isreuired      tinyint(1)                    not null,
-  remark         varchar(500) charset utf8mb4  null,
-  createtime     datetime(6)                   not null,
-  updatetime     datetime(6)                   null,
-  updateusername longtext charset utf8mb4      null
-);
+	`key` varchar(50) charset utf8mb4 not null
+		primary key,
+	`group` varchar(50) charset utf8mb4 not null,
+	name varchar(100) charset utf8mb4 not null,
+	value varchar(1000) charset utf8mb4 null,
+	sort int not null,
+	isreuired tinyint(1) not null,
+	remark varchar(500) charset utf8mb4 null,
+	createtime datetime(6) not null,
+	updatetime datetime(6) null,
+	updateusername varchar(50) charset utf8mb4 null
+)
+;
 
 create table systemlogs
 (
-  id         int auto_increment
-    primary key,
-  category   int                      not null,
-  message    longtext charset utf8mb4 not null,
-  stacktrace longtext charset utf8mb4 null,
-  scheduleid char(36)                 null,
-  node       longtext charset utf8mb4 null,
-  traceid    char(36)                 null,
-  createtime datetime(6)              not null
-);
+	id int auto_increment
+		primary key,
+	category int not null,
+	message longtext charset utf8mb4 not null,
+	stacktrace longtext charset utf8mb4 null,
+	scheduleid char(36) null,
+	node varchar(100) charset utf8mb4 null,
+	traceid char(36) null,
+	createtime datetime(6) not null
+)
+;
 
 create table systemusers
 (
-  id            int auto_increment
-    primary key,
-  username      longtext charset utf8mb4     not null,
-  password      longtext charset utf8mb4     not null,
-  realname      longtext charset utf8mb4     not null,
-  phone         varchar(15) charset utf8mb4  null,
-  email         varchar(500) charset utf8mb4 null,
-  status        int                          not null,
-  createtime    datetime(6)                  not null,
-  lastlogintime datetime(6)                  null
-);
+	id int auto_increment
+		primary key,
+	username varchar(50) charset utf8mb4 not null,
+	password varchar(50) charset utf8mb4 not null,
+	realname varchar(50) charset utf8mb4 not null,
+	phone varchar(15) charset utf8mb4 null,
+	email varchar(500) charset utf8mb4 null,
+	status int not null,
+	createtime datetime(6) not null,
+	lastlogintime datetime(6) null
+)
+;
+
 
 
 
