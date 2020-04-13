@@ -315,6 +315,10 @@ namespace Hos.ScheduleMaster.Web.Controllers
             var pager = new ListPager<ScheduleTraceEntity>(PageIndex, PageSize);
             pager.AddFilter(m => m.ScheduleId == sid.Value);
             pager.AddFilter(m => m.StartTime >= startDate && m.StartTime <= endDate);
+            if (result.HasValue)
+            {
+                pager.AddFilter(m => m.Result == result.Value);
+            }
             pager = _scheduleService.QueryTracePager(pager);
             return GridData(pager.Total, pager.Rows);
         }

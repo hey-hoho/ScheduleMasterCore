@@ -46,9 +46,16 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             var response = DoRequest();
             if (response == null)
             {
-                context.WriteLog("无响应：" + HttpOption.RequestUrl);
+                throw new Exception("无响应：" + HttpOption.RequestUrl);
             }
-            context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
+            if (response.IsSuccessful)
+            {
+                context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
+            }
+            else
+            {
+                throw response.ErrorException;
+            }
         }
 
         private IRestResponse DoRequest()
@@ -76,8 +83,15 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             {
                 var formData = HosScheduleFactory.ConvertParamsJson(HttpOption.Body);
                 requestBody = string.Join('&', formData.Select(x => $"{x.Key}={System.Net.WebUtility.UrlEncode(x.Value.ToString())}"));
+                if (request.Method == Method.GET && formData.Count > 0)
+                {
+                    client.BaseUrl = new Uri($"{HttpOption.RequestUrl}?{requestBody}");
+                }
             }
-            request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
+            if (request.Method != Method.GET)
+            {
+                request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
+            }
             IRestResponse response = client.Execute(request);
             return response;
         }
