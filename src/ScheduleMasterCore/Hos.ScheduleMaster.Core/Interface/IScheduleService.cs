@@ -69,7 +69,7 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// </summary>
         /// <param name="status"></param>
         /// <returns></returns>
-        List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status);
+        IEnumerable<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status);
 
         /// <summary>
         /// 查询任务的http配置

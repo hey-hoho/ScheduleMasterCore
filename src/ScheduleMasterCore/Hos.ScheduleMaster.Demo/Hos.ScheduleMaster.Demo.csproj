@@ -8,4 +8,10 @@
     <ProjectReference Include="..\Hos.ScheduleMaster.Base\Hos.ScheduleMaster.Base.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="myconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

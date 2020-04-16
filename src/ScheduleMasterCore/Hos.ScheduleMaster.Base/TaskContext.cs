@@ -23,11 +23,6 @@ namespace Hos.ScheduleMaster.Base
         public string Node { private get; set; }
 
         /// <summary>
-        /// 任务id，每次运行前都会重新赋值，方便写log或其他操作时跟踪
-        /// </summary>
-        public Guid TaskId { protected get; set; }
-
-        /// <summary>
         /// 运行轨迹
         /// </summary>
         public Guid TraceId { private get; set; }
@@ -91,7 +86,7 @@ namespace Hos.ScheduleMaster.Base
                 Category = (int)type,
                 Message = message,
                 CreateTime = DateTime.Now,
-                ScheduleId = TaskId,
+                ScheduleId = _instance.TaskId,
                 Node = Node,
                 TraceId = TraceId
             });
@@ -109,7 +104,7 @@ namespace Hos.ScheduleMaster.Base
                 Message = ex.Message,
                 StackTrace = ex.StackTrace,
                 CreateTime = DateTime.Now,
-                ScheduleId = TaskId,
+                ScheduleId = _instance.TaskId,
                 Node = Node,
                 TraceId = TraceId
             });

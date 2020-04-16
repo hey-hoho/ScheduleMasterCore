@@ -46,7 +46,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                             Stopwatch stopwatch = new Stopwatch();
                             TaskContext tctx = new TaskContext(instance.RunnableInstance);
                             tctx.Node = node;
-                            tctx.TaskId = _sid;
                             tctx.TraceId = traceId;
                             tctx.ParamsDict = instance.CustomParams;
                             if (context.MergedJobDataMap["PreviousResult"] is object prev)

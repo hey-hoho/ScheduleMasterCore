@@ -1,6 +1,8 @@
 ﻿using Hos.ScheduleMaster.Base.Dto;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Hos.ScheduleMaster.Base
 {
@@ -13,6 +15,25 @@ namespace Hos.ScheduleMaster.Base
         internal Queue<ScheduleLog> logger = new Queue<ScheduleLog>();
 
         private bool _isRunning = false;
+
+        /// <summary>
+        /// 任务id，创建实例时赋值，方便写log或其他操作时跟踪
+        /// </summary>
+        public Guid TaskId { get; set; }
+
+        /// <summary>
+        /// 自定义配置信息，使用前必须加载过配置文件
+        /// </summary>
+        public IConfigurationRoot Configuration { get; private set; }
+
+        /// <summary>
+        /// 这里可以执行一些初始化操作，比如加载自己的配置文件
+        /// </summary>
+        /// <param name="context"></param>
+        public virtual void Initialize()
+        {
+            ///TODO:
+        }
 
         /// <summary>
         /// 任务执行的方法，由具体任务去重写实现
@@ -52,6 +73,20 @@ namespace Hos.ScheduleMaster.Base
             {
                 new RunConflictException("互斥跳过");
             }
+        }
+
+
+        /// <summary>
+        /// 设置自定义json配置文件
+        /// </summary>
+        /// <param name="filePath">json文件的相对地址</param>
+        protected void SetConfigurationFile(string filePath)
+        {
+            if (string.IsNullOrEmpty(filePath) || !filePath.EndsWith(".json")) return;
+            var builder = new ConfigurationBuilder()
+             .SetBasePath($"{Directory.GetCurrentDirectory()}\\wwwroot\\plugins\\{TaskId.ToString()}\\".Replace('\\', Path.DirectorySeparatorChar))
+             .AddJsonFile(filePath, optional: false, reloadOnChange: true);
+            Configuration = builder.Build();
         }
 
         public ScheduleLog ReadLog()

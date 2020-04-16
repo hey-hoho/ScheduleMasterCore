@@ -158,7 +158,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="status"></param>
         /// <returns></returns>
-        public List<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status)
+        public IEnumerable<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status)
         {
             var query = _repositoryFactory.ScheduleTraces.WhereNoTracking(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-9));
             if (status.HasValue)
@@ -166,16 +166,15 @@ namespace Hos.ScheduleMaster.Core.Services
                 query = query.Where(x => x.Result == status.Value);
             }
             var list = query.GroupBy(x => x.StartTime.Date).Select(x => new KeyValuePair<long, int>(x.Key.ToTimeStamp(), x.Count())).ToList();
-            List<KeyValuePair<long, int>> result = new List<KeyValuePair<long, int>>();
+
             for (int i = 9; i >= 0; i--)
             {
                 long day = DateTime.Today.AddDays(-i).ToTimeStamp();
                 int cnt = 0;
                 var dl = list.Any(x => x.Key == day);
                 if (list.Any(x => x.Key == day)) cnt = list.FirstOrDefault(x => x.Key == day).Value;
-                result.Add(new KeyValuePair<long, int>(day, cnt));
+                yield return new KeyValuePair<long, int>(day, cnt);
             }
-            return result;
         }
 
         /// <summary>
@@ -315,7 +314,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 StartDate = model.StartDate,
                 Title = model.Title
             });
-            if (model.MetaType == 2)
+            if (model.MetaType == (int)ScheduleMetaType.Http)
             {
                 _repositoryFactory.ScheduleHttpOptions.DeleteBy(x => x.ScheduleId == model.Id);
                 _repositoryFactory.ScheduleHttpOptions.Add(new ScheduleHttpOptionEntity
@@ -652,6 +651,7 @@ namespace Hos.ScheduleMaster.Core.Services
                         NextRunTime = null
                     });
                     //删除关联数据
+                    _repositoryFactory.ScheduleHttpOptions.DeleteBy(x => x.ScheduleId == sid);
                     _repositoryFactory.ScheduleExecutors.DeleteBy(x => x.ScheduleId == sid);
                     _repositoryFactory.ScheduleKeepers.DeleteBy(x => x.ScheduleId == sid);
                     _repositoryFactory.ScheduleLocks.DeleteBy(x => x.ScheduleId == sid);
@@ -685,6 +685,15 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 w.LastUpdateTime = DateTime.Now;
                 _repositoryFactory.ServerNodes.Update(w);
+                //释放该节点占据的锁
+                _repositoryFactory.ScheduleLocks.UpdateBy(
+                    x => x.LockedNode == w.NodeName && x.Status == 1
+                    , x => new ScheduleLockEntity
+                    {
+                        Status = 0,
+                        LockedNode = null,
+                        LockedTime = null
+                    });
             });
             _unitOfWork.Commit();
         }

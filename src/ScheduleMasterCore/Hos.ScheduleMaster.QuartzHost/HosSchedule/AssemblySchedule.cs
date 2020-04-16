@@ -32,6 +32,8 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             {
                 throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
             }
+            RunnableInstance.TaskId = view.Schedule.Id;
+            RunnableInstance.Initialize();
         }
 
         public Type GetQuartzJobType()
