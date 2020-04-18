@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Base;
 using Hos.ScheduleMaster.Core.Models;
@@ -15,6 +16,8 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         public List<KeyValuePair<string, string>> Keepers { get; set; }
         public Dictionary<Guid, string> Children { get; set; }
         public TaskBase RunnableInstance { get; set; }
+
+        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         private PluginLoadContext loadContext;
 
@@ -32,8 +35,6 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             {
                 throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
             }
-            RunnableInstance.TaskId = view.Schedule.Id;
-            RunnableInstance.Initialize();
         }
 
         public Type GetQuartzJobType()
@@ -44,6 +45,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         public void Dispose()
         {
             AssemblyHelper.UnLoadAssemblyLoadContext(loadContext);
+            RunnableInstance = null;
         }
     }
 }

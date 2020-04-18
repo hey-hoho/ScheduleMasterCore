@@ -1,0 +1,102 @@
+﻿
+@model Hos.ScheduleMaster.Core.Models.ServerNodeEntity
+
+<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">@(Model != null ? "编辑" : "添加")节点</span>
+        </div>
+        <div class="widget-body">
+            <form class="form-horizontal" action="@Url.Action("NodeSave")" data-ajax="true" data-ajax-method="post" id="form1" data-ajax-complete="" data-ajax-begin="" novalidate="novalidate">
+
+                @if (Model == null)
+                {
+                    @Html.Hidden("savetype", "add");
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">节点名称</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.NodeName, new { @class = "form-control", required = "", maxlength = "50" })
+                            <p class="help-block">名称添加后不可修改，节点类型默认是worker</p>
+                        </div>
+                    </div>
+                    @Html.Hidden("NodeType", "worker");
+                }
+                else
+                {
+                    @Html.Hidden("savetype", "edit");
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">节点名称</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.NodeName, new { @class = "form-control", required = "", maxlength = "50", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    @Html.HiddenFor(x => x.NodeType)
+                }
+                @*<div class="form-group">
+            <label for="" class="col-sm-2 control-label no-padding-right">节点类型</label>
+            <div class="col-sm-6">
+                <div class="col-lg-4 col-sm-4 col-xs-4 no-padding-left">
+                    <div class="radio">
+                        <label class="no-padding-left">
+                            <input name="NodeType" type="radio" value="master" class="colored-blue" @((Model == null || Model.NodeType == "master") ? "checked=''" : "")>
+                            <span class="text"> master</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-sm-4 col-xs-4">
+                    <div class="radio">
+                        <label class="no-padding-left">
+                            <input name="NodeType" type="radio" value="worker" class="colored-blue" @((Model != null && Model.NodeType == "worker") ? "checked=''" : "")>
+                            <span class="text"> worker</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">主机名</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.MachineName, new { @class = "form-control", required = "", maxlength = "50" })
+                    </div>
+                </div>
+                <div class="form-group" id="ctn_CronExpression">
+                    <label for="" class="col-sm-2 control-label no-padding-right">访问协议</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.AccessProtocol, new { @class = "form-control", required = "", maxlength = "20" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">主机地址</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.Host, new { @class = "form-control", required = "", maxlength = "50" })
+                        <p class="help-block">格式为<b>{ip}:{port}</b></p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">权重</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.Priority, new { @class = "form-control", type = "number", max = "1000", min = "0" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <button type="submit" class="btn btn-primary">保  存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                    </div>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+    <script src="~/js/jquery.unobtrusive-ajax.js"></script>
+    <script src="~/js/jquery.validate.min.js"></script>
+    <script type="text/javascript">
+        hos.ui.util.breadCrumb("节点管理-编辑");
+        $(document).ready(function () {
+            hos.ui.util.formValidate("form1");
+        });
+    </script>
+}

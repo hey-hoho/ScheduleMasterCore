@@ -95,7 +95,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                     {
                         return SuccessTip("编辑用户成功！", Url.Action("Index"));
                     }
-                    return DangerTip("创建用户失败！");
+                    return DangerTip("编辑用户失败！");
                 }
                 else
                 {

@@ -26,7 +26,7 @@ namespace Hos.ScheduleMaster.Core.Log
                     {
                         Queue.Read((item, index) =>
                         {
-                            item.Node = ConfigurationCache.NodeSetting.IdentityName;
+                            item.Node = ConfigurationCache.NodeSetting?.IdentityName;
                             ///item.CreateTime = DateTime.Now;
                             db.SystemLogs.Add(item);
                         });
@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Core.Log
 
         public static void Shutdown()
         {
-            Queue.Clear();
+            if (Queue != null) { Queue.Clear(); }
         }
     }
 }

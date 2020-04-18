@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace Hos.ScheduleMaster.Base
 {
@@ -25,6 +26,8 @@ namespace Hos.ScheduleMaster.Base
         /// 自定义配置信息，使用前必须加载过配置文件
         /// </summary>
         public IConfigurationRoot Configuration { get; private set; }
+
+        public CancellationToken CancellationToken { get; set; }
 
         /// <summary>
         /// 这里可以执行一些初始化操作，比如加载自己的配置文件

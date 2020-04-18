@@ -61,7 +61,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public DateTime? LastUpdateTime { get; set; }
 
         /// <summary>
-        /// 节点状态，0-下线，1-停机，2-运行
+        /// 节点状态，0-下线，1-空闲，2-运行
         /// </summary>
         [Column("status")]
         public int Status { get; set; }

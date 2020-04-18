@@ -362,6 +362,20 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
+        /// 查询指定任务正在运行状态的worker列表
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        private List<ServerNodeEntity> GetAvaliableWorkerForSchedule(Guid sid)
+        {
+            var query = from n in _repositoryFactory.ServerNodes.Table
+                        where n.NodeType == "worker" && n.Status == 2
+                        && (from e in _repositoryFactory.ScheduleExecutors.Table where e.ScheduleId == sid && n.NodeName == e.WorkerName select 1).Any()
+                        select n;
+            return query.AsNoTracking().ToList();
+        }
+
+        /// <summary>
         /// 遍历所有worker并执行操作
         /// </summary>
         /// <param name="sid"></param>
@@ -370,12 +384,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         private bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
         {
-            var nodeList = _repositoryFactory.ServerNodes.WhereNoTracking(x => x.NodeType == "worker" && x.Status == 2).ToList();
-            var executor = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
-            if (executor.Any())
-            {
-                nodeList = nodeList.Where(x => executor.Contains(x.NodeName)).ToList();
-            }
+            var nodeList = GetAvaliableWorkerForSchedule(sid);
             if (nodeList.Any())
             {
                 Dictionary<string, string> param = new Dictionary<string, string>();
@@ -400,8 +409,9 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         private bool WorkerSelectOne(Guid sid, string router)
         {
+            var list = GetAvaliableWorkerForSchedule(sid).OrderBy(x => x.Priority).ToList();
+            if (!list.Any()) return false;
             //根据节点权重来选择一个节点运行
-            var list = _repositoryFactory.ServerNodes.Where(m => m.NodeType == "worker" && m.Status == 2).OrderBy(x => x.Priority).ToList();
             int[] arry = new int[list.Count + 1];
             arry[0] = 0;
             for (int i = 0; i < list.Count; i++)
@@ -429,17 +439,6 @@ namespace Hos.ScheduleMaster.Core.Services
 
         private bool NodeRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param)
         {
-            //var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get,
-            //$"{node.AccessProtocol}://{node.Host}/{router}");
-            //request.Headers.Add("sm_secret", node.AccessSecret);
-            //if (param != null)
-            //{
-            //    request.Content = new System.Net.Http.FormUrlEncodedContent(param.AsEnumerable());
-            //}
-            //var client = new System.Net.Http.HttpClient();
-
-            //var response = await client.SendAsync(request);
-            //if (response.IsSuccessStatusCode) { }
             Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
             string url = $"{node.AccessProtocol}://{node.Host}/{router}";
             var result = HttpRequest.Send(url, method, param, header);

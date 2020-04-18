@@ -47,10 +47,38 @@ namespace Hos.ScheduleMaster.Core.Interface
         ListPager<ServerNodeEntity> QueryNodePager(ListPager<ServerNodeEntity> pager);
 
         /// <summary>
+        /// 通过节点名称查询节点信息
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        ServerNodeEntity GetNodeByName(string name);
+
+        /// <summary>
+        /// 添加节点
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        bool AddNode(ServerNodeEntity entity);
+
+        /// <summary>
+        /// 修改节点
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        bool EditNode(ServerNodeEntity entity);
+
+        /// <summary>
+        /// 删除一个节点
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        bool DeleteNode(string name);
+
+        /// <summary>
         /// 节点操作
         /// </summary>
         /// <param name="nodeName"></param>
-        /// <param name="status"></param>
+        /// <param name="status">1-连接 2-空闲 3-运行</param>
         /// <returns></returns>
         bool NodeSwich(string nodeName, int status);
     }

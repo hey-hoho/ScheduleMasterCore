@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Demo
 {
+    /// <summary>
+    /// 演示如何读取自定义参数
+    /// </summary>
     public class CustomParams : TaskBase
     {
         public override void Run(TaskContext context)

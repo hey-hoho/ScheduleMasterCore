@@ -5,6 +5,9 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Demo
 {
+    /// <summary>
+    /// 演示如何设置自己的配置文件，以及读取配置项
+    /// </summary>
     public class CustomConfigFile : TaskBase
     {
         public override void Initialize()

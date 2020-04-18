@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <summary>
         /// worker访问秘钥
         /// </summary>
-        public static string AccessSecret { get; private set; }
+        public static string AccessSecret { get; internal set; }
 
         private QuartzManager() { }
 
@@ -60,6 +60,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 await _scheduler.Clear();
                 MarkNode(true);
                 LogHelper.Info("任务调度平台初始化成功！");
+                //启动系统任务
+                await Start<AppStart.TaskClearJob>("task-clear", "0 0/1 * * * ? *");
+                //恢复任务
                 RunningRecovery();
             }
             catch (Exception ex)
@@ -92,7 +95,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     string secret = Guid.NewGuid().ToString("n");
                     node.NodeName = setting.IdentityName;
                     node.NodeType = setting.Role;
-                    node.MachineName = Environment.MachineName;
+                    node.MachineName = setting.MachineName;
                     node.AccessProtocol = setting.Protocol;
                     node.Host = $"{setting.IP}:{setting.Port}";
                     node.Priority = setting.Priority;
@@ -126,14 +129,14 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             try
             {
                 //判断调度是否已经关闭
-                if (!_scheduler.IsShutdown)
+                if (_scheduler != null && !_scheduler.IsShutdown)
                 {
                     //等待任务运行完成再关闭调度
                     await _scheduler.Shutdown(true);
-                    MarkNode(false, isOnStop);
-                    LogHelper.Info("任务调度平台已经停止！");
                     _scheduler = null;
                 }
+                MarkNode(false, isOnStop);
+                LogHelper.Info("任务调度平台已经停止！");
             }
             catch (Exception ex)
             {
@@ -197,13 +200,19 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 JobKey jk = new JobKey(sid.ToString().ToLower());
                 if (await _scheduler.CheckExists(jk))
                 {
-                    //任务已经存在则暂停任务
-                    await _scheduler.PauseJob(jk);
                     var jobDetail = await _scheduler.GetJobDetail(jk);
+
+                    var instance = jobDetail.JobDataMap["instance"] as IHosSchedule;
+                    CancellationToken token = instance == null ? default : instance.CancellationTokenSource.Token;
+
+                    //任务已经存在则暂停任务
+                    await _scheduler.PauseJob(jk, token);
                     if (jobDetail.JobType.GetInterface("IInterruptableJob") != null)
                     {
-                        await _scheduler.Interrupt(jk);
+                        await _scheduler.Interrupt(jk, token);
                     }
+                    //发送取消信号
+                    instance?.CancellationTokenSource.Cancel();
                     LogHelper.Warn($"任务已经暂停运行！", sid);
                     return true;
                 }
@@ -228,8 +237,16 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 JobKey jk = new JobKey(sid.ToString().ToLower());
                 if (await _scheduler.CheckExists(jk))
                 {
+                    var jobDetail = await _scheduler.GetJobDetail(jk);
+                    var instance = jobDetail.JobDataMap["instance"] as IHosSchedule;
+
+                    //重置token
+                    instance.CancellationTokenSource = new CancellationTokenSource();
+                    CancellationToken token = instance.CancellationTokenSource.Token;
+                    instance.RunnableInstance.CancellationToken = token;
+
                     //恢复任务继续执行
-                    await _scheduler.ResumeJob(jk);
+                    await _scheduler.ResumeJob(jk, token);
                     LogHelper.Info($"任务已经恢复运行！", sid);
                     return true;
                 }
@@ -255,19 +272,23 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 var job = await _scheduler.GetJobDetail(jk);
                 if (job != null)
                 {
+                    CancellationToken token = default;
                     var instance = job.JobDataMap["instance"] as IHosSchedule;
                     //释放资源
                     if (instance != null)
                     {
-                        instance.Dispose();
                         instance.RunnableInstance?.Dispose();
+                        instance.Dispose();
+                        token = instance.CancellationTokenSource.Token;
                     }
                     //删除quartz有关设置
                     var trigger = new TriggerKey(sid.ToString());
-                    await _scheduler.PauseTrigger(trigger);
-                    await _scheduler.UnscheduleJob(trigger);
-                    await _scheduler.DeleteJob(jk);
+                    await _scheduler.PauseTrigger(trigger, token);
+                    await _scheduler.UnscheduleJob(trigger, token);
+                    await _scheduler.DeleteJob(jk, token);
                     _scheduler.ListenerManager.RemoveJobListener(sid.ToString());
+                    //发送取消信号
+                    instance?.CancellationTokenSource.Cancel();
                 }
                 LogHelper.Info($"任务已经停止运行！", sid);
                 return true;
@@ -336,7 +357,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 listener.OnSuccess += StartedEvent;
                 _scheduler.ListenerManager.AddJobListener(listener, KeyMatcher<JobKey>.KeyEquals(new JobKey(jobKey)));
 
-                await _scheduler.ScheduleJob(job, GetTrigger(schedule.Main));
+                await _scheduler.ScheduleJob(job, GetTrigger(schedule.Main), schedule.CancellationTokenSource.Token);
             }
             catch (Exception ex)
             {

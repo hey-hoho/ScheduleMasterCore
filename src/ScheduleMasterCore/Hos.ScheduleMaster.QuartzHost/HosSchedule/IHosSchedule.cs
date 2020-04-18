@@ -3,6 +3,7 @@ using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
@@ -18,6 +19,8 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         Dictionary<Guid, string> Children { get; set; }
 
         TaskBase RunnableInstance { get; set; }
+
+        CancellationTokenSource CancellationTokenSource { get; set; }
 
         void CreateRunnableInstance(ScheduleView view);
 

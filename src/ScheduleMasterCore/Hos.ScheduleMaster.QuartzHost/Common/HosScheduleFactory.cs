@@ -24,7 +24,11 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             result.CustomParams = ConvertParamsJson(view.Schedule.CustomParamsJson);
             result.Keepers = view.Keepers;
             result.Children = view.Children;
+            result.CancellationTokenSource = new System.Threading.CancellationTokenSource();
             result.CreateRunnableInstance(view);
+            result.RunnableInstance.TaskId = view.Schedule.Id;
+            result.RunnableInstance.CancellationToken = result.CancellationTokenSource.Token;
+            result.RunnableInstance.Initialize();
             return result;
         }
 

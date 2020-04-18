@@ -66,7 +66,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Init()
+        public async Task<IActionResult> StartUp()
         {
             try
             {
@@ -91,6 +91,36 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
             {
                 return BadRequest();
             }
+        }
+
+        [HttpPost, AllowAnonymous]
+        public IActionResult Connect()
+        {
+            string workerof = Environment.GetEnvironmentVariable("SMCORE_WORKEROF");
+            string encodeKey = Request.Headers["sm_connection"].FirstOrDefault();
+            if (string.IsNullOrEmpty(workerof) || string.IsNullOrEmpty(encodeKey))
+            {
+                _logger.LogWarning("connect failed! workerof or encodekey is null...");
+                return BadRequest("Unauthorized Connection.");
+            }
+            if (!Core.Common.SecurityHelper.MD5(workerof).Equals(encodeKey))
+            {
+                _logger.LogWarning("connect failed! encodekey is unvalid, wokerof:{0}, encodekey:{1}", workerof, encodeKey);
+                return BadRequest("Unauthorized Connection.");
+            }
+            string workerName = Request.Headers["sm_nameto"].FirstOrDefault();
+            var node = _db.ServerNodes.FirstOrDefault(x => x.NodeName == workerName);
+            if (node == null)
+            {
+                _logger.LogWarning("connect failed! unkown worker name:{0}...", workerName);
+                return BadRequest("Unkown Worker Name.");
+            }
+            Core.ConfigurationCache.SetNode(node);
+            string secret = Guid.NewGuid().ToString("n");
+            QuartzManager.AccessSecret = secret;
+            _logger.LogInformation("successfully connected to {0}!", workerof);
+            LogHelper.Info($"与{workerof}连接成功~");
+            return Ok(secret);
         }
 
         //[HttpGet]

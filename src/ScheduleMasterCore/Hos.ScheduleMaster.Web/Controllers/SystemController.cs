@@ -53,6 +53,77 @@ namespace Hos.ScheduleMaster.Web.Controllers
         }
 
         /// <summary>
+        /// 节点编辑页面
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ActionResult NodeEdit(string name = "")
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return View();
+            }
+            var entity = _systemService.GetNodeByName(name);
+            if (entity == null)
+            {
+                return PageNotFound();
+            }
+            return View(entity);
+        }
+
+        /// <summary>
+        /// 保存节点信息
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult NodeSave(ServerNodeEntity entity)
+        {
+            if (ModelState.IsValid)
+            {
+                string savetype = Request.Form["savetype"].ToString();
+                if (savetype == "edit")
+                {
+                    var result = _systemService.EditNode(entity);
+                    if (result)
+                    {
+                        return SuccessTip("编辑节点成功！", Url.Action("Node"));
+                    }
+                    return DangerTip("编辑节点失败！");
+                }
+                else if (savetype == "add")
+                {
+                    if (_systemService.GetNodeByName(entity.NodeName) != null)
+                    {
+                        return DangerTip("节点名称已存在！");
+                    }
+                    var result = _systemService.AddNode(entity);
+                    if (result)
+                    {
+                        return SuccessTip("新增节点成功！", Url.Action("Node"));
+                    }
+                    return DangerTip("新增节点失败！");
+                }
+            }
+            return DangerTip("数据验证失败！");
+        }
+
+        /// <summary>
+        /// 节点连接
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult NodeConnect(string name)
+        {
+            var result = _systemService.NodeSwich(name, 1);
+            if (result)
+            {
+                return this.JsonNet(true, "操作成功！");
+            }
+            return this.JsonNet(false, "操作失败！");
+        }
+
+        /// <summary>
         /// 节点启用
         /// </summary>
         /// <param name="id"></param>
@@ -60,7 +131,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeEnable(string name)
         {
-            var result = _systemService.NodeSwich(name, 2);
+            var result = _systemService.NodeSwich(name, 3);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -76,12 +147,28 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeDisable(string name)
         {
-            var result = _systemService.NodeSwich(name, 1);
+            var result = _systemService.NodeSwich(name, 2);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
             }
             return this.JsonNet(false, "操作失败！");
+        }
+
+        /// <summary>
+        /// 节点删除
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        [HttpPost, AjaxRequestOnly]
+        public ActionResult NodeDelete(string name)
+        {
+            var result = _systemService.DeleteNode(name);
+            if (result)
+            {
+                return this.JsonNet(true, "删除成功！");
+            }
+            return this.JsonNet(false, "删除失败！");
         }
 
         /// <summary>

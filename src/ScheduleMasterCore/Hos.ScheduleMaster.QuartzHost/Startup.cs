@@ -45,9 +45,9 @@ namespace Hos.ScheduleMaster.QuartzHost
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime, ILogger<Startup> logger)
         {
-            var s = Environment.MachineName;
+            //var s = Environment.MachineName;
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -70,14 +70,18 @@ namespace Hos.ScheduleMaster.QuartzHost
 
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
             //加载全局缓存
-            ConfigurationCache.SetNode(Configuration);
             ConfigurationCache.Reload();
             //初始化日志管理器
             Core.Log.LogManager.Init();
-            //初始化Quartz
-            Common.QuartzManager.InitScheduler().Wait();
-            //启动系统任务
-            Common.QuartzManager.Start<AppStart.TaskClearJob>("task-clear", "0 0/1 * * * ? *").Wait();
+            //判断是否要自动根据配置文件注册节点信息
+            if (Environment.GetEnvironmentVariable("SMCORE_AUTOR") != "false")
+            {
+                logger.LogInformation("enabled auto register...");
+                //设置节点信息
+                ConfigurationCache.SetNode(Configuration);
+                //初始化Quartz
+                Common.QuartzManager.InitScheduler().Wait();
+            }
 
             appLifetime.ApplicationStopping.Register(OnStopping);
         }

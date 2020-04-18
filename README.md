@@ -1,7 +1,7 @@
 
 ![schedulemaster ](https://imgkr.cn-bj.ufileos.com/3e2e493c-8813-4f4a-8b42-0a4882929ccd.png)
 
-ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core 3.1平台构建，支持跨平台多节点部署运行。
+ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core 3.1平台构建，支持跨平台多节点部署运行。
 [![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
 
 
@@ -11,6 +11,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 - [x] 高可用支持，跨平台多节点部署。
 - [x] 数据安全性，不会出现多实例并发调度。
 - [x] 支持自定义参数设置；
+- [x] 支持自定义配置文件和热更新；
 - [x] 支持设置监护人，运行异常时邮件告警；
 - [x] 支持设置任务依赖，自动触发，共享任务结果；
 - [x] 插件式开发，任务运行环境隔离；
@@ -23,20 +24,22 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.Net Core
 - [x] 指定节点运行；
 - [x] 支持http任务配置；
 - [ ] 支持延时任务；
+- [ ] 任务监控；
+- [ ] 资源监控；
 - [ ] 支持异常策略配置（失败重试、超时控制等）；
 - [ ] 接入redis缓存；
 - [ ] 用户权限更加精细化；
 - [ ] 报表统计完善；
 
 ## 技术栈
-Asp.Net Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin、Jquery...
+ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin、Jquery...
 
 ## 系统架构图
 ![Architecture ](https://imgkr.cn-bj.ufileos.com/9b61a8f3-fabf-4a87-ad60-1d25bf92fc12.png)
 
 ## 如何使用
 
-> 使用前请准备好所需环境：`Visual Studio 2019`、`.Net Core3.1 SDK`、`Mysql 5.7`、`Centos(可选)`、`Docker(可选)`。
+> 使用前请准备好所需环境：`Visual Studio 2019`、`.NET Core3.1 SDK`、`Mysql 5.7`、`Centos(可选)`、`Docker(可选)`。
 
 下载源码到本地，然后用VS2019打开解决方案并编译通过。
 
@@ -53,7 +56,7 @@ Asp.Net Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 * 登录到master中，可以看到**节点管理**菜单下各节点的运行状态。
 
 #### 在Linux(Centos)中运行
-> 运行前请确保机器已经安装好`.Net Core3.1`运行时环境。
+> 运行前请确保机器已经安装好`.NET Core3.1`运行时环境。
 
 把发布文件复制到Centos中，操作步骤同Windows。
 
@@ -75,3 +78,7 @@ Asp.Net Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 ## 文档
 
 - [快速开始](https://www.cnblogs.com/hohoa/p/12197518.html)
+
+## 交流学习
+
+QQ群：824535095

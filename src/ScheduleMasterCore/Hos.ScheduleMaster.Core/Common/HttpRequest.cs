@@ -67,7 +67,7 @@ namespace Hos.ScheduleMaster.Core.Common
             }
             catch (WebException ex)
             {
-                return new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.InternalServerError, ex.Message);
+                throw new Exception($"WebExceptionStatus: {ex.Status.GetTypeCode().ToString()}，{ex.Message}");
             }
             return new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.BadRequest, string.Empty);
         }

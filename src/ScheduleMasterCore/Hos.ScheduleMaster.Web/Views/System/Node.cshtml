@@ -8,6 +8,7 @@
 
 <div class="page-body">
     <div id="serch-form" class="form-inline">
+        <a href="@Url.Action("NodeEdit","System")" class="btn btn-primary">添加节点</a>
         <div class="pull-right">
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="节点名\主机名\主机地址" id="keyword">
@@ -30,45 +31,57 @@
         var grid = hos.ui.ctrl.gridView("table", {
             url: '/System/QueryNodePager',
             columns: [
-                { field: 'NodeName', title: '节点名称', align: 'center',width:'10' },
-                { field: 'NodeType', title: '节点类型', align: 'center',width:'8' },
-                { field: 'MachineName', title: '主机名', align: 'center' ,width:'8'},
-                { field: 'AccessProtocol', title: '访问协议' , align: 'center',width:'8'},
-                { field: 'Host', title: '主机地址',width:'15' },
-                { field: 'LastUpdateTime', title: '最后更新时间', align: 'center',width:'15' },
-                { field: 'Status', title: '状态', align: 'center',width:'10' ,  formatter: function (value, row, index) {
-                    var dict = [
-                        "<span class='label label-danger graded'>下线</span>",
-                        "<span class='label label-warning graded'>停机</span>",
-                        "<span class='label label-azure graded'>运行</span>"
-                    ];
-                      return dict[value];
-                 }},
-                { field: 'Priority', title: '权重', align: 'center' ,width:'8'},
+                { field: 'NodeName', title: '节点名称', align: 'center', width: '10' },
+                { field: 'NodeType', title: '节点类型', align: 'center', width: '8' },
+                { field: 'MachineName', title: '主机名', align: 'center', width: '8' },
+                { field: 'AccessProtocol', title: '访问协议', align: 'center', width: '8' },
+                { field: 'Host', title: '主机地址', width: '15' },
+                { field: 'LastUpdateTime', title: '最后更新时间', align: 'center', width: '15' },
+                {
+                    field: 'Status', title: '状态', align: 'center', width: '10', formatter: function (value, row, index) {
+                        var dict = [
+                            "<span class='label label-danger graded'>下线</span>",
+                            "<span class='label label-azure graded'>空闲</span>",
+                            "<span class='label label-green graded'>运行</span>"
+                        ];
+                        return dict[value];
+                    }
+                },
+                { field: 'Priority', title: '权重', align: 'center', width: '8' },
                 {
                     title: '操作', field: 'id', align: 'center', formatter: function (value, row, index) {
-                        if (row.NodeType == "master") return '';
-                    if (row.Status == 1) {
-                        return '<button class="btn btn-xs btn-primary" onclick="handlers.accountEnable(\'' + row.NodeName + '\')">启用</button>  ';
-                    }
-                    if (row.Status == 2) {
-                        return '<button class="btn btn-xs btn-warning" onclick="handlers.accountDisable(\'' + row.NodeName + '\')">停机</button>  ';
+                        var s = '<a href="/System/NodeEdit?name=' + row.NodeName + '" class="btn btn-xs">编辑</a>  ';
+                        if (row.NodeType == "master") return s;
+                        if (row.Status == 0) {
+                            return s + '<button class="btn btn-xs" onclick="handlers.nodeConnect(\'' + row.NodeName + '\')">连接</button>  <button class="btn btn-xs btn-danger" onclick="handlers.nodeDelete(\'' + row.NodeName + '\')">删除</button>  ';
+                        }
+                        if (row.Status == 1) {
+                            return s + '<button class="btn btn-xs btn-primary" onclick="handlers.nodeEnable(\'' + row.NodeName + '\')">启用</button>  ';
+                        }
+                        if (row.Status == 2) {
+                            return s + '<button class="btn btn-xs btn-azure" onclick="handlers.nodeDisable(\'' + row.NodeName + '\')">休息</button>  ';
+                        }
                     }
                 }
-            }
             ]
         });
         var handlers = {
-            accountEnable: function (value) {
+            nodeConnect: function (value) {
+                this.request(value, '/System/NodeConnect?name=' + value, "连接");
+            },
+            nodeEnable: function (value) {
                 this.request(value, '/System/NodeEnable?name=' + value, "启用");
             },
-            accountDisable: function (value) {
-                this.request(value, '/System/NodeDisable?name=' + value, "停机");
+            nodeDisable: function (value) {
+                this.request(value, '/System/NodeDisable?name=' + value, "休息");
+            },
+            nodeDelete: function (value) {
+                this.request(value, '/System/NodeDelete?name=' + value, "删除");
             },
             request: function (title, url, action) {
-                hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】吗？',
                     function () {
-                        hos.ui.util.postJson(url, null, function () {grid.reload(); })
+                        hos.ui.util.postJson(url, null, function () { grid.reload(); })
                     });
             }
         }

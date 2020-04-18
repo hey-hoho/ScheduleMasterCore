@@ -50,6 +50,23 @@ namespace Hos.ScheduleMaster.Core
             {
                 NodeSetting.Priority = Convert.ToInt32(ev["Priority"].ToString());
             }
+            NodeSetting.MachineName = Environment.MachineName;
+        }
+
+        /// <summary>
+        /// 配置节点信息
+        /// </summary>
+        /// <param name="model"></param>
+        public static void SetNode(Models.ServerNodeEntity model)
+        {
+            if (model == null) return;
+            NodeSetting = new NodeSetting();
+            NodeSetting.IdentityName = model.NodeName;
+            NodeSetting.Role = model.NodeType;
+            NodeSetting.Protocol = model.AccessProtocol;
+            NodeSetting.IP = model.Host.Split(':')[0];
+            NodeSetting.Port = Convert.ToInt32(model.Host.Split(':')[1]);
+            NodeSetting.Priority = model.Priority;
         }
 
         public static void Reload()
@@ -112,6 +129,13 @@ namespace Hos.ScheduleMaster.Core
         public string Protocol { get; set; }
 
         public string IP { get; set; }
+
+        private string _machineName;
+        public string MachineName
+        {
+            get { return _machineName; }
+            set { if (string.IsNullOrEmpty(value)) { _machineName = Environment.MachineName; } else { _machineName = value; } }
+        }
 
         public int Port { get; set; }
 

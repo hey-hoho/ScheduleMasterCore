@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using RestSharp;
 using Hos.ScheduleMaster.QuartzHost.Common;
 using Hos.ScheduleMaster.Core;
+using System.Threading;
 
 namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 {
@@ -17,6 +18,8 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         public List<KeyValuePair<string, string>> Keepers { get; set; }
         public Dictionary<Guid, string> Children { get; set; }
         public TaskBase RunnableInstance { get; set; }
+
+        public CancellationTokenSource CancellationTokenSource { get; set; }
 
         public void CreateRunnableInstance(ScheduleView view)
         {

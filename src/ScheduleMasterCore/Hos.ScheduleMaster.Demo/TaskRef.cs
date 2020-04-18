@@ -6,6 +6,9 @@ using System.Text.Json;
 
 namespace Hos.ScheduleMaster.Demo
 {
+    /// <summary>
+    /// 演示如何使用任务依赖关系
+    /// </summary>
     public class TaskRef : TaskBase
     {
         public override void Run(TaskContext context)
