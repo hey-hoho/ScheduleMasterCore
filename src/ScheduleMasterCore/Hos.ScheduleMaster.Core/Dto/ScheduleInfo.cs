@@ -93,10 +93,5 @@ namespace Hos.ScheduleMaster.Core.Dto
         }
     }
 
-    public class ScheduleParam
-    {
-        public string ParamKey { get; set; }
-        public string ParamValue { get; set; }
-        public string ParamRemark { get; set; }
-    }
+
 }

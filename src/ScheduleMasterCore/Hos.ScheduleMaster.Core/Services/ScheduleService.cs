@@ -74,28 +74,28 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ScheduleView QueryScheduleView(Guid sid)
+        public ScheduleContext QueryScheduleContext(Guid sid)
         {
-            ScheduleView view = new ScheduleView()
+            ScheduleContext context = new ScheduleContext()
             {
                 Schedule = QueryById(sid),
                 HttpOption = QueryScheduleHttpOptions(sid)
             };
-            if (view.Schedule != null)
+            if (context.Schedule != null)
             {
-                view.Keepers = (from t in _repositoryFactory.ScheduleKeepers.Table
-                                join u in _repositoryFactory.SystemUsers.Table on t.UserId equals u.Id
-                                where t.ScheduleId == sid
-                                select new KeyValuePair<string, string>(u.UserName, u.RealName)
+                context.Keepers = (from t in _repositoryFactory.ScheduleKeepers.Table
+                                   join u in _repositoryFactory.SystemUsers.Table on t.UserId equals u.Id
+                                   where t.ScheduleId == sid
+                                   select new KeyValuePair<string, string>(u.UserName, u.RealName)
                         ).ToList();
-                view.Children = (from c in _repositoryFactory.ScheduleReferences.Table
-                                 join t in _repositoryFactory.Schedules.Table on c.ChildId equals t.Id
-                                 where c.ScheduleId == sid && c.ChildId != sid
-                                 select new { t.Id, t.Title }
+                context.Children = (from c in _repositoryFactory.ScheduleReferences.Table
+                                    join t in _repositoryFactory.Schedules.Table on c.ChildId equals t.Id
+                                    where c.ScheduleId == sid && c.ChildId != sid
+                                    select new { t.Id, t.Title }
                                 ).ToDictionary(x => x.Id, x => x.Title);
-                view.Executors = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
+                context.Executors = _repositoryFactory.ScheduleExecutors.Where(x => x.ScheduleId == sid).Select(x => x.WorkerName).ToList();
             }
-            return view;
+            return context;
         }
 
         /// <summary>

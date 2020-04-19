@@ -156,8 +156,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 return true;
             }
-            ScheduleView view = await GetScheduleView(sid);
-            IHosSchedule schedule = HosScheduleFactory.GetHosSchedule(view);
+            ScheduleContext context = await GetScheduleContext(sid);
+            IHosSchedule schedule = HosScheduleFactory.GetHosSchedule(context);
             try
             {
                 for (int i = 0; i < 3; i++)
@@ -169,7 +169,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     }
                     catch (SchedulerException sexp)
                     {
-                        LogHelper.Error($"任务启动失败！开始第{i + 1}次重试...", sexp, view.Schedule.Id);
+                        LogHelper.Error($"任务启动失败！开始第{i + 1}次重试...", sexp, context.Schedule.Id);
                     }
                 }
                 //最后一次尝试
@@ -178,12 +178,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
             catch (SchedulerException sexp)
             {
-                LogHelper.Error($"任务所有重试都失败了，已放弃启动！", sexp, view.Schedule.Id);
+                LogHelper.Error($"任务所有重试都失败了，已放弃启动！", sexp, context.Schedule.Id);
                 return false;
             }
             catch (Exception exp)
             {
-                LogHelper.Error($"任务启动失败！", exp, view.Schedule.Id);
+                LogHelper.Error($"任务启动失败！", exp, context.Schedule.Id);
                 return false;
             }
         }
@@ -441,7 +441,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
-        private static async Task<ScheduleView> GetScheduleView(Guid sid)
+        private static async Task<ScheduleContext> GetScheduleContext(Guid sid)
         {
             using (var scope = new Core.ScopeDbContext())
             {
@@ -449,27 +449,27 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 var model = db.Schedules.FirstOrDefault(x => x.Id == sid && x.Status != (int)ScheduleStatus.Deleted);
                 if (model != null)
                 {
-                    ScheduleView view = new ScheduleView() { Schedule = model };
+                    ScheduleContext context = new ScheduleContext() { Schedule = model };
                     if (model.MetaType == (int)ScheduleMetaType.Http)
                     {
-                        view.HttpOption = db.ScheduleHttpOptions.FirstOrDefault(x => x.ScheduleId == sid);
+                        context.HttpOption = db.ScheduleHttpOptions.FirstOrDefault(x => x.ScheduleId == sid);
                     }
-                    view.Keepers = (from t in db.ScheduleKeepers
-                                    join u in db.SystemUsers on t.UserId equals u.Id
-                                    where t.ScheduleId == model.Id && !string.IsNullOrEmpty(u.Email)
-                                    select new KeyValuePair<string, string>(u.RealName, u.Email)
+                    context.Keepers = (from t in db.ScheduleKeepers
+                                       join u in db.SystemUsers on t.UserId equals u.Id
+                                       where t.ScheduleId == model.Id && !string.IsNullOrEmpty(u.Email)
+                                       select new KeyValuePair<string, string>(u.RealName, u.Email)
                             ).ToList();
-                    view.Children = (from c in db.ScheduleReferences
-                                     join t in db.Schedules on c.ChildId equals t.Id
-                                     where c.ScheduleId == model.Id && c.ChildId != model.Id
-                                     select new { t.Id, t.Title }
+                    context.Children = (from c in db.ScheduleReferences
+                                        join t in db.Schedules on c.ChildId equals t.Id
+                                        where c.ScheduleId == model.Id && c.ChildId != model.Id
+                                        select new { t.Id, t.Title }
                                     ).ToDictionary(x => x.Id, x => x.Title);
                     //如果是程序集任务，那就从master下载最新的文件包
                     if (model.MetaType == (int)ScheduleMetaType.Assembly)
                     {
                         await LoadPluginFile(db, model);
                     }
-                    return view;
+                    return context;
                 }
                 throw new InvalidOperationException($"不存在的任务id：{sid}");
             }

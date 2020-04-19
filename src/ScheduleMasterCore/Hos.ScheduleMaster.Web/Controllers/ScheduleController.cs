@@ -72,7 +72,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <returns></returns>
         public ActionResult Detail(Guid sid)
         {
-            var model = _scheduleService.QueryScheduleView(sid);
+            var model = _scheduleService.QueryScheduleContext(sid);
             if (model == null || model.Schedule == null)
             {
                 return PageNotFound();

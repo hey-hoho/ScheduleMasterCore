@@ -35,7 +35,7 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ScheduleView QueryScheduleView(Guid sid);
+        ScheduleContext QueryScheduleContext(Guid sid);
 
         /// <summary>
         /// 查询指定状态的任务数量

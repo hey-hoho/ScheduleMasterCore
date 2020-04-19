@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Base;
+using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         CancellationTokenSource CancellationTokenSource { get; set; }
 
-        void CreateRunnableInstance(ScheduleView view);
+        void CreateRunnableInstance(ScheduleContext context);
 
         Type GetQuartzJobType();
 

@@ -21,9 +21,9 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         public CancellationTokenSource CancellationTokenSource { get; set; }
 
-        public void CreateRunnableInstance(ScheduleView view)
+        public void CreateRunnableInstance(ScheduleContext context)
         {
-            RunnableInstance = new HttpTask() { HttpOption = view.HttpOption };
+            RunnableInstance = new HttpTask() { HttpOption = context.HttpOption };
         }
 
         public Type GetQuartzJobType()

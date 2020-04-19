@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Hos.ScheduleMaster.Base;
+using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.QuartzHost.Common;
 
@@ -22,18 +23,18 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         private PluginLoadContext loadContext;
 
 
-        public void CreateRunnableInstance(ScheduleView view)
+        public void CreateRunnableInstance(ScheduleContext context)
         {
-            loadContext = AssemblyHelper.LoadAssemblyContext(view.Schedule.Id, view.Schedule.AssemblyName);
+            loadContext = AssemblyHelper.LoadAssemblyContext(context.Schedule.Id, context.Schedule.AssemblyName);
             RunnableInstance = AssemblyHelper.CreateTaskInstance(
                 loadContext,
-                view.Schedule.Id,
-                view.Schedule.AssemblyName,
-                view.Schedule.ClassName
+                context.Schedule.Id,
+                context.Schedule.AssemblyName,
+                context.Schedule.ClassName
             );
             if (RunnableInstance == null)
             {
-                throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{view.Schedule.AssemblyName}，类型：{view.Schedule.ClassName}");
+                throw new InvalidCastException($"任务实例创建失败，请确认目标任务是否派生自TaskBase类型。程序集：{context.Schedule.AssemblyName}，类型：{context.Schedule.ClassName}");
             }
         }
 

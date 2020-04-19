@@ -1,4 +1,5 @@
-﻿using Hos.ScheduleMaster.Core.Dto;
+﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Dto;
 using Hos.ScheduleMaster.Core.Log;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.QuartzHost.HosSchedule;
@@ -11,22 +12,22 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 {
     public class HosScheduleFactory
     {
-        public static IHosSchedule GetHosSchedule(ScheduleView view)
+        public static IHosSchedule GetHosSchedule(ScheduleContext context)
         {
             IHosSchedule result;
-            switch ((ScheduleMetaType)view.Schedule.MetaType)
+            switch ((ScheduleMetaType)context.Schedule.MetaType)
             {
                 case ScheduleMetaType.Assembly: { result = new AssemblySchedule(); break; }
                 case ScheduleMetaType.Http: { result = new HttpSchedule(); break; }
                 default: throw new InvalidOperationException("unknown schedule type.");
             }
-            result.Main = view.Schedule;
-            result.CustomParams = ConvertParamsJson(view.Schedule.CustomParamsJson);
-            result.Keepers = view.Keepers;
-            result.Children = view.Children;
+            result.Main = context.Schedule;
+            result.CustomParams = ConvertParamsJson(context.Schedule.CustomParamsJson);
+            result.Keepers = context.Keepers;
+            result.Children = context.Children;
             result.CancellationTokenSource = new System.Threading.CancellationTokenSource();
-            result.CreateRunnableInstance(view);
-            result.RunnableInstance.TaskId = view.Schedule.Id;
+            result.CreateRunnableInstance(context);
+            result.RunnableInstance.TaskId = context.Schedule.Id;
             result.RunnableInstance.CancellationToken = result.CancellationTokenSource.Token;
             result.RunnableInstance.Initialize();
             return result;

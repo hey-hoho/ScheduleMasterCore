@@ -137,26 +137,6 @@ namespace Hos.ScheduleMaster.Core.Models
 
     }
 
-    public class ScheduleView
-    {
-        public ScheduleEntity Schedule { get; set; }
-
-        public ScheduleHttpOptionEntity HttpOption { get; set; }
-
-        public List<ScheduleParam> Params
-        {
-            get
-            {
-                return Newtonsoft.Json.JsonConvert.DeserializeObject<List<ScheduleParam>>(Schedule.CustomParamsJson);
-            }
-        }
-
-        public List<KeyValuePair<string, string>> Keepers { get; set; }
-
-        public Dictionary<Guid, string> Children { get; set; }
-
-        public List<string> Executors { get; set; }
-    }
 
     /// <summary>
     /// 任务状态
