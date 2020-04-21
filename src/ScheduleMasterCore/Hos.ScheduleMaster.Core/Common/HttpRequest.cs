@@ -67,7 +67,7 @@ namespace Hos.ScheduleMaster.Core.Common
             }
             catch (WebException ex)
             {
-                throw new Exception($"WebExceptionStatus: {ex.Status.GetTypeCode().ToString()}，{ex.Message}");
+                throw new Exception($"WebExceptionStatus: {Enum.GetValues(typeof(WebExceptionStatus)).GetValue(ex.Status.GetHashCode())}，{ex.Message}");
             }
             return new KeyValuePair<HttpStatusCode, string>(HttpStatusCode.BadRequest, string.Empty);
         }

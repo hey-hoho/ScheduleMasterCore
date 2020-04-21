@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Hos.ScheduleMaster.Core
@@ -29,26 +30,31 @@ namespace Hos.ScheduleMaster.Core
         public static void SetNode(IConfiguration configuration)
         {
             NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>(); ;
-            var ev = Environment.GetEnvironmentVariables();
-            if (ev.Contains("identity"))
+            //var ev = Environment.GetEnvironmentVariables();
+            string identity = AppCommandResolver.GetCommandLineArgsValue("identity");
+            if (!string.IsNullOrEmpty(identity))
             {
-                NodeSetting.IdentityName = ev["identity"].ToString();
+                NodeSetting.IdentityName = identity;
             }
-            if (ev.Contains("protocol"))
+            string protocol = AppCommandResolver.GetCommandLineArgsValue("protocol");
+            if (!string.IsNullOrEmpty(protocol))
             {
-                NodeSetting.Protocol = ev["Protocol"].ToString();
+                NodeSetting.Protocol = protocol;
             }
-            if (ev.Contains("ip"))
+            string ip = AppCommandResolver.GetCommandLineArgsValue("ip");
+            if (!string.IsNullOrEmpty(ip))
             {
-                NodeSetting.IP = ev["ip"].ToString();
+                NodeSetting.IP = ip;
             }
-            if (ev.Contains("port"))
+            string port = AppCommandResolver.GetCommandLineArgsValue("port");
+            if (!string.IsNullOrEmpty(port))
             {
-                NodeSetting.Port = Convert.ToInt32(ev["port"].ToString());
+                NodeSetting.Port = Convert.ToInt32(port);
             }
-            if (ev.Contains("priority"))
+            string priority = AppCommandResolver.GetCommandLineArgsValue("priority");
+            if (!string.IsNullOrEmpty(priority))
             {
-                NodeSetting.Priority = Convert.ToInt32(ev["Priority"].ToString());
+                NodeSetting.Priority = Convert.ToInt32(priority);
             }
             NodeSetting.MachineName = Environment.MachineName;
         }
@@ -118,6 +124,60 @@ namespace Hos.ScheduleMaster.Core
 
         #endregion
 
+    }
+
+    public class AppCommandResolver
+    {
+        private static List<string> CommandLineArgs = Environment.GetCommandLineArgs().ToList();
+
+        /// <summary>
+        /// 判断应用是否自动注册节点信息
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsAutoRegister()
+        {
+            //优先读取环境参数
+            string option = Environment.GetEnvironmentVariable("SMCORE_AUTOR");
+            //再看命令行参数中是否也有设置
+            string cmdArg = GetCommandLineArgsValue("autor");
+            if (!string.IsNullOrEmpty(cmdArg))
+            {
+                option = cmdArg;
+            }
+            return option != "false";
+        }
+
+        /// <summary>
+        /// 非自动注册模式下要绑定的master名称
+        /// </summary>
+        /// <returns></returns>
+        public static string GetTargetMasterName()
+        {
+            //优先读取环境参数
+            string option = Environment.GetEnvironmentVariable("SMCORE_WORKEROF");
+            //再看命令行参数中是否也有设置
+            string cmdArg = GetCommandLineArgsValue("workerof");
+            if (!string.IsNullOrEmpty(cmdArg))
+            {
+                option = cmdArg;
+            }
+            return option;
+        }
+
+        /// <summary>
+        /// 获取命令行参数值
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public static string GetCommandLineArgsValue(string key)
+        {
+            string cmdArg = CommandLineArgs.FirstOrDefault(x => x.StartsWith($"--{key}="));
+            if (!string.IsNullOrEmpty(cmdArg))
+            {
+                return cmdArg.Split('=')[1];
+            }
+            return string.Empty;
+        }
     }
 
     public class NodeSetting

@@ -610,8 +610,15 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
-                bool success = !HasAvailableWorker();
-                if (!success) success = WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
+                bool success = GetAvaliableWorkerForSchedule(sid).Any();
+                if (success)
+                {
+                    success = WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
+                }
+                else
+                {
+                    success = true;
+                }
                 if (success)
                 {
                     //更新任务状态为已停止

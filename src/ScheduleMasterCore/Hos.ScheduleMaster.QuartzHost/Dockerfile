@@ -11,5 +11,11 @@ COPY . /app
 #设置Docker容器对外暴露的端口
 EXPOSE 80 5000
 
+#设置默认时区
+ENV TZ="Asia/Shanghai"
+
+#自定义命令行参数
+ENV PARAMS ""
+
 #容器中使用 ["dotnet","系统启动的dll"] 来运行应用程序
-ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.QuartzHost.dll"]
+ENTRYPOINT ["sh","-c", "dotnet Hos.ScheduleMaster.QuartzHost.dll $PARAMS"]

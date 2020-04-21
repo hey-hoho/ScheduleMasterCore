@@ -11,5 +11,8 @@ COPY . /app
 #设置Docker容器对外暴露的端口
 EXPOSE 30000
 
+#设置默认时区
+ENV TZ="Asia/Shanghai"
+
 #容器中使用 ["dotnet","系统启动的dll"] 来运行应用程序
 ENTRYPOINT ["dotnet", "Hos.ScheduleMaster.Web.dll"]

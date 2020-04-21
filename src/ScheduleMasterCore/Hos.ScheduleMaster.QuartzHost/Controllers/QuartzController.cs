@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Log;
 using Microsoft.AspNetCore.Authorization;
+using Hos.ScheduleMaster.Core;
 
 namespace Hos.ScheduleMaster.QuartzHost.Controllers
 {
@@ -96,7 +97,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         [HttpPost, AllowAnonymous]
         public IActionResult Connect()
         {
-            string workerof = Environment.GetEnvironmentVariable("SMCORE_WORKEROF");
+            string workerof = AppCommandResolver.GetTargetMasterName();
             string encodeKey = Request.Headers["sm_connection"].FirstOrDefault();
             if (string.IsNullOrEmpty(workerof) || string.IsNullOrEmpty(encodeKey))
             {

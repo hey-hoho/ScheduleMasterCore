@@ -191,7 +191,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    Log.LogHelper.Warn($"worker连接异常[{result.Key.GetHashCode()}]：{result.Value}");
+                    Log.LogHelper.Warn($"{nodeName}连接异常[{result.Key.GetHashCode()}]：{result.Value}");
                 }
                 return success;
             }

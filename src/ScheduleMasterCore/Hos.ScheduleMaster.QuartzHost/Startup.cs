@@ -74,7 +74,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             //初始化日志管理器
             Core.Log.LogManager.Init();
             //判断是否要自动根据配置文件注册节点信息
-            if (Environment.GetEnvironmentVariable("SMCORE_AUTOR") != "false")
+            if (AppCommandResolver.IsAutoRegister())
             {
                 logger.LogInformation("enabled auto register...");
                 //设置节点信息

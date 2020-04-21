@@ -1,0 +1,7 @@
+{
+  "TestKey1": "MyValue1",
+  "TestKey2": {
+    "Name": "hoho",
+    "Age": 18
+  }
+}
