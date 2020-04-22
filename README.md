@@ -41,6 +41,8 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 > 使用前请准备好所需环境：`Visual Studio 2019`、`.NET Core3.1 SDK`、`Mysql 5.7`、`Centos(可选)`、`Docker(可选)`。
 
+下面以用配置文件方式启动为例做介绍，其他方式参考详细文档。
+
 下载源码到本地，然后用VS2019打开解决方案并编译通过。
 
 打开项目Hos.ScheduleMaster.Web根目录下的`appsettings.json`文件，先修改Mysql数据库连接字符串以保证数据库正常访问，再找到`NodeSetting`节点，修改`IP`字段为master将要部署的ip地址（master端口为30000不用修改），在项目上右击选择发布...，发布到本地文件夹。

@@ -38,9 +38,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryPager(string name = "")
+        public ActionResult QueryPager(string title = "", string workerName = "")
         {
-            return QueryList(null, name);
+            return QueryList(null, title, workerName);
         }
 
         /// <summary>
@@ -49,19 +49,19 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryCurrentUserPager(string name)
+        public ActionResult QueryCurrentUserPager(string title, string workerName)
         {
-            return QueryList(CurrentAdmin.Id, name);
+            return QueryList(CurrentAdmin.Id, title, workerName);
         }
 
-        private ActionResult QueryList(int? userId, string name)
+        private ActionResult QueryList(int? userId, string title, string workerName)
         {
-            var pager = new ListPager<ScheduleEntity>(PageIndex, PageSize);
-            if (!string.IsNullOrEmpty(name))
+            var pager = new ListPager<ScheduleInfo>(PageIndex, PageSize);
+            if (!string.IsNullOrEmpty(title))
             {
-                pager.AddFilter(m => m.Title.Contains(name));
+                pager.AddFilter(m => m.Title.Contains(title));
             }
-            pager = _scheduleService.QueryPager(pager, userId);
+            pager = _scheduleService.QueryPager(pager, userId, workerName);
             return GridData(pager.Total, pager.Rows);
         }
 

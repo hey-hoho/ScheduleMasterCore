@@ -1,4 +1,5 @@
-﻿@using Hos.ScheduleMaster.Core.Models;
+﻿@using Hos.ScheduleMaster.Core.Dto;
+@using Hos.ScheduleMaster.Core.Models;
 @using Hos.ScheduleMaster.Core.Common;
 @{
     ViewBag.Title = "Home";
@@ -82,7 +83,7 @@
                         <div class="databox-top">
                             <div class="databox-piechart">
                                 <div id="success_num_pie" data-toggle="easypiechart" class="easyPieChart block-center" data-barcolor="#2dc3e8" data-linecap="butt" data-percent="" data-animate="500" data-linewidth="8" data-size="125" data-trackcolor="#eee" style="width: 125px; height: 125px; line-height: 125px;">
-                                    <span class="font-200"><i class="fa fa-smile-o azure"></i></span>                                    
+                                    <span class="font-200"><i class="fa fa-smile-o azure"></i></span>
                                 </div>
                             </div>
                         </div>
@@ -176,7 +177,7 @@
                 </div>
                 <ul class="orders-list">
                     @{
-                        var mySchedule = ViewBag.MySchedule as List<ScheduleEntity>;
+                        var mySchedule = ViewBag.MySchedule as List<ScheduleInfo>;
                         if (mySchedule != null && mySchedule.Any())
                         {
                             foreach (var item in mySchedule)

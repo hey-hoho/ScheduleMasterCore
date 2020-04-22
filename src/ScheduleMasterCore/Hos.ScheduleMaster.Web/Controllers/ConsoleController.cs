@@ -8,6 +8,7 @@ using Hos.ScheduleMaster.Web.Extension;
 using Microsoft.AspNetCore.Mvc;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Common;
+using Hos.ScheduleMaster.Core.Dto;
 
 namespace Hos.ScheduleMaster.Web.Controllers
 {
@@ -31,7 +32,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         public ActionResult Home()
         {
             //我负责的top任务，创建时间倒序
-            var pager = new ListPager<ScheduleEntity>(1, 7);
+            var pager = new ListPager<ScheduleInfo>(1, 7);
             ViewBag.MySchedule = _scheduleService.QueryPager(pager, CurrentAdmin.Id).Rows;
             return View();
         }

@@ -76,10 +76,12 @@ namespace Hos.ScheduleMaster.Web
             //自动注册所有业务service
             services.AddAppServices();
             services.AddScoped<AccessControlFilter>();
+
+            services.AddHostedService<AppStart.AppLifetimeHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime appLifetime)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -107,33 +109,10 @@ namespace Hos.ScheduleMaster.Web
                      name: "default",
                      pattern: "{controller=Console}/{action=Index}/{id?}");
             });
-            //加载全局缓存
+
             ConfigurationCache.RootServiceProvider = app.ApplicationServices;
-            ConfigurationCache.SetNode(Configuration);
-            ConfigurationCache.Reload();
-            //初始化日志管理器
-            Core.Log.LogManager.Init();
-            //注册节点
-            AppStart.NodeRegistry.Register();
-            //初始化系统任务
-            FluentScheduler.JobManager.Initialize(new AppStart.SystemSchedulerRegistry());
-            FluentScheduler.JobManager.JobException += info => Core.Log.LogHelper.Error("An error just happened with a FluentScheduler job", info.Exception);
-            //任务恢复
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                Core.Services.ScheduleService service = new Core.Services.ScheduleService();
-                AutowiredServiceProvider provider = new AutowiredServiceProvider();
-                provider.PropertyActivate(service, scope.ServiceProvider);
-                service.RunningRecovery();
-            }
-            appLifetime.ApplicationStopping.Register(OnStopping);
         }
-        private void OnStopping()
-        {
-            // Perform on-stopping activities here
-            Core.Log.LogManager.Shutdown();
-            AppStart.NodeRegistry.Shutdown();
-        }
+
 
     }
     public class ApiControllerAuthorizeConvention : IApplicationModelConvention

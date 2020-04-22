@@ -32,13 +32,40 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="pager"></param>
         /// <param name="userId"></param>
         /// <returns></returns>
-        public ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager, int? userId)
+        public ListPager<ScheduleInfo> QueryPager(ListPager<ScheduleInfo> pager, int? userId, string workerName = "")
         {
-            if (userId.HasValue && userId.Value > 0)
+            bool basUserId = userId.HasValue && userId.Value > 0;
+            bool hasWorkerName = !string.IsNullOrEmpty(workerName);
+            var schedule = _repositoryFactory.Schedules.Table;
+            var keeper = _repositoryFactory.ScheduleKeepers.Table;
+            var executor = _repositoryFactory.ScheduleExecutors.Table;
+            var query = (from s in schedule
+                         where  basUserId ? (from k in keeper where k.UserId == userId && k.ScheduleId == s.Id select 1).Any() : true
+                         && hasWorkerName ? (from e in executor where e.WorkerName == workerName && e.ScheduleId == s.Id select 1).Any() : true
+                         //orderby s.CreateTime descending
+                         select new ScheduleInfo
+                         {
+                             Id = s.Id,
+                             Title = s.Title,
+                             RunLoop = s.RunLoop,
+                             StartDate = s.StartDate,
+                             LastRunTime = s.LastRunTime,
+                             NextRunTime = s.NextRunTime,
+                             TotalRunCount = s.TotalRunCount,
+                             Status = s.Status,
+                             CreateTime = s.CreateTime,
+                             Executors = (from e in executor where e.ScheduleId == s.Id select e.WorkerName).ToList()
+                         });
+            pager.AddFilter(x => x.Status != (int)ScheduleStatus.Deleted);
+
+                foreach (var filter in pager.Filters)
             {
-                return QueryUserSchedule(userId.Value, pager);
+                query = query.Where(filter);
             }
-            return _repositoryFactory.Schedules.WherePager(pager, m => m.Status != (int)ScheduleStatus.Deleted, m => m.CreateTime, false);
+            var orderList = query.OrderByDescending(x => x.CreateTime);
+            pager.Rows = orderList.Skip(pager.SkipCount).Take(pager.PageSize).AsNoTracking().ToList();
+            pager.Total = orderList.Count();
+            return pager;
         }
 
         /// <summary>

@@ -44,7 +44,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         {
             try
             {
-                if (_scheduler == null)
+                if (_scheduler == null || _scheduler.IsShutdown)
                 {
                     NameValueCollection properties = new NameValueCollection();
                     properties["quartz.scheduler.instanceName"] = "Hos.ScheduleMaster";
@@ -132,6 +132,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 if (_scheduler != null && !_scheduler.IsShutdown)
                 {
                     //等待任务运行完成再关闭调度
+                    await _scheduler.Clear();
                     await _scheduler.Shutdown(true);
                     _scheduler = null;
                 }

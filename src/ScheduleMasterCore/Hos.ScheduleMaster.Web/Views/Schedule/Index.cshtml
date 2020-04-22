@@ -1,16 +1,24 @@
 ﻿
 @{
-
+    
 }
-<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
 
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+<style type="text/css">
+    #table code{
+        float:right;
+    }
+</style>
 
 <div class="page-body">
     <div id="serch-form" class="form-inline">
         <a href="@Url.Action("Create","Schedule")" class="btn btn-primary">创建任务</a>
         <div class="pull-right">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="任务名称" id="name">
+                <input type="text" class="form-control" placeholder="任务名称" id="title">
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="节点名称" id="workerName">
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
                 </span>
@@ -42,7 +50,12 @@
                 },
                 {
                     field: 'Title', title: '名称', width: '18', formatter: function (value, row, index) {
-                        return '<a href="javascript:"  onclick="handlers.showDetail(\'' + row.Id + '\');" >' + value + '</a>';
+                        var html = '<a href="javascript:"  onclick="handlers.showDetail(\'' + row.Id + '\');" >' + value + '</a>';
+                        var length = row.Executors.length > 3 ? 3 : row.Executors.length;
+                        for (var i = 0; i < length; i++) {
+                            html += ('<code>'+row.Executors[i]+'</code><i>&nbsp; </i>');
+                        }
+                        return html;
                     }
                 },
                 { field: 'RunLoop', title: '运行模式', width: '5', align: 'center' , formatter: function (value, row, index) {

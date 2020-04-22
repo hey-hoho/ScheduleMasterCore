@@ -20,8 +20,9 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// </summary>
         /// <param name="pager"></param>
         ///  <param name="userId"></param>
+        ///  <param name="workerName"></param>
         /// <returns></returns>
-        ListPager<ScheduleEntity> QueryPager(ListPager<ScheduleEntity> pager, int? userId);
+        ListPager<ScheduleInfo> QueryPager(ListPager<ScheduleInfo> pager, int? userId, string workerName = "");
 
         /// <summary>
         /// id查询任务

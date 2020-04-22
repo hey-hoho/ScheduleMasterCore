@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Hos.ScheduleMaster.Core.Dto
 {
-    public class ScheduleInfo
+    public class ScheduleInfo: Models.ScheduleEntity
     {
         public ScheduleInfo()
         {
@@ -15,37 +15,7 @@ namespace Hos.ScheduleMaster.Core.Dto
             this.Params = new List<ScheduleParam>();
         }
 
-        public Guid Id { get; set; }
-
-        [Required, MaxLength(50)]
-        public string Title { get; set; }
-
-        public int MetaType { get; set; }
-
-        public bool RunLoop { get; set; }
-
-        [MaxLength(500)]
-        public string Remark { get; set; }
-
-        [MaxLength(50)]
-        public string CronExpression { get; set; }
-
-        [MaxLength(200)]
-        public string AssemblyName { get; set; }
-
-        [MaxLength(200)]
-        public string ClassName { get; set; }
-
-        public DateTime? StartDate { get; set; }
-
-        public DateTime? EndDate { get; set; }
-
-        [MaxLength(2000)]
-        public string CustomParamsJson { get; set; }
-
         public bool RunNow { get; set; }
-
-        public string CreateUserName { get; set; }
 
         [MaxLength(500)]
         public string HttpRequestUrl { get; set; }

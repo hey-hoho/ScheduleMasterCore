@@ -15,7 +15,9 @@ EXPOSE 80 5000
 ENV TZ="Asia/Shanghai"
 
 #自定义命令行参数
-ENV PARAMS ""
+#ENV MS_OPTS ""
 
 #容器中使用 ["dotnet","系统启动的dll"] 来运行应用程序
-ENTRYPOINT ["sh","-c", "dotnet Hos.ScheduleMaster.QuartzHost.dll $PARAMS"]
+ENTRYPOINT ["dotnet","Hos.ScheduleMaster.QuartzHost.dll"]
+
+#ENTRYPOINT dotnet Hos.ScheduleMaster.QuartzHost.dll  $MS_OPTS

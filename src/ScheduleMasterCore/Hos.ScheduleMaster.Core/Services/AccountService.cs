@@ -149,7 +149,8 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 Password = password
             });
-            return _unitOfWork.Commit() > 0;
+            _unitOfWork.Commit();
+            return true;
         }
 
         /// <summary>

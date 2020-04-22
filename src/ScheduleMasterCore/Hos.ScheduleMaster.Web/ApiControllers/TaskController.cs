@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         [HttpGet]
         public object QueryList(string name = "")
         {
-            var pager = new ListPager<ScheduleEntity>(PageIndex, PageSize);
+            var pager = new ListPager<ScheduleInfo>(PageIndex, PageSize);
             if (!string.IsNullOrEmpty(name))
             {
                 pager.AddFilter(m => m.Title.Contains(name));

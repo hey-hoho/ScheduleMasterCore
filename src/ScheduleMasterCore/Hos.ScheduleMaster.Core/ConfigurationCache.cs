@@ -73,6 +73,7 @@ namespace Hos.ScheduleMaster.Core
             NodeSetting.IP = model.Host.Split(':')[0];
             NodeSetting.Port = Convert.ToInt32(model.Host.Split(':')[1]);
             NodeSetting.Priority = model.Priority;
+            NodeSetting.MachineName = model.MachineName;
         }
 
         public static void Reload()
