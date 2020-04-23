@@ -156,10 +156,11 @@ create table systemusers
 
 
 
-INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Assembly_ImagePullPolicy', '程序集配置', '文件包拉取策略', 'IfNotPresent', 1, 1, 'Always-总是拉取，IfNotPresent-本地没有时拉取', '2020-04-05 08:57:18.417000', '2020-04-05 17:12:09.487020', 'admin');
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Assembly_ImagePullPolicy', '程序集配置', '文件包拉取策略', 'IfNotPresent', 1, 1, 'Always-总是拉取，IfNotPresent-本地没有时拉取，默认是Always', '2020-04-05 08:57:18.417000', '2020-04-05 17:12:09.487020', 'admin');
 INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_FromAccount', '邮件配置', '发件人账号', '', 3, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583060', '2020-04-05 17:12:09.492483', 'admin');
 INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_FromAccountPwd', '邮件配置', '发件人账号密码', '', 4, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583060', '2020-04-05 17:12:09.493020', 'admin');
 INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_SmtpPort', '邮件配置', '邮件服务器端口', '25', 2, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.583053', '2020-04-05 17:12:09.491849', 'admin');
 INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Email_SmtpServer', '邮件配置', '邮件服务器', '', 1, 1, 'seed by efcore auto migration', '2020-04-05 15:38:14.582863', '2020-04-05 17:12:09.491180', 'admin');
 INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('Http_RequestTimeout', 'HTTP配置', '请求超时时间', '10', 1, 1, '单位是秒，默认值是10', '2020-04-08 06:48:48.201000', null, null);
+INSERT INTO schedule_master.systemconfigs (`key`, `group`, name, value, sort, isreuired, remark, createtime, updatetime, updateusername) VALUES ('System_WorkerUnHealthTimes', '系统配置', 'Worker允许无响应次数', '3', 1, 1, '健康检查失败达到最大次数会被下线剔除，默认值是3', '2020-04-08 06:48:48.201000', null, null);
 

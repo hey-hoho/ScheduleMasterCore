@@ -157,8 +157,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 return true;
             }
-            ScheduleContext context = await GetScheduleContext(sid);
-            IHosSchedule schedule = HosScheduleFactory.GetHosSchedule(context);
+            ScheduleContext context = GetScheduleContext(sid);
+            IHosSchedule schedule = await HosScheduleFactory.GetHosSchedule(context);
             try
             {
                 for (int i = 0; i < 3; i++)
@@ -442,7 +442,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
         }
 
-        private static async Task<ScheduleContext> GetScheduleContext(Guid sid)
+        private static ScheduleContext GetScheduleContext(Guid sid)
         {
             using (var scope = new Core.ScopeDbContext())
             {
@@ -465,53 +465,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                                         where c.ScheduleId == model.Id && c.ChildId != model.Id
                                         select new { t.Id, t.Title }
                                     ).ToDictionary(x => x.Id, x => x.Title);
-                    //如果是程序集任务，那就从master下载最新的文件包
-                    if (model.MetaType == (int)ScheduleMetaType.Assembly)
-                    {
-                        await LoadPluginFile(db, model);
-                    }
                     return context;
                 }
                 throw new InvalidOperationException($"不存在的任务id：{sid}");
             }
         }
 
-        private static async Task LoadPluginFile(SmDbContext db, ScheduleEntity model)
-        {
-            bool pull = true;
-            var pluginPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id}".ToPhysicalPath();
-            //看一下拉取策略
-            string policy = ConfigurationCache.GetField<string>("Assembly_ImagePullPolicy");
-            if (policy == "IfNotPresent" && Directory.Exists(pluginPath))
-            {
-                pull = false;
-            }
-            if (pull)
-            {
-                var master = db.ServerNodes.FirstOrDefault(x => x.NodeType == "master");
-                if (master == null)
-                {
-                    throw new InvalidOperationException("master not found.");
-                }
-                var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
-                var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id.ToString("n")}.zip".ToPhysicalPath();
-                using (WebClient client = new WebClient())
-                {
-                    try
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
-                        throw ex;
-                    }
-                }
-                //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
-                ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
-                System.IO.File.Delete(zipPath);
-            }
-        }
 
         private static void StartedEvent(Guid sid, DateTime? nextRunTime)
         {
@@ -526,7 +485,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 task.TotalRunCount += 1;
                 db.SaveChanges();
             }
-            //LogHelper.Info($"任务[{task.Title}]运行成功！", task.Id);
         }
 
         private static void RunningRecovery()

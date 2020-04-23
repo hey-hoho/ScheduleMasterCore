@@ -40,7 +40,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var keeper = _repositoryFactory.ScheduleKeepers.Table;
             var executor = _repositoryFactory.ScheduleExecutors.Table;
             var query = (from s in schedule
-                         where  basUserId ? (from k in keeper where k.UserId == userId && k.ScheduleId == s.Id select 1).Any() : true
+                         where basUserId ? (from k in keeper where k.UserId == userId && k.ScheduleId == s.Id select 1).Any() : true
                          && hasWorkerName ? (from e in executor where e.WorkerName == workerName && e.ScheduleId == s.Id select 1).Any() : true
                          //orderby s.CreateTime descending
                          select new ScheduleInfo
@@ -58,7 +58,7 @@ namespace Hos.ScheduleMaster.Core.Services
                          });
             pager.AddFilter(x => x.Status != (int)ScheduleStatus.Deleted);
 
-                foreach (var filter in pager.Filters)
+            foreach (var filter in pager.Filters)
             {
                 query = query.Where(filter);
             }
@@ -711,24 +711,36 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             workers.ForEach((w) =>
             {
+                ConfigurationCache.WorkerUnHealthCounter.TryAdd(w.NodeName, 0);
+                int failedCount = ConfigurationCache.WorkerUnHealthCounter[w.NodeName];
                 var success = NodeRequest(w, "health", "get", null);
                 if (!success)
                 {
-                    w.Status = 0;
+                    System.Threading.Interlocked.Increment(ref failedCount);
                 }
-                w.LastUpdateTime = DateTime.Now;
-                _repositoryFactory.ServerNodes.Update(w);
-                //释放该节点占据的锁
-                _repositoryFactory.ScheduleLocks.UpdateBy(
-                    x => x.LockedNode == w.NodeName && x.Status == 1
-                    , x => new ScheduleLockEntity
-                    {
-                        Status = 0,
-                        LockedNode = null,
-                        LockedTime = null
-                    });
+                if (failedCount >= ConfigurationCache.GetField<int>("System_WorkerUnHealthTimes"))
+                {
+                    w.Status = 0;//标记下线，实际上可能存在因为网络抖动等原因导致检查失败但worker进程还在运行的情况
+                    w.LastUpdateTime = DateTime.Now;
+                    _repositoryFactory.ServerNodes.Update(w);
+                    //释放该节点占据的锁
+                    _repositoryFactory.ScheduleLocks.UpdateBy(
+                        x => x.LockedNode == w.NodeName && x.Status == 1
+                        , x => new ScheduleLockEntity
+                        {
+                            Status = 0,
+                            LockedNode = null,
+                            LockedTime = null
+                        });
+                    _unitOfWork.Commit();
+                    //重置计数器
+                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = 0;
+                }
+                else
+                {
+                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = failedCount;
+                }
             });
-            _unitOfWork.Commit();
         }
 
         /// <summary>

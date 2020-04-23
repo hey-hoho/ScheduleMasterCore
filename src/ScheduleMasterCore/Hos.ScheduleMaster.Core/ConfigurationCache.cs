@@ -16,11 +16,14 @@ namespace Hos.ScheduleMaster.Core
 
         private static ConcurrentDictionary<string, string> _cacheContainer;
 
+        public static ConcurrentDictionary<string, int> WorkerUnHealthCounter;
+
         static ConfigurationCache()
         {
             //初始分配100个容量，避免配置项多了以后频繁扩容，100基本够用了
             //并发级别为1，表示仅允许1个线程同时更新
             _cacheContainer = new ConcurrentDictionary<string, string>(1, 100);
+            WorkerUnHealthCounter = new ConcurrentDictionary<string, int>(1, 16);
         }
 
         /// <summary>

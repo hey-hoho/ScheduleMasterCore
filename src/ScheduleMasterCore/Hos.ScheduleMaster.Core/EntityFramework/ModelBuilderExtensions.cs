@@ -85,7 +85,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Name = "文件包拉取策略",
                     Value = "Always",
                     Group = "程序集配置",
-                    Remark = "Always-总是拉取，IfNotPresent-本地没有时拉取",
+                    Remark = "Always-总是拉取，IfNotPresent-本地没有时拉取，默认是Always",
                     Sort = 1
                 },
                 new SystemConfigEntity()
@@ -97,6 +97,17 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Value = "10",
                     Group = "HTTP配置",
                     Remark = "单位是秒，默认值是10",
+                    Sort = 1
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "System_WorkerUnHealthTimes",
+                    Name = "Worker允许无响应次数",
+                    Value = "3",
+                    Group = "系统配置",
+                    Remark = "健康检查失败达到最大次数会被下线剔除，默认值是3",
                     Sort = 1
                 }
                 );
