@@ -2,7 +2,12 @@
 ![schedulemaster ](https://imgkr.cn-bj.ufileos.com/3e2e493c-8813-4f4a-8b42-0a4882929ccd.png)
 
 ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core 3.1平台构建，支持跨平台多节点部署运行。
+
+
 [![Build Status](https://dev.azure.com/591310381/ScheduleMasterCore/_apis/build/status/ScheduleMasterCore?branchName=master)](https://dev.azure.com/591310381/ScheduleMasterCore/_build/latest?definitionId=4&branchName=master)
+![Nuget](https://img.shields.io/nuget/dt/ScheduleMaster)
+![PowerShell Gallery](https://img.shields.io/powershellgallery/p/DNS.1.1.1.1)
+![GitHub last commit](https://img.shields.io/github/last-commit/hey-hoho/ScheduleMasterCore)
 
 
 ## 主要特性

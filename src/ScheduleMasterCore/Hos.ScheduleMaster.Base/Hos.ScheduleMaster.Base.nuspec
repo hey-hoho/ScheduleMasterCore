@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package >
   <metadata>
-    <id>$id$</id>
-    <version>$version$</version>
-    <title>$title$</title>
-    <authors>$author$</authors>
-    <owners>$author$</owners>
+    <id>ScheduleMaster</id>
+    <version>2.0.1</version>
+    <title>ScheduleMaster</title>
+    <authors>HOHO</authors>
+    <owners>HOHO</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <license type="expression">MIT</license>
-    <projectUrl>http://project_url_here_or_delete_this_line/</projectUrl>
-    <iconUrl>http://icon_url_here_or_delete_this_line/</iconUrl>
-    <description>$description$</description>
+    <license type="expression">Apache-2.0</license>
+    <projectUrl>https://github.com/hey-hoho/ScheduleMasterCore</projectUrl>
+    <iconUrl>https://imgkr.cn-bj.ufileos.com/1dac6c35-4511-46b0-88d1-95e43c7a4b0c.png</iconUrl>
+    <description>ScheduleMaster task entry.</description>
     <releaseNotes>Summary of changes made in this release of the package.</releaseNotes>
     <copyright>Copyright 2020</copyright>
-    <tags>Tag1 Tag2</tags>
+    <tags>netcore schedule quartz task</tags>
   </metadata>
 </package>

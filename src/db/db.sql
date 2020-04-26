@@ -95,7 +95,7 @@ create table scheduletraces
 
 create table servernodes
 (
-	nodename varchar(255) charset utf8mb4 not null
+	nodename varchar(100) charset utf8mb4 not null
 		primary key,
 	nodetype varchar(20) charset utf8mb4 not null,
 	machinename varchar(100) charset utf8mb4 null,

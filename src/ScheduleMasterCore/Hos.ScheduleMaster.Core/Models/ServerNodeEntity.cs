@@ -13,6 +13,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 节点标识
         /// </summary>
         [Key]
+        [MaxLength(100)]
         [Column("nodename")]
         public string NodeName { get; set; }
 
