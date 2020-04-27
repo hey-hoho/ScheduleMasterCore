@@ -709,16 +709,22 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 return;
             }
+            //允许最大失败次数
+            int allowMaxFailed = ConfigurationCache.GetField<int>("System_WorkerUnHealthTimes");
+            if (allowMaxFailed <= 0) allowMaxFailed = 3;
+            //遍历处理
             workers.ForEach((w) =>
             {
+                //初始化计数器
                 ConfigurationCache.WorkerUnHealthCounter.TryAdd(w.NodeName, 0);
+                //获取已失败次数
                 int failedCount = ConfigurationCache.WorkerUnHealthCounter[w.NodeName];
                 var success = NodeRequest(w, "health", "get", null);
                 if (!success)
                 {
                     System.Threading.Interlocked.Increment(ref failedCount);
                 }
-                if (failedCount >= ConfigurationCache.GetField<int>("System_WorkerUnHealthTimes"))
+                if (failedCount >= allowMaxFailed)
                 {
                     w.Status = 0;//标记下线，实际上可能存在因为网络抖动等原因导致检查失败但worker进程还在运行的情况
                     w.LastUpdateTime = DateTime.Now;

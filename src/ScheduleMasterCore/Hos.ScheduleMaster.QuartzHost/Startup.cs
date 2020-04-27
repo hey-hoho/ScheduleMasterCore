@@ -44,6 +44,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
 
             services.AddHostedService<AppStart.AppLifetimeHostedService>();
+            services.AddHostedService<AppStart.ConfigurationRefreshService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
