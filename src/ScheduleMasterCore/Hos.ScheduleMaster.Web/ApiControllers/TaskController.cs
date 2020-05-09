@@ -61,12 +61,11 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="task"></param>
         /// <returns></returns>
         [HttpPost]
-        // [ApiParamValidation]
         public ServiceResponseMessage Create([FromForm]ScheduleInfo task)
         {
             ScheduleEntity main = new ScheduleEntity
             {
-                MetaType = 1,
+                MetaType = task.MetaType,
                 CreateTime = DateTime.Now,
                 CronExpression = task.CronExpression,
                 EndDate = task.EndDate,
@@ -79,13 +78,13 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 TotalRunCount = 0,
                 CreateUserName = task.CreateUserName
             };
-            if (task.MetaType == 1)
+            if (task.MetaType == (int)ScheduleMetaType.Assembly)
             {
                 main.AssemblyName = task.AssemblyName;
                 main.ClassName = task.ClassName;
             }
             ScheduleHttpOptionEntity httpOption = null;
-            if (task.MetaType == 2)
+            if (task.MetaType == (int)ScheduleMetaType.Http)
             {
                 httpOption = new ScheduleHttpOptionEntity
                 {

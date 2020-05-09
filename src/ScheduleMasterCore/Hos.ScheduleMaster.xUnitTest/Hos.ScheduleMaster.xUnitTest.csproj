@@ -15,4 +15,10 @@
     <PackageReference Include="coverlet.collector" Version="1.0.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Hos.ScheduleMaster.Core\Hos.ScheduleMaster.Core.csproj" />
+    <ProjectReference Include="..\Hos.ScheduleMaster.QuartzHost\Hos.ScheduleMaster.QuartzHost.csproj" />
+    <ProjectReference Include="..\Hos.ScheduleMaster.Web\Hos.ScheduleMaster.Web.csproj" />
+  </ItemGroup>
+
 </Project>

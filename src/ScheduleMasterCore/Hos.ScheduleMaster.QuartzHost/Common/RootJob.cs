@@ -42,7 +42,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     {
                         if (job.JobDataMap["instance"] is IHosSchedule instance)
                         {
-                            Guid traceId = GreateRunTrace();
+                            Guid traceId = CreateRunTrace();
                             Stopwatch stopwatch = new Stopwatch();
                             TaskContext tctx = new TaskContext(instance.RunnableInstance);
                             tctx.Node = node;
@@ -105,7 +105,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         public abstract void OnExecuted(TaskContext context);
 
-        private Guid GreateRunTrace()
+        private Guid CreateRunTrace()
         {
             ScheduleTraceEntity entity = new ScheduleTraceEntity();
             entity.TraceId = Guid.NewGuid();
