@@ -73,7 +73,29 @@ namespace Hos.ScheduleMaster.QuartzHost.AppStart
         protected override Task ExecuteAsync()
         {
             Core.ConfigurationCache.Reload();
-            _logger.LogDebug($"ConfigurationRefresh Finished.");
+            _logger.LogInformation($"ConfigurationRefresh Finished.");
+            return Task.CompletedTask;
+        }
+    }
+
+    public class DelayedTaskConsumerService : BackgroundTimerHostedService
+    {
+        ILogger<DelayedTaskConsumerService> _logger;
+        public DelayedTaskConsumerService(ILogger<DelayedTaskConsumerService> logger) : base(TimeSpan.FromSeconds(1), logger)
+        {
+            _logger = logger;
+        }
+
+        protected override Task ExecuteAsync()
+        {
+            if (DelayedTask.DelayPlanManager.IsEnabled)
+            {
+                DelayedTask.DelayPlanManager.Read();
+            }
+            else
+            {
+                _logger.LogWarning($"DelayPlanManager Is Unenabled.");
+            }
             return Task.CompletedTask;
         }
     }

@@ -17,13 +17,8 @@ namespace Hos.ScheduleMaster.Core.Services
 
         public BaseService()
         {
-            //AutowiredServiceProvider.Autowired(this);
-        }
 
-        //public BaseService(IUnitOfWork unitOfWork)
-        //{
-        //    this._unitOfWork = unitOfWork;
-        //}
+        }
 
         protected ServiceResponseMessage ServiceResult(ResultStatus status, string msg = "", object data = null)
         {

@@ -22,6 +22,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
+        [Autowired]
+        public INodeService _nodeService { get; set; }
+
         /// <summary>
         /// 任务列表页面
         /// </summary>
@@ -88,7 +91,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         {
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
-            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
+            ViewBag.WorkerList = _nodeService.QueryWorkerList();
             return View();
         }
 
@@ -182,7 +185,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             ViewBag.UserList = _accountService.GetUserAll();
             ViewBag.TaskList = _scheduleService.QueryAll().ToDictionary(x => x.Id, x => x.Title);
-            ViewBag.WorkerList = _scheduleService.QueryWorkerList();
+            ViewBag.WorkerList = _nodeService.QueryWorkerList();
             ScheduleInfo viewer = ObjectMapper<ScheduleEntity, ScheduleInfo>.Convert(model);
             if (model.MetaType == (int)ScheduleMetaType.Http)
             {

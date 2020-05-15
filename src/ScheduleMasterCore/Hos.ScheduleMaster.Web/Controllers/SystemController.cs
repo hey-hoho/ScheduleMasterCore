@@ -20,6 +20,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         public ISystemService _systemService { get; set; }
 
         [Autowired]
+        public INodeService _nodeService { get; set; }
+
+        [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
         // GET: System
@@ -48,7 +51,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 pager.AddFilter(x => x.MachineName.Contains(keyword) || x.NodeName.Contains(keyword) || x.Host.Contains(keyword));
             }
-            pager = _systemService.QueryNodePager(pager);
+            pager = _nodeService.QueryNodePager(pager);
             return GridData(pager.Total, pager.Rows);
         }
 
@@ -63,7 +66,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 return View();
             }
-            var entity = _systemService.GetNodeByName(name);
+            var entity = _nodeService.GetNodeByName(name);
             if (entity == null)
             {
                 return PageNotFound();
@@ -84,7 +87,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 string savetype = Request.Form["savetype"].ToString();
                 if (savetype == "edit")
                 {
-                    var result = _systemService.EditNode(entity);
+                    var result = _nodeService.EditNode(entity);
                     if (result)
                     {
                         return SuccessTip("编辑节点成功！", Url.Action("Node"));
@@ -93,11 +96,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
                 }
                 else if (savetype == "add")
                 {
-                    if (_systemService.GetNodeByName(entity.NodeName) != null)
+                    if (_nodeService.GetNodeByName(entity.NodeName) != null)
                     {
                         return DangerTip("节点名称已存在！");
                     }
-                    var result = _systemService.AddNode(entity);
+                    var result = _nodeService.AddNode(entity);
                     if (result)
                     {
                         return SuccessTip("新增节点成功！", Url.Action("Node"));
@@ -115,7 +118,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeConnect(string name)
         {
-            var result = _systemService.NodeSwich(name, 1);
+            var result = _nodeService.NodeSwich(name, 1);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -131,7 +134,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeEnable(string name)
         {
-            var result = _systemService.NodeSwich(name, 3);
+            var result = _nodeService.NodeSwich(name, 3);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -147,7 +150,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeDisable(string name)
         {
-            var result = _systemService.NodeSwich(name, 2);
+            var result = _nodeService.NodeSwich(name, 2);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -163,7 +166,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [HttpPost, AjaxRequestOnly]
         public ActionResult NodeDelete(string name)
         {
-            var result = _systemService.DeleteNode(name);
+            var result = _nodeService.DeleteNode(name);
             if (result)
             {
                 return this.JsonNet(true, "删除成功！");

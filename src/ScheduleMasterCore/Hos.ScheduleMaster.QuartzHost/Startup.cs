@@ -37,6 +37,7 @@ namespace Hos.ScheduleMaster.QuartzHost
                 config.Filters.Add(typeof(GlobalExceptionFilter));
             });
             services.AddHealthChecks();
+            services.AddHttpClient();
 
             services.AddDbContextPool<SmDbContext>(option =>
             option.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
@@ -45,6 +46,7 @@ namespace Hos.ScheduleMaster.QuartzHost
 
             services.AddHostedService<AppStart.AppLifetimeHostedService>();
             services.AddHostedService<AppStart.ConfigurationRefreshService>();
+            services.AddHostedService<AppStart.DelayedTaskConsumerService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

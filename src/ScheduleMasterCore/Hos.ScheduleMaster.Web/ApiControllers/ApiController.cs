@@ -44,6 +44,8 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             }
         }
 
+        public string CurrentUserName => HttpContext.Request.Headers["ms_auth_user"].FirstOrDefault();
+
         /// <summary>
         /// 接口统一的返回消息
         /// </summary>

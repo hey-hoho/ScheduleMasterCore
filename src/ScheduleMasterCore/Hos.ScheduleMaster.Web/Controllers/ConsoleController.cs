@@ -17,6 +17,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
+        [Autowired]
+        public INodeService _nodeService { get; set; }
+
         public IActionResult Index()
         {
             ViewBag.CurrentAdmin = CurrentAdmin;
@@ -53,11 +56,11 @@ namespace Hos.ScheduleMaster.Web.Controllers
             //累计运行失败次数
             int trace_failed = _scheduleService.QueryTraceCount(2);
             //总节点数
-            int worker_total = _scheduleService.QueryWorkerCount(null);
+            int worker_total = _nodeService.QueryWorkerCount(null);
             //工作中节点数
-            int worker_running = _scheduleService.QueryWorkerCount(2);
+            int worker_running = _nodeService.QueryWorkerCount(2);
             //休息中节点数
-            int worker_ready = _scheduleService.QueryWorkerCount(1);
+            int worker_ready = _nodeService.QueryWorkerCount(1);
             //近一周运行成功数据
             object weekly_success = _scheduleService.QueryTraceWeeklyReport(1);
             //近一周运行失败数据

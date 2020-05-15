@@ -109,6 +109,39 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     Group = "系统配置",
                     Remark = "健康检查失败达到最大次数会被下线剔除，默认值是3",
                     Sort = 1
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "DelayTask_DelayPattern",
+                    Name = "延迟模式",
+                    Value = "Relative",
+                    Group = "延时任务配置",
+                    Remark = "Relative-相对时间，Absolute-绝对时间，默认值是Relative",
+                    Sort = 1
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "DelayTask_RetryTimes",
+                    Name = "回调失败重试次数",
+                    Value = "3",
+                    Group = "延时任务配置",
+                    Remark = "回调失败重试次数，默认值是3",
+                    Sort = 2
+                },
+                new SystemConfigEntity()
+                {
+                    CreateTime = DateTime.Now,
+                    IsReuired = true,
+                    Key = "DelayTask_RetrySpans",
+                    Name = "回调失败重试间隔",
+                    Value = "10",
+                    Group = "延时任务配置",
+                    Remark = "回调失败重试间隔时间(s)，会随着重试次数递增，默认值是10秒",
+                    Sort = 3
                 }
                 );
             return builder;

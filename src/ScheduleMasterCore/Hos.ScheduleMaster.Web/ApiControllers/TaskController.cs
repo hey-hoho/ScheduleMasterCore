@@ -63,6 +63,10 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         [HttpPost]
         public ServiceResponseMessage Create([FromForm]ScheduleInfo task)
         {
+            if (!ModelState.IsValid)
+            {
+                return ApiResponse(ResultStatus.ParamError, "非法提交参数");
+            }
             ScheduleEntity main = new ScheduleEntity
             {
                 MetaType = task.MetaType,
@@ -76,7 +80,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 CustomParamsJson = task.CustomParamsJson,
                 RunLoop = task.RunLoop,
                 TotalRunCount = 0,
-                CreateUserName = task.CreateUserName
+                CreateUserName = CurrentUserName
             };
             if (task.MetaType == (int)ScheduleMetaType.Assembly)
             {

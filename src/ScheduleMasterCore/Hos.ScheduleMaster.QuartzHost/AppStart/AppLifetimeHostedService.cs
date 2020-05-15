@@ -57,6 +57,8 @@ namespace Hos.ScheduleMaster.QuartzHost.AppStart
                 ConfigurationCache.SetNode(_configuration);
                 //初始化Quartz
                 Common.QuartzManager.InitScheduler().Wait();
+                //初始化延时队列容器
+                DelayedTask.DelayPlanManager.Init();
             }
         }
 
@@ -65,6 +67,7 @@ namespace Hos.ScheduleMaster.QuartzHost.AppStart
             _logger.LogInformation("Hosted service OnStopping");
 
             Common.QuartzManager.Shutdown(true).Wait();
+            DelayedTask.DelayPlanManager.Clear();
             Core.Log.LogManager.Shutdown();
         }
 

@@ -1,0 +1,53 @@
+﻿
+@model Hos.ScheduleMaster.Core.Dto.ScheduleDelayedInfo
+
+@{
+    Layout = null;
+    string[] StatusEnum = new string[] { "已作废", "已创建", "已就绪", "执行成功", "异常" };
+}
+
+<div class="well well-lg">
+    <h4 class="block"><b>@Model.Id</b></h4>
+    <div class="row">
+        <p class="col-lg-12 col-sm-12 col-xs-12"><strong>来源：</strong>@Model.SourceApp </p>
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>主题：</strong>@Model.Topic </p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>业务关键字：</strong>@Model.ContentKey </p>
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>延迟的绝对时间：</strong>@Model.DelayAbsoluteTime </p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>延迟的相对时间：</strong>@Model.DelayTimeSpan s</p>
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>创建人：</strong>@Model.CreateUserName </p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>创建时间：</strong>@Model.CreateTime </p>
+
+        <p class="col-lg-12 col-sm-12 col-xs-12"><strong>备注：</strong>@Model.Remark </p>
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>最后执行时间：</strong>@Model.ExecuteTime</p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>执行成功时间：</strong>@Model.FinishTime</p>
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>状态：</strong>@StatusEnum[Model.Status]</p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>失败重试次数：</strong>@Model.FailedRetrys</p>
+    </div>
+    <hr />
+
+    <div class="row">
+
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>请求地址：</strong>@Model.NotifyUrl </p>
+        <p class="col-lg-6 col-sm-6 col-xs-12"><strong>数据格式：</strong>@Model.NotifyDataType </p>
+        <p class="col-lg-12 col-sm-12 col-xs-12"><strong>回调参数：</strong>@Html.Raw(Model.NotifyBody) </p>
+        
+    </div>
+    <hr />
+
+    <div class="row">
+        <p class="col-lg-12 col-sm-12 col-xs-12">
+            <strong>运行节点：</strong>
+            @{
+                foreach (var item in Model.Executors)
+                {
+                    <code>@item</code><i>&nbsp; </i>
+                }
+            }
+        </p>
+    </div>
+</div>

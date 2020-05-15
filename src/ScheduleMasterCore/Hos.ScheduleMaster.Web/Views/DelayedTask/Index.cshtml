@@ -1,0 +1,139 @@
+﻿
+@{
+
+}
+
+<link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+<style type="text/css">
+
+</style>
+
+<div class="page-body">
+    <div id="serch-form" class="form-inline">
+        <a href="@Url.Action("Create","Schedule")" class="btn btn-primary">创建任务</a>
+        <div class="pull-right">
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="主题" id="Topic">
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="业务关键字" id="ContentKey">
+            </div>
+            <div class="input-group">
+                <select class="form-control" id="Status">
+                    <option value="-1">全部状态</option>
+                    <option value="0">已作废</option>
+                    <option value="1">已创建</option>
+                    <option value="2">已就绪</option>
+                    <option value="3">执行成功</option>
+                    <option value="4">异常</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="text" class="form-control" placeholder="节点名称" id="workerName">
+                <span class="input-group-btn">
+                    <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
+                </span>
+            </div>
+        </div>
+    </div>
+    <table id="table" class="mychar1-table"></table>
+</div>
+<div id="detailModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true" style="display: none;">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div>
+
+@section scripts{
+    <!--Page Related Scripts-->
+    <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script>
+        hos.ui.util.breadCrumb('延迟任务');
+        var grid = hos.ui.ctrl.gridView("table", {
+            url: '@ViewBag.PagerQueryUrl',
+            columns: [
+                {
+                    field: 'Id', title: 'ID', width: '5', formatter: function (value, row, index) {
+                        return '<a href="javascript:" class="tooltips" data-toggle="tooltip" data-original-title="' + value + '" onclick="hos.ui.util.copyToClip(\'' + value + '\')">' + value.substring(0, 8) + '</a>';
+                    }
+                },
+                { field: 'SourceApp', title: '来源', width: '6', align: 'center' },
+                { field: 'Topic', title: '主题', width: '8', align: 'center' },
+                { field: 'ContentKey', title: '业务关键字', width: '8', align: 'center' , formatter: function (value, row, index) {
+                        return '<a href="javascript:"  onclick="handlers.showDetail(\'' + row.Id + '\');" >' + value + '</a>';
+                    }},
+                {
+                    field: 'Executors', title: '执行节点', width: '10', align: 'center',formatter: function (value, row, index) {
+                        var html = '';
+                        var length = row.Executors.length > 3 ? 3 : row.Executors.length;
+                        for (var i = 0; i < length; i++) {
+                            html += ('<code>'+row.Executors[i]+'</code><i>&nbsp; </i>');
+                        }
+                        return html;
+                    }
+                },
+                { field: 'DelayTimeSpan', title: '延时相对时间', width: '6', align: 'center' },
+                { field: 'DelayAbsoluteTime', title: '延迟绝对时间', width: '8', align: 'center' },
+                { field: 'ExecuteTime', title: '执行时间', width: '8', align: 'center' },
+                { field: 'FailedRetrys', title: '重试次数', width: '5', align: 'center' },
+                {
+                    field: 'Status', title: '状态', width: '5', align: 'center', formatter: function (value, row, index) {
+                        var dict = [
+                            "<span class='label label-gray graded'>已作废</span>",
+                            "已创建",
+                            "<span class='label label-green graded'>已就绪</span>",
+                            "<span class='label label-azure graded'>执行成功</span>",
+                            "<span class='label label-danger graded'>异常</span>"
+                        ];
+                        return dict[value];
+                    }
+                },
+                { field: 'CreateTime', title: '创建时间', width: '8', align: 'center' },
+                {
+                    title: '操作', field: 'id', align: 'center', width: '8', formatter: function (value, row, index) {
+                        var l = '<a href="/Schedule/TraceLog?sid=' + row.Id + '" class="btn btn-xs">日志</a>  ';
+                        if (row.Status == 1||row.Status == 2) {
+                            l += '<button class="btn btn-xs btn-danger" onclick="handlers.taskStop(\'' + row.Id + '\',\'' + row.ContentKey + '\')">作废</button>  ';
+                        }
+                        if (row.Status == 4) {
+                            l += '<button class="btn btn-xs btn-info" onclick="handlers.taskRun(\'' + row.Id + '\',\'' + row.ContentKey + '\')">执行</button> ';
+                        }
+                        if (row.Status != 2) {
+                            l += '<button class="btn btn-xs btn-primary" onclick="handlers.taskStart(\'' + row.Id + '\',\'' + row.ContentKey + '\')">重置</button>  ';
+                        }
+                        return l;
+                    }
+                }
+            ],
+            onPostBody: function (data) {
+                $('[data-toggle="tooltip"]').tooltip();
+            }
+        });
+        var handlers = {
+            showDetail: function (id) {
+                $("#detailModal").modal({ remote: '/DelayedTask/Detail?sid=' + id }).on("hidden.bs.modal", function () {
+                    $(this).removeData("bs.modal");
+                    $(this).find(".modal-content").children().remove();
+                });
+            },
+            taskStart: function (value, title) {
+                this.request(title, '/DelayedTask/Start?id=' + value, "重置");
+            },
+            taskStop: function (value, title) {
+                this.request(title, '/DelayedTask/Stop?id=' + value, "作废");
+            },
+            taskRun: function (value, title) {
+                this.request(title, '/DelayedTask/Execute?id=' + value, "执行");
+            },
+            request: function (title, url, action) {
+                hos.ui.util.confirm('确定要 <span style="color:red" > ' + action + '</span>【' + title + '】？',
+                    function () {
+                        hos.ui.util.postJson(url, {}, function () { grid.reload(); })
+                    });
+            }
+        }
+    </script>
+}
+

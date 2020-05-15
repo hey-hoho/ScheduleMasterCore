@@ -46,19 +46,6 @@ namespace Hos.ScheduleMaster.Core.Interface
         int QueryScheduleCount(int? status);
 
         /// <summary>
-        /// 查询指定worker状态数量
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        int QueryWorkerCount(int? status);
-
-        /// <summary>
-        /// 查询所有worker列表
-        /// </summary>
-        /// <returns></returns>
-        List<ServerNodeEntity> QueryWorkerList();
-
-        /// <summary>
         /// 查询指定运行状态数量
         /// </summary>
         /// <param name="status"></param>
@@ -189,5 +176,19 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="result"></param>
         /// <returns></returns>
         bool UpdateRunTrace(Guid traceId, double timeSpan, ScheduleRunResult result);
+
+        /// <summary>
+        /// 创建一个延时任务
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        ServiceResponseMessage AddDelayed(ScheduleDelayedEntity entity);
+
+        /// <summary>
+        /// 立即执行延时任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        ServiceResponseMessage ExecuteDelayed(Guid sid);
     }
 }

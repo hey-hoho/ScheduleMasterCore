@@ -44,12 +44,12 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
         public override void Run(TaskContext context)
         {
             if (HttpOption == null) return;
-            context.WriteLog("即将请求：" + HttpOption.RequestUrl);
+            context.WriteLog($"即将请求：{HttpOption.RequestUrl}");
 
             var response = DoRequest();
             if (response == null)
             {
-                throw new Exception("无响应：" + HttpOption.RequestUrl);
+                throw new Exception($"无响应：{HttpOption.RequestUrl}");
             }
             if (response.IsSuccessful)
             {

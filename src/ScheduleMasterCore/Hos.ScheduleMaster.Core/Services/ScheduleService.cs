@@ -15,7 +15,8 @@ namespace Hos.ScheduleMaster.Core.Services
     [ServiceMapTo(typeof(IScheduleService))]
     public class ScheduleService : BaseService, IScheduleService
     {
-        //private readonly System.Net.Http.IHttpClientFactory _clientFactory;
+        [Autowired]
+        public INodeService _nodeService { get; set; }
 
         /// <summary>
         /// 查询所有未删除的任务
@@ -140,30 +141,6 @@ namespace Hos.ScheduleMaster.Core.Services
             return query.Count();
         }
 
-        /// <summary>
-        /// 查询指定worker状态数量
-        /// </summary>
-        /// <param name="status"></param>
-        /// <returns></returns>
-        public int QueryWorkerCount(int? status)
-        {
-            var query = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker");
-            if (status.HasValue)
-            {
-                query = query.Where(x => x.Status == status.Value);
-            }
-            return query.Count();
-        }
-
-        /// <summary>
-        /// 查询所有worker列表
-        /// </summary>
-        /// <returns></returns>
-        public List<ServerNodeEntity> QueryWorkerList()
-        {
-            var query = _repositoryFactory.ServerNodes.WhereNoTracking(x => x.NodeType == "worker").OrderByDescending(x => x.LastUpdateTime);
-            return query.ToList();
-        }
 
         /// <summary>
         /// 查询指定运行状态数量
@@ -255,6 +232,15 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public ServiceResponseMessage Add(ScheduleEntity model, ScheduleHttpOptionEntity httpOption, List<int> keepers, List<Guid> nexts, List<string> executors = null)
         {
+            if (executors == null || !executors.Any())
+            {
+                //没有指定worker就根据权重选择2个
+                executors = _nodeService.GetAvaliableWorkerByPriority(null, 2).Select(x => x.NodeName).ToList();
+            }
+            if (!executors.Any())
+            {
+                return ServiceResult(ResultStatus.Failed, "没有可用节点!");
+            }
             model.CreateTime = DateTime.Now;
             var user = _repositoryFactory.SystemUsers.FirstOrDefault(x => x.UserName == model.CreateUserName);
             if (user != null)
@@ -272,20 +258,11 @@ namespace Hos.ScheduleMaster.Core.Services
                 _repositoryFactory.ScheduleHttpOptions.Add(httpOption);
             }
             //保存运行节点
-            if (executors == null || !executors.Any())
+            _repositoryFactory.ScheduleExecutors.AddRange(executors.Select(x => new ScheduleExecutorEntity
             {
-                //没有指定worker就根据权重选择2个
-                executors = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status != 0)
-                    .OrderByDescending(x => x.Priority).Take(2).Select(x => x.NodeName).ToList();
-            }
-            if (executors.Any())
-            {
-                _repositoryFactory.ScheduleExecutors.AddRange(executors.Select(x => new ScheduleExecutorEntity
-                {
-                    ScheduleId = model.Id,
-                    WorkerName = x
-                }));
-            }
+                ScheduleId = model.Id,
+                WorkerName = x
+            }));
             //保存监护人
             if (keepers != null && keepers.Count > 0)
             {
@@ -380,7 +357,7 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
-        /// 是否存在可用的work节点
+        /// 是否存在可用的worker节点
         /// </summary>
         /// <returns></returns>
         private bool HasAvailableWorker()
@@ -388,94 +365,6 @@ namespace Hos.ScheduleMaster.Core.Services
             return _repositoryFactory.ServerNodes.Any(x => x.NodeType == "worker" && x.Status == 2);
         }
 
-        /// <summary>
-        /// 查询指定任务正在运行状态的worker列表
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <returns></returns>
-        private List<ServerNodeEntity> GetAvaliableWorkerForSchedule(Guid sid)
-        {
-            var query = from n in _repositoryFactory.ServerNodes.Table
-                        where n.NodeType == "worker" && n.Status == 2
-                        && (from e in _repositoryFactory.ScheduleExecutors.Table where e.ScheduleId == sid && n.NodeName == e.WorkerName select 1).Any()
-                        select n;
-            return query.AsNoTracking().ToList();
-        }
-
-        /// <summary>
-        /// 遍历所有worker并执行操作
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="router"></param>
-        /// <param name="verb"></param>
-        /// <returns></returns>
-        private bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
-        {
-            var nodeList = GetAvaliableWorkerForSchedule(sid);
-            if (nodeList.Any())
-            {
-                Dictionary<string, string> param = new Dictionary<string, string>();
-                if (sid != Guid.Empty)
-                {
-                    //param.Add("sid", sid.ToString());
-                }
-                var result = nodeList.AsParallel().Select(n =>
-                  {
-                      return NodeRequest(n, router, verb, param);
-                  }).ToArray();
-                return result.All(x => x == true);
-            }
-            throw new InvalidOperationException("running worker not found.");
-        }
-
-        /// <summary>
-        /// 根据权重选择一个worker执行操作
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="router"></param>
-        /// <returns></returns>
-        private bool WorkerSelectOne(Guid sid, string router)
-        {
-            var list = GetAvaliableWorkerForSchedule(sid).OrderBy(x => x.Priority).ToList();
-            if (!list.Any()) return false;
-            //根据节点权重来选择一个节点运行
-            int[] arry = new int[list.Count + 1];
-            arry[0] = 0;
-            for (int i = 0; i < list.Count; i++)
-            {
-                arry[i + 1] = list[i].Priority + arry[i];
-            }
-            var sum = list.Sum(x => x.Priority);
-            int rnd = new Random().Next(0, sum);
-            ServerNodeEntity selectedNode = null;
-            for (int i = 1; i < arry.Length; i++)
-            {
-                if (rnd >= arry[i - 1] && rnd < arry[i])
-                {
-                    selectedNode = list[i - 1];
-                    break;
-                }
-            }
-            if (selectedNode != null)
-            {
-                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
-                return NodeRequest(selectedNode, router, "post", param);
-            }
-            return false;
-        }
-
-        private bool NodeRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param)
-        {
-            Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
-            string url = $"{node.AccessProtocol}://{node.Host}/{router}";
-            var result = HttpRequest.Send(url, method, param, header);
-            var success = result.Key == HttpStatusCode.OK;
-            if (!success)
-            {
-                Log.LogHelper.Warn($"响应码：{result.Key.GetHashCode()}，请求地址：{url}，响应消息：{result.Value}");
-            }
-            return success;
-        }
 
         /// <summary>
         /// 恢复运行中的任务
@@ -510,7 +399,7 @@ namespace Hos.ScheduleMaster.Core.Services
         private ServiceResponseMessage InnerStart(Guid sid)
         {
             //启动任务
-            bool success = WorkersTraverseAction(sid, "api/quartz/start?sid=" + sid);
+            bool success = _nodeService.WorkersTraverseAction(sid, "api/quartz/start?sid=" + sid);
             if (success)
             {
                 //启动成功后更新任务状态为运行中
@@ -526,7 +415,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                WorkersTraverseAction(sid, "api/quartz/stop?sid=" + sid);
+                _nodeService.WorkersTraverseAction(sid, "api/quartz/stop?sid=" + sid);
                 _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
@@ -547,7 +436,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = WorkersTraverseAction(task.Id, "api/quartz/pause?sid=" + sid);
+                bool success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/pause?sid=" + sid);
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -564,7 +453,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    WorkersTraverseAction(sid, "api/quartz/resume?sid=" + sid);
+                    _nodeService.WorkersTraverseAction(sid, "api/quartz/resume?sid=" + sid);
                     return ServiceResult(ResultStatus.Failed, "任务暂停失败!");
                 }
             }
@@ -581,7 +470,7 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
-                bool success = WorkersTraverseAction(task.Id, "api/quartz/resume?sid=" + sid);
+                bool success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/resume?sid=" + sid);
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -597,7 +486,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    WorkersTraverseAction(sid, "api/quartz/pause?sid=" + sid);
+                    _nodeService.WorkersTraverseAction(sid, "api/quartz/pause?sid=" + sid);
                     return ServiceResult(ResultStatus.Failed, "任务恢复失败!");
                 }
             }
@@ -614,7 +503,9 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = WorkerSelectOne(sid, "api/quartz/runonce?sid=" + sid);
+                ServerNodeEntity worker = _nodeService.GetAvaliableWorkerByPriority(sid).FirstOrDefault();
+                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
+                bool success = _nodeService.WorkerRequest(worker, "api/quartz/runonce?sid=" + sid, "post", param);
                 if (success)
                 {
                     return ServiceResult(ResultStatus.Success, "任务运行成功!");
@@ -637,10 +528,10 @@ namespace Hos.ScheduleMaster.Core.Services
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
             {
-                bool success = GetAvaliableWorkerForSchedule(sid).Any();
+                bool success = _nodeService.GetAvaliableWorkerForSchedule(sid).Any();
                 if (success)
                 {
-                    success = WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
+                    success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
                 }
                 else
                 {
@@ -697,56 +588,6 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
             }
             return ServiceResult(ResultStatus.Failed, "当前任务状态下不能删除!");
-        }
-
-        /// <summary>
-        /// worker健康检查
-        /// </summary>
-        public void WorkerHealthCheck()
-        {
-            var workers = _repositoryFactory.ServerNodes.Where(x => x.NodeType == "worker" && x.Status != 0).ToList();
-            if (!workers.Any())
-            {
-                return;
-            }
-            //允许最大失败次数
-            int allowMaxFailed = ConfigurationCache.GetField<int>("System_WorkerUnHealthTimes");
-            if (allowMaxFailed <= 0) allowMaxFailed = 3;
-            //遍历处理
-            workers.ForEach((w) =>
-            {
-                //初始化计数器
-                ConfigurationCache.WorkerUnHealthCounter.TryAdd(w.NodeName, 0);
-                //获取已失败次数
-                int failedCount = ConfigurationCache.WorkerUnHealthCounter[w.NodeName];
-                var success = NodeRequest(w, "health", "get", null);
-                if (!success)
-                {
-                    System.Threading.Interlocked.Increment(ref failedCount);
-                }
-                if (failedCount >= allowMaxFailed)
-                {
-                    w.Status = 0;//标记下线，实际上可能存在因为网络抖动等原因导致检查失败但worker进程还在运行的情况
-                    w.LastUpdateTime = DateTime.Now;
-                    _repositoryFactory.ServerNodes.Update(w);
-                    //释放该节点占据的锁
-                    _repositoryFactory.ScheduleLocks.UpdateBy(
-                        x => x.LockedNode == w.NodeName && x.Status == 1
-                        , x => new ScheduleLockEntity
-                        {
-                            Status = 0,
-                            LockedNode = null,
-                            LockedTime = null
-                        });
-                    _unitOfWork.Commit();
-                    //重置计数器
-                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = 0;
-                }
-                else
-                {
-                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = failedCount;
-                }
-            });
         }
 
         /// <summary>
@@ -810,5 +651,88 @@ namespace Hos.ScheduleMaster.Core.Services
             });
             return _unitOfWork.Commit() > 0;
         }
+
+
+        #region 延时任务部分
+
+        /// <summary>
+        /// 创建一个延时任务
+        /// </summary>
+        /// <param name="entity"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage AddDelayed(ScheduleDelayedEntity entity)
+        {
+            //分配节点-权重选择2个可用worker
+            var executors = _nodeService.GetAvaliableWorkerByPriority(null, 2).Select(x => x.NodeName).ToList();
+            if (!executors.Any())
+            {
+                return ServiceResult(ResultStatus.Failed, "没有可用节点!");
+            }
+            entity.CreateTime = DateTime.Now;
+
+            //保存主信息
+            _repositoryFactory.ScheduleDelayeds.Add(entity);
+            //创建并保存任务锁
+            _repositoryFactory.ScheduleLocks.Add(new ScheduleLockEntity { ScheduleId = entity.Id, Status = 0 });
+
+            //保存执行节点
+            _repositoryFactory.ScheduleExecutors.AddRange(executors.Select(x => new ScheduleExecutorEntity
+            {
+                ScheduleId = entity.Id,
+                WorkerName = x
+            }));
+
+            //事务提交
+            if (_unitOfWork.Commit() > 0)
+            {
+                //任务持久化成功后分发给worker，进入就绪状态
+                return StartDelayed(entity.Id);
+            }
+            return ServiceResult(ResultStatus.Failed, "数据保存失败!");
+        }
+        private ServiceResponseMessage StartDelayed(Guid sid)
+        {
+            //启动任务
+            bool success = _nodeService.WorkersTraverseAction(sid, "api/delayedtask/insert?sid=" + sid);
+            if (success)
+            {
+                //启动成功后更新任务状态为就绪
+                _repositoryFactory.ScheduleDelayeds.UpdateBy(m => m.Id == sid, m => new ScheduleDelayedEntity
+                {
+                    Status = (int)ScheduleDelayStatus.Ready//就绪状态
+                });
+                if (_unitOfWork.Commit() > 0)
+                {
+                    return ServiceResult(ResultStatus.Success, "任务启动成功!");
+                }
+                return ServiceResult(ResultStatus.Failed, "更新任务状态失败!");
+            }
+            else
+            {
+                _nodeService.WorkersTraverseAction(sid, "api/delayedtask/remove?sid=" + sid);
+                return ServiceResult(ResultStatus.Failed, "任务启动失败!");
+            }
+        }
+
+        /// <summary>
+        /// 立即执行延时任务
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <returns></returns>
+        public ServiceResponseMessage ExecuteDelayed(Guid sid)
+        {
+            ServerNodeEntity worker = _nodeService.GetAvaliableWorkerByPriority(sid).FirstOrDefault();
+            Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
+            bool success = _nodeService.WorkerRequest(worker, "api/delayedtask/execute?sid=" + sid, "post", param);
+            if (success)
+            {
+                return ServiceResult(ResultStatus.Success, "任务运行成功!");
+            }
+            else
+            {
+                return ServiceResult(ResultStatus.Failed, "任务运行失败!");
+            }
+        }
+        #endregion
     }
 }
