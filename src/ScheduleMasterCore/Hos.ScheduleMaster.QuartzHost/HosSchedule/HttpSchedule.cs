@@ -101,7 +101,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         private Method GetRestSharpMethod(string method)
         {
-            switch (method)
+            switch (method.ToUpper())
             {
                 case "POST": return Method.POST;
                 case "PUT": return Method.PUT;

@@ -14,12 +14,12 @@ namespace Hos.ScheduleMaster.Web.Filters
     public class AccessControlFilter : IActionFilter
     {
         private IHttpContextAccessor _accessor;
-        private IAccountService _account;
+        private SmDbContext _db;
 
-        public AccessControlFilter(IHttpContextAccessor accessor, IAccountService account)
+        public AccessControlFilter(IHttpContextAccessor accessor, SmDbContext db)
         {
             _accessor = accessor;
-            _account = account;
+            _db = db;
         }
 
         public void OnActionExecuted(ActionExecutedContext context)
@@ -28,17 +28,11 @@ namespace Hos.ScheduleMaster.Web.Filters
 
         public void OnActionExecuting(ActionExecutingContext context)
         {
-            //var conn = _accessor.HttpContext.Connection;
-            //if (conn.RemoteIpAddress.Equals(conn.LocalIpAddress))
-            //{
-            //    //同域请求不做验证
-            //    return;
-            //}
             string userName = context.HttpContext.Request.Headers["ms_auth_user"].FirstOrDefault();
             string secret = context.HttpContext.Request.Headers["ms_auth_secret"].FirstOrDefault();
             if (!string.IsNullOrEmpty(userName) && !string.IsNullOrEmpty(secret))
             {
-                var user = _account.GetUserbyUserName(userName);
+                var user = _db.SystemUsers.FirstOrDefault(x => x.UserName == userName);
                 if (user != null && user.Status == (int)SystemUserStatus.Available)
                 {
                     string se = SecurityHelper.MD5($"{userName}{user.Password}{userName}");

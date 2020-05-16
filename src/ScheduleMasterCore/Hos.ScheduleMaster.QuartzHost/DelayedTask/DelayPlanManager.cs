@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Log;
 using Hos.ScheduleMaster.Core.Models;
 using Microsoft.EntityFrameworkCore;
@@ -177,7 +178,7 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                 db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString(), traceId));
                 //失败重试策略
                 int maxRetry = ConfigurationCache.GetField<int>("DelayTask_RetryTimes");
-                if (entity.FailedRetrys <= (maxRetry > 0 ? maxRetry : 3))
+                if (entity.FailedRetrys < (maxRetry > 0 ? maxRetry : 3))
                 {
                     //更新结果字段
                     entity.FailedRetrys++;
@@ -195,6 +196,15 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                     entity.Remark = $"重试{entity.FailedRetrys}次后失败结束";
                     //更新日志
                     LogHelper.Error($"延时任务[{entity.Topic}:{entity.ContentKey}]重试{entity.FailedRetrys}次后失败结束。", ex, sid, traceId);
+                    //邮件通知
+                    var user = await db.SystemUsers.FirstOrDefaultAsync(x => x.UserName == entity.CreateUserName && !string.IsNullOrEmpty(x.Email));
+                    if (user != null)
+                    {
+                        var keeper = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(user.RealName, user.Email) };
+                        MailKitHelper.SendMail(keeper, $"延时任务异常 — {entity.Topic}:{entity.ContentKey}",
+                                Common.QuartzManager.GetErrorEmailContent($"{entity.Topic}:{entity.ContentKey}", ex)
+                            );
+                    }
                 }
                 // .....
                 // 其实这个重试策略稍微有点问题，只能在抢锁成功的节点上进行重试，如果遭遇单点故障会导致任务丢失

@@ -19,6 +19,14 @@
             </div>
             <div class="input-group">
                 <input type="text" class="form-control" placeholder="节点名称" id="workerName">
+            </div>
+            <div class="input-group">
+                <select class="form-control" id="status">
+                    <option value="-1">全部状态</option>
+                    <option value="0">已停止</option>
+                    <option value="1">运行中</option>
+                    <option value="2">已暂停</option>
+                </select>
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
                 </span>

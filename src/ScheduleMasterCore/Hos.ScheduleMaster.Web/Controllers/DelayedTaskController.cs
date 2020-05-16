@@ -20,6 +20,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         [Autowired]
         public IDelayedTaskService _taskService { get; set; }
 
+        [Autowired]
+        public INodeService _nodeService { get; set; }
+
         /// <summary>
         /// 任务列表页面
         /// </summary>
@@ -36,9 +39,17 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryPager(string topic = "", string contentkey = "", int? status = null, string workerName = "")
+        public ActionResult QueryPager(DateTime? startDate, DateTime? endDate, int? status, string topic = "", string contentkey = "", string workerName = "")
         {
             var pager = new ListPager<ScheduleDelayedInfo>(PageIndex, PageSize);
+            if (startDate.HasValue)
+            {
+                pager.AddFilter(m => m.CreateTime >= startDate);
+            }
+            if (endDate.HasValue)
+            {
+                pager.AddFilter(m => m.CreateTime <= endDate);
+            }
             if (status.HasValue && status.Value >= 0)
             {
                 pager.AddFilter(m => m.Status == status.Value);
@@ -53,6 +64,38 @@ namespace Hos.ScheduleMaster.Web.Controllers
             }
             pager = _taskService.QueryPager(pager, workerName);
             return GridData(pager.Total, pager.Rows);
+        }
+
+        /// <summary>
+        /// 创建页面
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult Create()
+        {
+            ViewBag.WorkerList = _nodeService.QueryWorkerList();
+            return View();
+        }
+
+        /// <summary>
+        /// 创建页面提交
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        public ActionResult Create(ScheduleDelayedInfo task)
+        {
+            if (!ModelState.IsValid)
+            {
+                return this.JsonNet(false, "数据验证失败！");
+            }
+            ScheduleDelayedEntity entity = ObjectMapper<ScheduleDelayedInfo, ScheduleDelayedEntity>.Convert(task);
+            entity.Status = (int)ScheduleDelayStatus.Created;
+            entity.CreateUserName = CurrentAdmin.UserName;
+            var result = _taskService.Add(entity, task.Executors);
+            if (result.Status == ResultStatus.Success)
+            {
+                return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
+            }
+            return this.JsonNet(false, "任务创建失败！");
         }
 
         /// <summary>

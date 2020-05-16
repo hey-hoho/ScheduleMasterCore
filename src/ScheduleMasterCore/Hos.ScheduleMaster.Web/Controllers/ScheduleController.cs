@@ -38,28 +38,44 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <summary>
         /// 查询分页数据
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="status"></param>
+        /// <param name="title"></param>
+        /// <param name="workerName"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryPager(string title = "", string workerName = "")
+        public ActionResult QueryPager(int? status, string title = "", string workerName = "")
         {
-            return QueryList(null, title, workerName);
+            return QueryList(null, status, title, workerName);
         }
 
         /// <summary>
         /// 我负责监护的任务列表
         /// </summary>
-        /// <param name="name"></param>
+        /// <param name="status"></param>
+        /// <param name="title"></param>
+        /// <param name="workerName"></param>
         /// <returns></returns>
         [HttpGet]
-        public ActionResult QueryCurrentUserPager(string title, string workerName)
+        public ActionResult QueryCurrentUserPager(int? status, string title, string workerName)
         {
-            return QueryList(CurrentAdmin.Id, title, workerName);
+            return QueryList(CurrentAdmin.Id, status, title, workerName);
         }
 
-        private ActionResult QueryList(int? userId, string title, string workerName)
+        /// <summary>
+        /// 通用列表查询
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="status"></param>
+        /// <param name="title"></param>
+        /// <param name="workerName"></param>
+        /// <returns></returns>
+        private ActionResult QueryList(int? userId, int? status, string title, string workerName)
         {
             var pager = new ListPager<ScheduleInfo>(PageIndex, PageSize);
+            if (status.HasValue && status.Value >= 0)
+            {
+                pager.AddFilter(m => m.Status == status.Value);
+            }
             if (!string.IsNullOrEmpty(title))
             {
                 pager.AddFilter(m => m.Title.Contains(title));

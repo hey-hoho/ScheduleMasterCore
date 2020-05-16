@@ -17,9 +17,6 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         [Autowired]
         public IScheduleService _scheduleService { get; set; }
 
-        [Autowired]
-        public ISystemService _systemService { get; set; }
-
         /// <summary>
         /// 查询分页数据
         /// </summary>

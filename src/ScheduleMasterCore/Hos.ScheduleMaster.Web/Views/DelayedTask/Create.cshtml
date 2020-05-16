@@ -1,0 +1,178 @@
+﻿@using Hos.ScheduleMaster.Core;
+
+@model Hos.ScheduleMaster.Core.Dto.ScheduleDelayedInfo
+
+@{
+
+}
+
+@section styles{
+    <style type="text/css">
+        .dd-empty {
+            height: 400px !important;
+            vertical-align: middle;
+        }
+    </style>
+}
+
+<div class="page-body">
+    <div class="widget">
+        <div class="widget-header bordered-bottom bordered-lightred">
+            <span class="widget-caption">创建任务</span>
+        </div>
+        <div class="widget-body">
+            <div id="horizontal-form">
+                <div class="row">
+                    <div class="col-lg-4 col-sm-6 col-xs-9">
+                        <button id="sbtn_form1" type="button" class="btn btn-primary">保  存</button>
+                        <button type="button" class="btn btn-default" onclick="history.back();">返  回</button>
+                    </div>
+                </div>
+                <br />
+                <form class="form-horizontal" id="form1" novalidate="novalidate">
+                    @if (Model != null)
+                    {
+                        @Html.HiddenFor(x => x.Id)
+                    }
+
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">来源</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.SourceApp, new { @class = "form-control", required = "", placeholder = "", maxlength = "50" })
+                            <p class="help-block">表示由什么应用创建，例如用户系统\订单系统</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">主题</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.Topic, new { @class = "form-control", required = "", placeholder = "", maxlength = "50" })
+                            <p class="help-block">表示任务的业务类型，例如超时取消订单</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">业务关键字</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.ContentKey, new { @class = "form-control", required = "", placeholder = "", maxlength = "50" })
+                            <p class="help-block">表示区分业务实体的唯一识别码，例如订单编码</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">延迟相对时间(s)</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.DelayTimeSpan, new { @class = "form-control", type = "number",required = "", max = "99999999", min = "1" })
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">延迟绝对时间</label>
+                        <div class="col-sm-6">
+                            <span class="input-icon icon-right">
+                                @Html.TextBoxFor(x => x.DelayAbsoluteTime, "{0:yyyy-MM-dd HH:mm:ss}", new { @class = "form-control date-picker", required = "", placeholder = "" })
+                                <i class="fa fa-calendar"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">回调地址</label>
+                        <div class="col-sm-6">
+                            @Html.TextBoxFor(x => x.NotifyUrl, new { @class = "form-control", required = "", placeholder = "", maxlength = "200" })
+                            <p class="help-block">业务回调入口，只支持post回调，响应状态码为2xx并且响应结果中包含"success"才算成功</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">数据格式</label>
+                        <div class="col-sm-6">
+                            <div class="col-lg-4 col-sm-4 col-xs-4 no-padding-left">
+                                <div class="radio">
+                                    <label class="no-padding-left">
+                                        <input name="NotifyDataType" type="radio" value="application/x-www-form-urlencoded" class="colored-blue" @((Model == null || Model.NotifyDataType == "application/x-www-form-urlencoded") ? "checked=''" : "")>
+                                        <span class="text"> form-data</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-lg-4 col-sm-4 col-xs-4">
+                                <div class="radio">
+                                    <label class="no-padding-left">
+                                        <input name="NotifyDataType" type="radio" value="application/json" class="colored-blue" @((Model != null && Model.NotifyDataType == "application/json") ? "checked=''" : "")>
+                                        <span class="text"> json-data</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">回调参数</label>
+                        <div class="col-sm-6">
+                            @Html.TextAreaFor(x => x.NotifyBody, new { @class = "form-control", placeholder = "", rows = "10" })
+                            <p class="help-block">Json格式的字符串</p>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="" class="col-sm-2 control-label no-padding-right">执行节点</label>
+                        <div class="col-sm-6">
+                            <select id="Executor" name="Executors" multiple="multiple" style="width: 100%;" required="required">
+                                @{
+                                    var workerList = ViewBag.WorkerList as List<Hos.ScheduleMaster.Core.Models.ServerNodeEntity>;
+                                    foreach (var item in workerList)
+                                    {
+                                        if (Model != null && Model.Executors.Any(x => x == item.NodeName))
+                                        {
+                                            <option value="@item.NodeName" selected="selected" />
+                                            @item.NodeName
+                                        }
+                                        else
+                                        {
+                                            <option value="@item.NodeName" />
+                                            @item.NodeName
+                                        }
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-sm-2 checkbox" style="display:inline-block">
+                            <label>
+                                <input type="checkbox" onclick="executorCheckAll(this)">
+                                <span class="text">全选</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts{
+    <script src="~/js/jquery.validate.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
+    <script src="~/assets/js/select2/select2.js"></script>
+
+    <script type="text/javascript">
+        var matedataValidator1, matedataValidator2;
+        hos.ui.util.breadCrumb("延时任务-创建");
+        $(document).ready(function () {
+            hos.ui.util.formValidate("form1");
+            $("#Executor").select2({ allowClear: true });
+
+            laydate.render({
+                elem: '#DelayAbsoluteTime', type: 'datetime', done: function (value, date, endDate) { }
+            });
+
+            hos.ui.util.formSubmit("form1", function (data) {
+                if (!$("#form1").valid()) { return false; }
+
+                hos.ui.util.postJson("/DelayedTask/Create", data);
+            });
+        });
+
+        function executorCheckAll(obj) {
+            if (obj.checked == true) {
+                var val = $("#Executor").children().map((i, obj) => { return obj.value; });
+                $('#Executor').val(val).trigger('change');
+            }
+            else {
+                $('#Executor').val(null).trigger("change");
+            }
+        }
+    </script>
+}

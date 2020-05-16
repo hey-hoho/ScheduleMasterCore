@@ -5,21 +5,37 @@
 
 <link href="~/assets/js/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
 <style type="text/css">
-
 </style>
 
 <div class="page-body">
     <div id="serch-form" class="form-inline">
-        <a href="@Url.Action("Create","Schedule")" class="btn btn-primary">创建任务</a>
+        <a href="@Url.Action("Create","DelayedTask")" class="btn btn-primary">创建任务</a>
         <div class="pull-right">
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="主题" id="Topic">
+                <input type="text" class="form-control" placeholder="主题" id="topic">
             </div>
             <div class="input-group">
-                <input type="text" class="form-control" placeholder="业务关键字" id="ContentKey">
+                <input type="text" class="form-control" placeholder="业务关键字" id="contentKey">
             </div>
             <div class="input-group">
-                <select class="form-control" id="Status">
+                <input type="text" class="form-control" placeholder="节点名称" id="workerName">
+
+            </div>
+            <div class="form-group">
+                <span class="input-icon icon-right">
+                    <input type="text" class="form-control date-picker" value="@DateTime.Now.AddDays(-7).ToString("yyyy-MM-dd")" id="startDate" placeholder="开始时间">
+                    <i class="fa fa-calendar"></i>
+                </span>
+            </div>
+            -
+            <div class="form-group">
+                <span class="input-icon icon-right">
+                    <input type="text" class="form-control" value="@DateTime.Now.AddDays(1).ToString("yyyy-MM-dd")"  id="endDate" placeholder="结束时间">
+                    <i class="fa fa-calendar"></i>
+                </span>
+            </div>
+            <div class="input-group">
+                <select class="form-control" id="status">
                     <option value="-1">全部状态</option>
                     <option value="0">已作废</option>
                     <option value="1">已创建</option>
@@ -27,9 +43,6 @@
                     <option value="3">执行成功</option>
                     <option value="4">异常</option>
                 </select>
-            </div>
-            <div class="input-group">
-                <input type="text" class="form-control" placeholder="节点名称" id="workerName">
                 <span class="input-group-btn">
                     <button class="btn btn-default" type="button" id="btn_table_search" onclick="grid.reload();"><i class="fa fa-search blue"></i></button>
                 </span>
@@ -49,8 +62,22 @@
     <!--Page Related Scripts-->
     <script src="~/assets/js/bootstrap-table/bootstrap-table.min.js"></script>
     <script src="~/assets/js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script src="~/assets/js/laydate5.0.9/laydate.js"></script>
     <script>
         hos.ui.util.breadCrumb('延迟任务');
+        var startTime = laydate.render({
+            elem: '#startDate', type: 'date', done: function (value, date, endDate) {
+                date.month = date.month - 1;
+                endTime.config.min = date;
+                $(endTime.config.elem).focus();
+            }
+        });
+        var endTime = laydate.render({
+            elem: '#endDate', type: 'date', done: function (value, date, endDate) {
+                date.month = date.month - 1;
+                startTime.config.max = date;
+            }
+        });
         var grid = hos.ui.ctrl.gridView("table", {
             url: '@ViewBag.PagerQueryUrl',
             columns: [
@@ -74,14 +101,14 @@
                         return html;
                     }
                 },
-                { field: 'DelayTimeSpan', title: '延时相对时间', width: '6', align: 'center' },
+                { field: 'DelayTimeSpan', title: '延迟相对时间', width: '6', align: 'center' },
                 { field: 'DelayAbsoluteTime', title: '延迟绝对时间', width: '8', align: 'center' },
                 { field: 'ExecuteTime', title: '执行时间', width: '8', align: 'center' },
                 { field: 'FailedRetrys', title: '重试次数', width: '5', align: 'center' },
                 {
                     field: 'Status', title: '状态', width: '5', align: 'center', formatter: function (value, row, index) {
                         var dict = [
-                            "<span class='label label-gray graded'>已作废</span>",
+                            "已作废",
                             "已创建",
                             "<span class='label label-green graded'>已就绪</span>",
                             "<span class='label label-azure graded'>执行成功</span>",
