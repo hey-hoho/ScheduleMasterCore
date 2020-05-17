@@ -131,14 +131,14 @@ namespace Hos.ScheduleMaster.Core.Services
                 });
                 if (_unitOfWork.Commit() > 0)
                 {
-                    return ServiceResult(ResultStatus.Success, "任务启动成功!");
+                    return ServiceResult(ResultStatus.Success, "任务启动成功!", sid);
                 }
-                return ServiceResult(ResultStatus.Failed, "更新任务状态失败!");
+                return ServiceResult(ResultStatus.Failed, "更新任务状态失败!", sid);
             }
             else
             {
                 _nodeService.WorkersTraverseAction(sid, "api/delayedtask/remove?sid=" + sid);
-                return ServiceResult(ResultStatus.Failed, "任务启动失败!");
+                return ServiceResult(ResultStatus.Failed, "任务启动失败!", sid);
             }
         }
 

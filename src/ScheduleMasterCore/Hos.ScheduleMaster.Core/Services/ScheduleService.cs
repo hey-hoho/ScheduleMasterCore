@@ -284,7 +284,7 @@ namespace Hos.ScheduleMaster.Core.Services
             //事务提交
             if (_unitOfWork.Commit() > 0)
             {
-                return ServiceResult(ResultStatus.Success, "任务创建成功!");
+                return ServiceResult(ResultStatus.Success, "任务创建成功!", model.Id);
             }
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
         }

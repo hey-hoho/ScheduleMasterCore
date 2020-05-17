@@ -86,6 +86,8 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 ![ ](https://imgkr.cn-bj.ufileos.com/c5331959-ca55-4377-9c27-9b3639a3d223.png)
 
+![ ](https://imgkr.cn-bj.ufileos.com/b81930d6-e067-4086-ad1d-df69d9ff1623.png)
+
 ![ ](https://imgkr.cn-bj.ufileos.com/7acd35ed-b634-4ab8-a919-3a43a0f43f87.png)
 
 ![ ](https://imgkr.cn-bj.ufileos.com/d0f48272-ab36-45d9-a093-f14a5bd2d7d1.png)

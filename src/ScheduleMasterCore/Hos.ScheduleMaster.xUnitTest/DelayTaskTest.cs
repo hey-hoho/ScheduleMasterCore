@@ -86,7 +86,7 @@ namespace Hos.ScheduleMaster.xUnitTest
                 int rndNum = new Random().Next(20, 500);
                 List<KeyValuePair<string, string>> args = new List<KeyValuePair<string, string>>();
                 args.Add(new KeyValuePair<string, string>("SourceApp", "TestApp"));
-                args.Add(new KeyValuePair<string, string>("Topic", "TestApp.Trade.TimeoutCancle"));
+                args.Add(new KeyValuePair<string, string>("Topic", "TestApp.Trade.TimeoutCancel"));
                 args.Add(new KeyValuePair<string, string>("ContentKey", i.ToString()));
                 args.Add(new KeyValuePair<string, string>("DelayTimeSpan", rndNum.ToString()));
                 args.Add(new KeyValuePair<string, string>("DelayAbsoluteTime", DateTime.Now.AddSeconds(rndNum).ToString("yyyy-MM-dd HH:mm:ss")));

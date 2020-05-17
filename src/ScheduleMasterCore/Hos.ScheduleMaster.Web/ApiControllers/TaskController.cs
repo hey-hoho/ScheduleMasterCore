@@ -102,7 +102,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
                 if (task.RunNow)
                 {
                     var start = _scheduleService.Start(main);
-                    return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), main.Id);
+                    return ApiResponse(ResultStatus.Success, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), result.Data);
                 }
             }
             return result;
