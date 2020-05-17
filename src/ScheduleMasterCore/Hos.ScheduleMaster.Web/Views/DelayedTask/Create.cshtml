@@ -59,7 +59,7 @@
                     <div class="form-group">
                         <label for="" class="col-sm-2 control-label no-padding-right">延迟相对时间(s)</label>
                         <div class="col-sm-6">
-                            @Html.TextBoxFor(x => x.DelayTimeSpan, new { @class = "form-control", type = "number",required = "", max = "99999999", min = "1" })
+                            @Html.TextBoxFor(x => x.DelayTimeSpan, new { @class = "form-control", type = "number", required = "", max = "99999999", min = "1" })
                         </div>
                     </div>
                     <div class="form-group">
@@ -137,6 +137,14 @@
                     </div>
                 </form>
             </div>
+            <hr />
+            <section>
+                <p>注意事项：</p>
+                <ul>
+                    <li>默认以<b>延迟相对时间</b>执行，可以通过系统参数[延时任务配置-延迟模式]选项进行设置。</li>
+                    <li>由于延时任务具有重置和重试功能，<strong>业务接口请务必做好幂等性处理</strong>。</li>
+                </ul>
+            </section>
         </div>
     </div>
 </div>

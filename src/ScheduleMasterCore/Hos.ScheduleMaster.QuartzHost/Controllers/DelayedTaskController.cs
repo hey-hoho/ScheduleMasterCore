@@ -53,11 +53,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
                 try
                 {
                     var httpClient = clientFactory.CreateClient();
-                    HttpContent reqContent = new StringContent(entity.NotifyBody, System.Text.Encoding.UTF8, "application/json");
+                    string notifyBody = entity.NotifyBody.Replace("\r\n", "");
+                    HttpContent reqContent = new StringContent(notifyBody, System.Text.Encoding.UTF8, "application/json");
                     if (entity.NotifyDataType == "application/x-www-form-urlencoded")
                     {
                         //任务创建是要确保参数是键值对的json格式
-                        reqContent = new FormUrlEncodedContent(Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<KeyValuePair<string, string>>>(entity.NotifyBody));
+                        reqContent = new FormUrlEncodedContent(Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<KeyValuePair<string, string>>>(notifyBody));
                     }
                     var response = await httpClient.PostAsync(entity.NotifyUrl, reqContent);
                     var content = await response.Content.ReadAsStringAsync();

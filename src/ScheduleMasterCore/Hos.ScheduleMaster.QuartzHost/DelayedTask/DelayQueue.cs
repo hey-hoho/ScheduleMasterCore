@@ -27,6 +27,10 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
         public DelayQueue(int length)
         {
             _queue = new List<T>[length];
+            for (int i = 0; i < length; i++)
+            {
+                _queue[i] = new List<T>();
+            }
         }
 
         public int Count => _count;
@@ -51,10 +55,6 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                 item.Version = 0;
                 item.TimeSpan = delaySeconds;
                 //加入到延时队列中
-                if (_queue[item.Slot] == null)
-                {
-                    _queue[item.Slot] = new List<T>();
-                }
                 _queue[item.Slot].Add(item);
                 Interlocked.Increment(ref _count);
                 return true;
@@ -63,7 +63,7 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
 
         public bool Remove(string slotKey)
         {
-            var item = _queue.Where(x => x != null).SelectMany(x => x).FirstOrDefault(x => x.Key == slotKey);
+            var item = _queue.SelectMany(x => x).FirstOrDefault(x => x.Key == slotKey);
             if (item == null) return false;
             if (_queue[item.Slot] != null)
             {

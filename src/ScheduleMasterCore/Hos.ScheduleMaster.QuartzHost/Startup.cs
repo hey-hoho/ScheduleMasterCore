@@ -42,6 +42,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             services.AddDbContextPool<SmDbContext>(option =>
             option.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
             );
+            services.AddTransient<HosLock.IHosLock, HosLock.DatabaseLock>();
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
 
             services.AddHostedService<AppStart.AppLifetimeHostedService>();

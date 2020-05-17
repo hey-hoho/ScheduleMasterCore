@@ -24,6 +24,8 @@ Welcome to the ScheduleMaster wiki!
 
 - [使用API接入任务]()
 
+- [延时任务]()
+
 
 ### 原理解析
 

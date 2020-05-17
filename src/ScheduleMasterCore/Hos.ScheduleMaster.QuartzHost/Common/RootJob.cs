@@ -26,86 +26,79 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         SmDbContext _db;
         string node = ConfigurationCache.NodeSetting.IdentityName;
 
-        public Task Execute(IJobExecutionContext context)
+        public async Task Execute(IJobExecutionContext context)
         {
             _sid = Guid.Parse(context.JobDetail.Key.Name);
 
             using (var scope = new ScopeDbContext())
             {
                 _db = scope.GetDbContext();
-                bool getLocked = _db.Database.ExecuteSqlRaw($"update schedulelocks set status=1,lockedtime=now(),lockednode='{node}' where scheduleid='{_sid.ToString()}' and status=0") > 0;
-                if (getLocked)
+                var locker = scope.GetService<HosLock.IHosLock>();
+                if (locker.TryGetLock(context.JobDetail.Key.Name))
                 {
-                    LogHelper.Info($"节点{node}抢锁成功！准备执行任务....", _sid);
-                    IJobDetail job = context.JobDetail;
-                    try
-                    {
-                        if (job.JobDataMap["instance"] is IHosSchedule instance)
-                        {
-                            Guid traceId = CreateRunTrace();
-                            Stopwatch stopwatch = new Stopwatch();
-                            TaskContext tctx = new TaskContext(instance.RunnableInstance);
-                            tctx.Node = node;
-                            tctx.TraceId = traceId;
-                            tctx.ParamsDict = instance.CustomParams;
-                            if (context.MergedJobDataMap["PreviousResult"] is object prev)
-                            {
-                                tctx.PreviousResult = prev;
-                            }
-                            try
-                            {
-                                stopwatch.Restart();
-                                //执行
-                                OnExecuting(tctx);
-                                stopwatch.Stop();
-                                //更新执行结果
-                                UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
-                                LogHelper.Info($"任务[{instance.Main.Title}]运行成功！用时{Math.Round(stopwatch.Elapsed.TotalMilliseconds, 3).ToString()}ms", _sid, traceId);
-                                //保存运行结果用于子任务触发
-                                context.Result = tctx.Result;
-                            }
-                            catch (RunConflictException conflict)
-                            {
-                                stopwatch.Stop();
-                                UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Conflict);
-                                throw conflict;
-                            }
-                            catch (Exception e)
-                            {
-                                stopwatch.Stop();
-                                UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
-                                LogHelper.Error($"任务\"{instance.Main.Title}\"运行失败！", e, _sid, traceId);
-                                //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
-                                //如果吃掉异常会导致程序误以为本次任务执行成功
-                                throw new BusinessRunException(e);
-                            }
-                            finally
-                            {
-                                OnExecuted(tctx);
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        //为了避免各节点之间的时间差，延迟1秒释放锁
-                        System.Threading.Thread.Sleep(1000);
-                        _db.Database.ExecuteSqlRaw($"update schedulelocks set status=0,lockedtime=null,lockednode=null where scheduleid='{_sid.ToString()}'");
-                    }
+                    await InnerRun(context);
                 }
                 else
                 {
-                    //LogHelper.Info($"节点{node}抢锁失败！", _sid);
                     throw new JobExecutionException("lock_failed");
                 }
             }
-            return Task.CompletedTask;
+        }
+
+        private async Task InnerRun(IJobExecutionContext context)
+        {
+            IJobDetail job = context.JobDetail;
+            if (job.JobDataMap["instance"] is IHosSchedule instance)
+            {
+                Guid traceId = await CreateRunTrace();
+                Stopwatch stopwatch = new Stopwatch();
+                TaskContext tctx = new TaskContext(instance.RunnableInstance);
+                tctx.Node = node;
+                tctx.TraceId = traceId;
+                tctx.ParamsDict = instance.CustomParams;
+                if (context.MergedJobDataMap["PreviousResult"] is object prev)
+                {
+                    tctx.PreviousResult = prev;
+                }
+                try
+                {
+                    stopwatch.Restart();
+                    //执行
+                    OnExecuting(tctx);
+                    stopwatch.Stop();
+                    //更新执行结果
+                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
+                    LogHelper.Info($"任务[{instance.Main.Title}]运行成功！用时{Math.Round(stopwatch.Elapsed.TotalMilliseconds, 3).ToString()}ms", _sid, traceId);
+                    //保存运行结果用于子任务触发
+                    context.Result = tctx.Result;
+                }
+                catch (RunConflictException conflict)
+                {
+                    stopwatch.Stop();
+                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Conflict);
+                    throw conflict;
+                }
+                catch (Exception e)
+                {
+                    stopwatch.Stop();
+                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
+                    LogHelper.Error($"任务\"{instance.Main.Title}\"运行失败！", e, _sid, traceId);
+                    //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
+                    //如果吃掉异常会导致程序误以为本次任务执行成功
+                    throw new BusinessRunException(e);
+                }
+                finally
+                {
+                    OnExecuted(tctx);
+                }
+            }
         }
 
         public abstract void OnExecuting(TaskContext context);
 
         public abstract void OnExecuted(TaskContext context);
 
-        private Guid CreateRunTrace()
+        private async Task<Guid> CreateRunTrace()
         {
             ScheduleTraceEntity entity = new ScheduleTraceEntity();
             entity.TraceId = Guid.NewGuid();
@@ -114,17 +107,17 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             entity.StartTime = DateTime.Now;
             entity.Result = (int)ScheduleRunResult.Null;
             _db.ScheduleTraces.Add(entity);
-            if (_db.SaveChanges() > 0)
+            if (await _db.SaveChangesAsync() > 0)
             {
                 return entity.TraceId;
             }
             return Guid.Empty;
         }
 
-        private void UpdateRunTrace(Guid traceId, double elapsed, ScheduleRunResult result)
+        private async Task UpdateRunTrace(Guid traceId, double elapsed, ScheduleRunResult result)
         {
             if (traceId == Guid.Empty) return;
-            _db.Database.ExecuteSqlRaw($"update scheduletraces set result={(int)result},elapsedtime={elapsed},endtime=now() where traceid='{traceId}'");
+            await _db.Database.ExecuteSqlRawAsync($"update scheduletraces set result={(int)result},elapsedtime={elapsed},endtime=now() where traceid='{traceId}'");
         }
     }
 }

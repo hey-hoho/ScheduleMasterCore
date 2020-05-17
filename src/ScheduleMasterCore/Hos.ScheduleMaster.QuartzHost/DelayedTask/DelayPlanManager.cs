@@ -99,27 +99,13 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
         {
             if (slot is NotifyPlan plan)
             {
-                using (var scope = new ScopeDbContext())
+                using (var scope = new ServiceProviderWrapper())
                 {
-                    var db = scope.GetDbContext();
-                    string node = ConfigurationCache.NodeSetting.IdentityName;
-                    bool getLocked = await db.Database.ExecuteSqlRawAsync($"update schedulelocks set status=1,lockedtime=now(),lockednode='{node}' where scheduleid='{slot.Key}' and status=0") > 0;
-                    if (getLocked)
+                    var locker = scope.GetService<HosLock.IHosLock>();
+                    if (locker.TryGetLock(slot.Key))
                     {
-                        Guid traceId = Guid.NewGuid();
-                        try
-                        {
-                            var httpClient = scope.GetService<IHttpClientFactory>().CreateClient();
-                            //创建一条trace
-                            await db.Database.ExecuteSqlRawAsync($"insert into scheduletraces values('{traceId.ToString()}','{slot.Key}','{node}',now(),'0001-01-01',0,0)");
-                            //执行回调
-                            await NotifyRequest(httpClient, db, plan, traceId);
-                        }
-                        finally
-                        {
-                            System.Threading.Thread.Sleep(1000);
-                            await db.Database.ExecuteSqlRawAsync($"update schedulelocks set status=0,lockedtime=null,lockednode=null where scheduleid='{slot.Key}'");
-                        }
+                        //竞争成功执行回调
+                        await NotifyRequest(plan);
                     }
                     else
                     {
@@ -130,88 +116,113 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
             }
         }
 
-        private static async Task NotifyRequest(HttpClient httpClient, SmDbContext db, NotifyPlan plan, Guid traceId)
+        private static async Task NotifyRequest(NotifyPlan plan)
         {
             Guid sid = Guid.Parse(plan.Key);
-            var entity = await db.ScheduleDelayeds.FirstOrDefaultAsync(x => x.Id == sid);
-            if (entity == null) return;
-            entity.ExecuteTime = DateTime.Now;
+            Guid traceId = Guid.NewGuid();
 
+            string insertTraceSql = "insert into scheduletraces values('{0}','{1}','{2}',now(),'0001-01-01',0,0)";
             string updateTraceSql = "update scheduletraces set result={0},elapsedtime={1},endtime=now() where traceid='{2}'";
-            Stopwatch stopwatch = new Stopwatch();
-            try
+            using (var scope = new ScopeDbContext())
             {
-                stopwatch.Restart();
+                var db = scope.GetDbContext();
 
-                HttpContent reqContent = new StringContent(plan.NotifyBody, System.Text.Encoding.UTF8, "application/json");
-                if (plan.NotifyDataType == "application/x-www-form-urlencoded")
+                //创建一条trace
+                await db.Database.ExecuteSqlRawAsync(string.Format(insertTraceSql, traceId.ToString(), plan.Key, ConfigurationCache.NodeSetting.IdentityName));
+
+                var entity = await db.ScheduleDelayeds.FirstOrDefaultAsync(x => x.Id == sid);
+                if (entity == null)
                 {
-                    //任务创建是要确保参数是键值对的json格式
-                    reqContent = new FormUrlEncodedContent(Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<KeyValuePair<string, string>>>(plan.NotifyBody));
+                    LogHelper.Info($"不存在的任务ID。", sid, traceId);
+                    await db.Database.ExecuteSqlRawAsync(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, "0", traceId.ToString()));
+                    return;
                 }
 
-                LogHelper.Info($"即将请求：{entity.NotifyUrl}", sid, traceId);
-                var response = await httpClient.PostAsync(plan.NotifyUrl, reqContent);
-                var content = await response.Content.ReadAsStringAsync();
-                LogHelper.Info($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.Content.Headers.GetValues("Content-Type").Any(x => x.Contains("text/html")) ? "html文档" : content)}", sid, traceId);
+                entity.ExecuteTime = DateTime.Now;
+                Exception failedException = null;
 
-                if (response.IsSuccessStatusCode && content.Contains("success"))
+                Stopwatch stopwatch = new Stopwatch();
+                try
                 {
-                    stopwatch.Stop();
-                    string elapsed = Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString();
-                    db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Success, elapsed, traceId));
-                    //更新结果字段
-                    entity.FinishTime = DateTime.Now;
-                    entity.Status = (int)ScheduleDelayStatus.Successed;
-                    //更新日志
-                    LogHelper.Info($"延时任务[{entity.Topic}:{entity.ContentKey}]执行成功。", sid, traceId);
-                }
-                else
-                {
-                    throw new HttpRequestException("异常的返回结果。");
-                }
-            }
-            catch (Exception ex)
-            {
-                stopwatch.Stop();
-                //更新日志
-                db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString(), traceId));
-                //失败重试策略
-                int maxRetry = ConfigurationCache.GetField<int>("DelayTask_RetryTimes");
-                if (entity.FailedRetrys < (maxRetry > 0 ? maxRetry : 3))
-                {
-                    //更新结果字段
-                    entity.FailedRetrys++;
-                    //计算下次延时间隔
-                    int timespan = ConfigurationCache.GetField<int>("DelayTask_RetrySpans");
-                    int delay = (timespan > 0 ? timespan : 10) * entity.FailedRetrys;
-                    //重新进入延时队列
-                    Insert(plan, delay);
-                    //更新日志
-                    LogHelper.Error($"延时任务[{entity.Topic}:{entity.ContentKey}]执行失败，将在{delay.ToString()}秒后开始第{entity.FailedRetrys.ToString()}次重试。", ex, sid, traceId);
-                }
-                else
-                {
-                    entity.Status = (int)ScheduleDelayStatus.Failed;
-                    entity.Remark = $"重试{entity.FailedRetrys}次后失败结束";
-                    //更新日志
-                    LogHelper.Error($"延时任务[{entity.Topic}:{entity.ContentKey}]重试{entity.FailedRetrys}次后失败结束。", ex, sid, traceId);
-                    //邮件通知
-                    var user = await db.SystemUsers.FirstOrDefaultAsync(x => x.UserName == entity.CreateUserName && !string.IsNullOrEmpty(x.Email));
-                    if (user != null)
+                    stopwatch.Restart();
+
+                    var httpClient = scope.GetService<IHttpClientFactory>().CreateClient();
+                    plan.NotifyBody=plan.NotifyBody.Replace("\r\n", "");
+                    HttpContent reqContent = new StringContent(plan.NotifyBody, System.Text.Encoding.UTF8, "application/json");
+                    if (plan.NotifyDataType == "application/x-www-form-urlencoded")
                     {
-                        var keeper = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(user.RealName, user.Email) };
-                        MailKitHelper.SendMail(keeper, $"延时任务异常 — {entity.Topic}:{entity.ContentKey}",
-                                Common.QuartzManager.GetErrorEmailContent($"{entity.Topic}:{entity.ContentKey}", ex)
-                            );
+                        //任务创建时要确保参数是键值对的json格式
+                        reqContent = new FormUrlEncodedContent(Newtonsoft.Json.JsonConvert.DeserializeObject<IEnumerable<KeyValuePair<string, string>>>(plan.NotifyBody));
+                    }
+
+                    LogHelper.Info($"即将请求：{entity.NotifyUrl}", sid, traceId);
+                    var response = await httpClient.PostAsync(plan.NotifyUrl, reqContent);
+                    var content = await response.Content.ReadAsStringAsync();
+                    stopwatch.Stop();
+                    LogHelper.Info($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.Content.Headers.GetValues("Content-Type").Any(x => x.Contains("text/html")) ? "html文档" : content)}", sid, traceId);
+
+                    if (response.IsSuccessStatusCode && content.Contains("success"))
+                    {
+                        string elapsed = Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString();
+                        db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Success, elapsed, traceId.ToString()));
+                        //更新结果字段
+                        entity.FinishTime = DateTime.Now;
+                        entity.Status = (int)ScheduleDelayStatus.Successed;
+                        //更新日志
+                        LogHelper.Info($"延时任务[{entity.Topic}:{entity.ContentKey}]执行成功。", sid, traceId);
+                    }
+                    else
+                    {
+                        failedException = new Exception("异常的返回结果。");
                     }
                 }
-                // .....
-                // 其实这个重试策略稍微有点问题，只能在抢锁成功的节点上进行重试，如果遭遇单点故障会导致任务丢失
-                // 严格来说应该通知到master让其对所有节点执行重试策略，但考虑到master也会有单点问题，综合考虑后还是放到当前worker中重试，若worker节点异常可以在控制台中人工干预进行重置或立即执行
+                catch (Exception ex)
+                {
+                    stopwatch.Stop();
+                    failedException = ex;
+                }
+                // 对异常进行处理
+                if (failedException != null)
+                {
+                    //更新日志
+                    db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString(), traceId.ToString()));
+                    //失败重试策略
+                    int maxRetry = ConfigurationCache.GetField<int>("DelayTask_RetryTimes");
+                    if (entity.FailedRetrys < (maxRetry > 0 ? maxRetry : 3))
+                    {
+                        //更新结果字段
+                        entity.FailedRetrys++;
+                        //计算下次延时间隔
+                        int timespan = ConfigurationCache.GetField<int>("DelayTask_RetrySpans");
+                        int delay = (timespan > 0 ? timespan : 10) * entity.FailedRetrys;
+                        //重新进入延时队列
+                        Insert(plan, delay);
+                        //更新日志
+                        LogHelper.Error($"延时任务[{entity.Topic}:{entity.ContentKey}]执行失败，将在{delay.ToString()}秒后开始第{entity.FailedRetrys.ToString()}次重试。", failedException, sid, traceId);
+                    }
+                    else
+                    {
+                        entity.Status = (int)ScheduleDelayStatus.Failed;
+                        entity.Remark = $"重试{entity.FailedRetrys}次后失败结束";
+                        //更新日志
+                        LogHelper.Error($"延时任务[{entity.Topic}:{entity.ContentKey}]重试{entity.FailedRetrys}次后失败结束。", failedException, sid, traceId);
+                        //邮件通知
+                        var user = await db.SystemUsers.FirstOrDefaultAsync(x => x.UserName == entity.CreateUserName && !string.IsNullOrEmpty(x.Email));
+                        if (user != null)
+                        {
+                            var keeper = new List<KeyValuePair<string, string>>() { new KeyValuePair<string, string>(user.RealName, user.Email) };
+                            MailKitHelper.SendMail(keeper, $"延时任务异常 — {entity.Topic}:{entity.ContentKey}",
+                                    Common.QuartzManager.GetErrorEmailContent($"{entity.Topic}:{entity.ContentKey}", failedException)
+                                );
+                        }
+                    }
+                    // .....
+                    // 其实这个重试策略稍微有点问题，只能在抢锁成功的节点上进行重试，如果遭遇单点故障会导致任务丢失
+                    // 严格来说应该通知到master让其对所有节点执行重试策略，但考虑到master也会有单点问题，综合考虑后还是放到当前worker中重试，若worker节点异常可以在控制台中人工干预进行重置或立即执行
+                }
+                db.Update(entity);
+                await db.SaveChangesAsync();
             }
-            db.Update(entity);
-            await db.SaveChangesAsync();
         }
 
 
