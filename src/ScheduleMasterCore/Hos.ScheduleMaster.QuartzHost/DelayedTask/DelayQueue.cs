@@ -116,7 +116,7 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                     list.ForEach(item =>
                     {
                         item.CycleNum--;
-                        System.Diagnostics.Debug.WriteLine($"@@槽点：{item.Slot.ToString()}，剩余环数：{item.CycleNum.ToString()}");
+                        //System.Diagnostics.Debug.WriteLine($"@@槽点：{item.Slot.ToString()}，剩余环数：{item.CycleNum.ToString()}");
                     });
                 }
                 //往后移动一位

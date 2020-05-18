@@ -17,7 +17,7 @@ namespace Hos.ScheduleMaster.xUnitTest
         {
             //初始化容器
             DelayPlanManager.Init();
-
+            Debug.WriteLine($"延时队列初始化完成时间：{DateTime.Now}");
 
             //构造消费者
             System.Threading.Thread consumer = new System.Threading.Thread(() =>

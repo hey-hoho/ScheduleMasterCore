@@ -7,6 +7,28 @@ create table `__efmigrationshistory`
 )
 ;
 
+create table scheduledelayeds
+(
+  id                char(36)                      not null
+    primary key,
+  sourceapp         varchar(50) charset utf8mb4   not null,
+  topic             varchar(100) charset utf8mb4  not null,
+  contentkey        varchar(100) charset utf8mb4  not null,
+  delaytimespan     int                           not null,
+  delayabsolutetime datetime(6)                   not null,
+  createtime        datetime(6)                   not null,
+  createusername    varchar(50) charset utf8mb4   null,
+  executetime       datetime(6)                   null,
+  finishtime        datetime(6)                   null,
+  status            int                           not null,
+  failedretrys      int                           not null,
+  remark            varchar(255) charset utf8mb4  null,
+  notifyurl         varchar(255) charset utf8mb4  not null,
+  notifydatatype    varchar(50) charset utf8mb4   not null,
+  notifybody        varchar(1000) charset utf8mb4 not null
+);
+
+
 create table scheduleexecutors
 (
 	id int auto_increment

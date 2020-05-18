@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosLock
         {
             if (_isLocked)
             {
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(1000);
                 _dbContext.Database.ExecuteSqlRaw($"update schedulelocks set status=0,lockedtime=null,lockednode=null where scheduleid='{_key}'");
             }
         }
