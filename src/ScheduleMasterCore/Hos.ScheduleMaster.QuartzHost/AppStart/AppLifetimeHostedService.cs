@@ -1,4 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -44,6 +45,12 @@ namespace Hos.ScheduleMaster.QuartzHost.AppStart
         private void OnStarted()
         {
             _logger.LogInformation("Hosted service OnStarted");
+
+            string pluginBasePath = ConfigurationCache.PluginPathPrefix.ToPhysicalPath();
+            if (!System.IO.Directory.Exists(pluginBasePath))
+            {
+                System.IO.Directory.CreateDirectory(pluginBasePath);
+            }
 
             //加载全局缓存
             ConfigurationCache.Reload();

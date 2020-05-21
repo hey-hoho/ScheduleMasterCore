@@ -67,33 +67,9 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
         /// <returns></returns>
         public static PluginLoadContext LoadAssemblyContext(Guid sid, string assemblyName)
         {
-            try
-            {
-                string pluginLocation = GetTaskAssemblyPath(sid, assemblyName);
-                PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
-                return loadContext;
-
-                //AppDomainSetup setup = new AppDomainSetup();
-                //setup.ApplicationName = assemblyName;
-                //setup.ApplicationBase = Path.GetDirectoryName(dllPath);
-                //if (File.Exists(dllPath + ".config"))
-                //{
-                //    setup.ConfigurationFile = dllPath + ".config";
-                //}
-                ////setup.ShadowCopyFiles = "true"; //启用影像复制程序集
-                ////setup.ShadowCopyDirectories = setup.ApplicationBase;
-                ////AppDomain.CurrentDomain.SetShadowCopyFiles();
-                //Assembly assembly = Assembly.Load(File.ReadAllBytes(dllPath));
-                //AssemblyLoadContext context = new AssemblyLoadContext("");
-                //AppDomain domain = AppDomain.CreateDomain(assemblyName, null, setup);
-                ////AppDomain.MonitoringIsEnabled = true;
-                //return domain;
-            }
-            catch (Exception exp)
-            {
-                LogHelper.Error($"加载应用程序域{assemblyName}失败！", exp);
-                throw exp;
-            }
+            string pluginLocation = GetTaskAssemblyPath(sid, assemblyName);
+            PluginLoadContext loadContext = new PluginLoadContext(pluginLocation);
+            return loadContext;
         }
 
         /// <summary>

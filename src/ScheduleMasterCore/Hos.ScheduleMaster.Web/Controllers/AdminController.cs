@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             get
             {
                 var value = Request.Query["pageNumber"];
-                if (string.IsNullOrEmpty(value))
+                if (string.IsNullOrEmpty(value) && Request.Method.ToLower() == "post" && Request.ContentType.Contains("form"))
                 {
                     value = Request.Form["pageNumber"];
                 }
@@ -41,13 +41,13 @@ namespace Hos.ScheduleMaster.Web.Controllers
             get
             {
                 var value = Request.Query["pageSize"];
-                if (string.IsNullOrEmpty(value))
+                if (string.IsNullOrEmpty(value) && Request.Method.ToLower() == "post" && Request.ContentType.Contains("form"))
                 {
                     value = Request.Form["pageSize"];
                 }
                 if (string.IsNullOrEmpty(value))
                 {
-                    return 1;
+                    return 10;
                 }
                 return Convert.ToInt32(value);
             }

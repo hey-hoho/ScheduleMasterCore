@@ -21,4 +21,17 @@
     <ProjectReference Include="..\Hos.ScheduleMaster.Web\Hos.ScheduleMaster.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Mock\Worker\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="wwwroot\plugins\3c915575-7171-4d95-b08e-9f082b3f58b0\Hos.ScheduleMaster.Demo.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="wwwroot\plugins\3c915575-7171-4d95-b08e-9f082b3f58b0\myconfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
@@ -66,17 +67,21 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     }
                     var sourcePath = $"{master.AccessProtocol}://{master.Host}/static/downloadpluginfile?pluginname={model.AssemblyName}";
                     var zipPath = $"{ConfigurationCache.PluginPathPrefix}\\{model.Id.ToString("n")}.zip".ToPhysicalPath();
-                    using (WebClient client = new WebClient())
+
+                    try
                     {
-                        try
-                        {
-                            await client.DownloadFileTaskAsync(new Uri(sourcePath), zipPath);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
-                            throw ex;
-                        }
+                        //下载文件
+                        var httpClient = scope.GetService<IHttpClientFactory>().CreateClient();
+                        var array = await httpClient.GetByteArrayAsync(sourcePath);
+                        System.IO.FileStream fs = new System.IO.FileStream(zipPath, System.IO.FileMode.Create);
+                        fs.Write(array, 0, array.Length);
+                        fs.Close();
+                        fs.Dispose();
+                    }
+                    catch (Exception ex)
+                    {
+                        LogHelper.Warn($"下载程序包异常，地址：{sourcePath}", model.Id);
+                        throw ex.InnerException ?? ex;
                     }
                     //将指定 zip 存档中的所有文件都解压缩到各自对应的目录下
                     ZipFile.ExtractToDirectory(zipPath, pluginPath, true);
