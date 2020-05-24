@@ -2,6 +2,7 @@
 using Hos.ScheduleMaster.Core.Dto;
 using Hos.ScheduleMaster.Core.Interface;
 using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.Core.Services.RemoteCaller;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
@@ -17,6 +19,9 @@ namespace Hos.ScheduleMaster.Core.Services
     {
         [Autowired]
         public INodeService _nodeService { get; set; }
+
+        [Autowired]
+        public WorkerDispatcher _workerDispatcher { get; set; }
 
         /// <summary>
         /// 查询所有未删除的任务
@@ -357,24 +362,14 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
-        /// 是否存在可用的worker节点
-        /// </summary>
-        /// <returns></returns>
-        private bool HasAvailableWorker()
-        {
-            return _repositoryFactory.ServerNodes.Any(x => x.NodeType == "worker" && x.Status == 2);
-        }
-
-
-        /// <summary>
         /// 恢复运行中的任务
         /// </summary>
         public void RunningRecovery()
         {
             _repositoryFactory.Schedules.WhereNoTracking(x => x.Status == (int)ScheduleStatus.Running).ToList()
-                .ForEach(x =>
+                .ForEach(async x =>
                 {
-                    try { InnerStart(x.Id); } catch { }
+                    try { await InnerStart(x.Id); } catch { }
                 });
         }
 
@@ -383,7 +378,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Start(ScheduleEntity model)
+        public async Task<ServiceResponseMessage> Start(ScheduleEntity model)
         {
             if (model == null) return ServiceResult(ResultStatus.Failed, "任务信息不能为空！");
             if (model.Status != (int)ScheduleStatus.Stop)
@@ -394,12 +389,12 @@ namespace Hos.ScheduleMaster.Core.Services
             {
                 return ServiceResult(ResultStatus.Failed, "任务结束时间不能小于当前时间！");
             }
-            return InnerStart(model.Id);
+            return await InnerStart(model.Id);
         }
-        private ServiceResponseMessage InnerStart(Guid sid)
+        private async Task<ServiceResponseMessage> InnerStart(Guid sid)
         {
             //启动任务
-            bool success = _nodeService.WorkersTraverseAction(sid, "api/quartz/start?sid=" + sid);
+            bool success = await _workerDispatcher.ScheduleStart(sid);
             if (success)
             {
                 //启动成功后更新任务状态为运行中
@@ -407,7 +402,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 {
                     Status = (int)ScheduleStatus.Running
                 });
-                if (_unitOfWork.Commit() > 0)
+                if (await _unitOfWork.CommitAsync() > 0)
                 {
                     return ServiceResult(ResultStatus.Success, "任务启动成功!");
                 }
@@ -415,13 +410,13 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                _nodeService.WorkersTraverseAction(sid, "api/quartz/stop?sid=" + sid);
+                await _workerDispatcher.ScheduleStop(sid);
                 _repositoryFactory.Schedules.UpdateBy(m => m.Id == sid, m => new ScheduleEntity
                 {
                     Status = (int)ScheduleStatus.Stop,
                     NextRunTime = null
                 });
-                _unitOfWork.Commit();
+                await _unitOfWork.CommitAsync();
                 return ServiceResult(ResultStatus.Failed, "任务启动失败!");
             }
         }
@@ -431,12 +426,12 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Pause(Guid sid)
+        public async Task<ServiceResponseMessage> Pause(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                bool success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/pause?sid=" + sid);
+                bool success = await _workerDispatcher.SchedulePause(sid);
                 if (success)
                 {
                     //暂停成功后更新任务状态为已暂停
@@ -445,7 +440,7 @@ namespace Hos.ScheduleMaster.Core.Services
                         Status = (int)ScheduleStatus.Paused,
                         NextRunTime = null
                     });
-                    if (_unitOfWork.Commit() > 0)
+                    if (await _unitOfWork.CommitAsync() > 0)
                     {
                         return ServiceResult(ResultStatus.Success, "任务暂停成功!");
                     }
@@ -453,7 +448,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    _nodeService.WorkersTraverseAction(sid, "api/quartz/resume?sid=" + sid);
+                    await _workerDispatcher.ScheduleResume(sid);
                     return ServiceResult(ResultStatus.Failed, "任务暂停失败!");
                 }
             }
@@ -465,12 +460,12 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Resume(Guid sid)
+        public async Task<ServiceResponseMessage> Resume(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Paused)
             {
-                bool success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/resume?sid=" + sid);
+                bool success = await _workerDispatcher.ScheduleResume(sid);
                 if (success)
                 {
                     //恢复运行后更新任务状态为运行中
@@ -478,7 +473,7 @@ namespace Hos.ScheduleMaster.Core.Services
                     {
                         Status = (int)ScheduleStatus.Running
                     });
-                    if (_unitOfWork.Commit() > 0)
+                    if (await _unitOfWork.CommitAsync() > 0)
                     {
                         return ServiceResult(ResultStatus.Success, "任务恢复成功!");
                     }
@@ -486,7 +481,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 }
                 else
                 {
-                    _nodeService.WorkersTraverseAction(sid, "api/quartz/pause?sid=" + sid);
+                    await _workerDispatcher.SchedulePause(sid);
                     return ServiceResult(ResultStatus.Failed, "任务恢复失败!");
                 }
             }
@@ -498,14 +493,12 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage RunOnce(Guid sid)
+        public async Task<ServiceResponseMessage> RunOnce(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status == (int)ScheduleStatus.Running)
             {
-                ServerNodeEntity worker = _nodeService.GetAvaliableWorkerByPriority(sid).FirstOrDefault();
-                Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
-                bool success = _nodeService.WorkerRequest(worker, "api/quartz/runonce?sid=" + sid, "post", param);
+                bool success = await _workerDispatcher.ScheduleRunOnce(sid);
                 if (success)
                 {
                     return ServiceResult(ResultStatus.Success, "任务运行成功!");
@@ -523,7 +516,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Stop(Guid sid)
+        public async Task<ServiceResponseMessage> Stop(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status > (int)ScheduleStatus.Stop)
@@ -531,7 +524,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 bool success = _nodeService.GetAvaliableWorkerForSchedule(sid).Any();
                 if (success)
                 {
-                    success = _nodeService.WorkersTraverseAction(task.Id, "api/quartz/stop?sid=" + sid);
+                    success = await _workerDispatcher.ScheduleStop(sid);
                 }
                 else
                 {
@@ -545,7 +538,7 @@ namespace Hos.ScheduleMaster.Core.Services
                         Status = (int)ScheduleStatus.Stop,
                         NextRunTime = null
                     });
-                    if (_unitOfWork.Commit() > 0)
+                    if (await _unitOfWork.CommitAsync() > 0)
                     {
                         return ServiceResult(ResultStatus.Success, "任务已停止运行!");
                     }
@@ -652,87 +645,5 @@ namespace Hos.ScheduleMaster.Core.Services
             return _unitOfWork.Commit() > 0;
         }
 
-
-        #region 延时任务部分
-
-        /// <summary>
-        /// 创建一个延时任务
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        public ServiceResponseMessage AddDelayed(ScheduleDelayedEntity entity)
-        {
-            //分配节点-权重选择2个可用worker
-            var executors = _nodeService.GetAvaliableWorkerByPriority(null, 2).Select(x => x.NodeName).ToList();
-            if (!executors.Any())
-            {
-                return ServiceResult(ResultStatus.Failed, "没有可用节点!");
-            }
-            entity.CreateTime = DateTime.Now;
-
-            //保存主信息
-            _repositoryFactory.ScheduleDelayeds.Add(entity);
-            //创建并保存任务锁
-            _repositoryFactory.ScheduleLocks.Add(new ScheduleLockEntity { ScheduleId = entity.Id, Status = 0 });
-
-            //保存执行节点
-            _repositoryFactory.ScheduleExecutors.AddRange(executors.Select(x => new ScheduleExecutorEntity
-            {
-                ScheduleId = entity.Id,
-                WorkerName = x
-            }));
-
-            //事务提交
-            if (_unitOfWork.Commit() > 0)
-            {
-                //任务持久化成功后分发给worker，进入就绪状态
-                return StartDelayed(entity.Id);
-            }
-            return ServiceResult(ResultStatus.Failed, "数据保存失败!");
-        }
-        private ServiceResponseMessage StartDelayed(Guid sid)
-        {
-            //启动任务
-            bool success = _nodeService.WorkersTraverseAction(sid, "api/delayedtask/insert?sid=" + sid);
-            if (success)
-            {
-                //启动成功后更新任务状态为就绪
-                _repositoryFactory.ScheduleDelayeds.UpdateBy(m => m.Id == sid, m => new ScheduleDelayedEntity
-                {
-                    Status = (int)ScheduleDelayStatus.Ready//就绪状态
-                });
-                if (_unitOfWork.Commit() > 0)
-                {
-                    return ServiceResult(ResultStatus.Success, "任务启动成功!");
-                }
-                return ServiceResult(ResultStatus.Failed, "更新任务状态失败!");
-            }
-            else
-            {
-                _nodeService.WorkersTraverseAction(sid, "api/delayedtask/remove?sid=" + sid);
-                return ServiceResult(ResultStatus.Failed, "任务启动失败!");
-            }
-        }
-
-        /// <summary>
-        /// 立即执行延时任务
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <returns></returns>
-        public ServiceResponseMessage ExecuteDelayed(Guid sid)
-        {
-            ServerNodeEntity worker = _nodeService.GetAvaliableWorkerByPriority(sid).FirstOrDefault();
-            Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
-            bool success = _nodeService.WorkerRequest(worker, "api/delayedtask/execute?sid=" + sid, "post", param);
-            if (success)
-            {
-                return ServiceResult(ResultStatus.Success, "任务运行成功!");
-            }
-            else
-            {
-                return ServiceResult(ResultStatus.Failed, "任务运行失败!");
-            }
-        }
-        #endregion
     }
 }

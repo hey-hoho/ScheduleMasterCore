@@ -3,6 +3,7 @@ using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Interface
 {
@@ -63,7 +64,7 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="nodeName"></param>
         /// <param name="status">1-连接 2-空闲 3-运行</param>
         /// <returns></returns>
-        bool NodeSwich(string nodeName, int status);
+        Task<bool> NodeSwich(string nodeName, int status);
 
         /// <summary>
         /// 查询指定任务正在运行状态的worker列表
@@ -87,23 +88,8 @@ namespace Hos.ScheduleMaster.Core.Interface
         List<ServerNodeEntity> GetAvaliableWorkerByPriority(Guid? sid, int size = 1);
 
         /// <summary>
-        /// 遍历所有worker并执行操作
+        /// worker健康检查
         /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="router"></param>
-        /// <param name="verb"></param>
-        /// <returns></returns>
-        bool WorkersTraverseAction(Guid sid, string router, string verb = "post");
-
-        /// <summary>
-        /// 向worker发送请求
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="router"></param>
-        /// <param name="method"></param>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        bool WorkerRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param);
-
+        void WorkerHealthCheck();
     }
 }

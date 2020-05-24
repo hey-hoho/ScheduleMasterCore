@@ -116,9 +116,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost, AjaxRequestOnly]
-        public ActionResult NodeConnect(string name)
+        public async Task<ActionResult> NodeConnect(string name)
         {
-            var result = _nodeService.NodeSwich(name, 1);
+            var result = await _nodeService.NodeSwich(name, 1);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -132,9 +132,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, AjaxRequestOnly]
-        public ActionResult NodeEnable(string name)
+        public async Task<ActionResult> NodeEnable(string name)
         {
-            var result = _nodeService.NodeSwich(name, 3);
+            var result = await _nodeService.NodeSwich(name, 3);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");
@@ -148,9 +148,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost, AjaxRequestOnly]
-        public ActionResult NodeDisable(string name)
+        public async Task<ActionResult> NodeDisable(string name)
         {
-            var result = _nodeService.NodeSwich(name, 2);
+            var result = await _nodeService.NodeSwich(name, 2);
             if (result)
             {
                 return this.JsonNet(true, "操作成功！");

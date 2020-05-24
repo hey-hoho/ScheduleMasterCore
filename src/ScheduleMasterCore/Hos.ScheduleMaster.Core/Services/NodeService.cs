@@ -7,12 +7,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Net.Http;
+using Hos.ScheduleMaster.Core.Services.RemoteCaller;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
     [ServiceMapTo(typeof(INodeService))]
     public class NodeService : BaseService, INodeService
     {
+        public ServerClient _serverClient;
+
+        public NodeService(ServerClient serverClient)
+        {
+            _serverClient = serverClient;
+        }
 
         /// <summary>
         /// 查询节点分页数据
@@ -114,48 +123,45 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="nodeName"></param>
         /// <param name="status">1-连接 2-空闲 3-运行</param>
         /// <returns></returns>
-        public bool NodeSwich(string nodeName, int status)
+        public async Task<bool> NodeSwich(string nodeName, int status)
         {
             var node = GetNodeByName(nodeName);
             if (node == null || node.NodeType == "master") return false;
-            string router;
+
+            _serverClient.Server = node;
             switch (status)
             {
-                case 1: { if (node.Status != 0) return false; router = "connect"; } break;
-                case 2: { if (node.Status != 2) return false; router = "shutdown"; } break;
-                case 3: { if (node.Status != 1) return false; router = "startup"; } break;
-                default: return false;
-            }
-            string url = $"{node.AccessProtocol}://{node.Host}/api/server/{router}";
-            if (status == 1)
-            {
-                Dictionary<string, string> header = new Dictionary<string, string> {
-                    { "sm_connection", SecurityHelper.MD5(ConfigurationCache.NodeSetting.IdentityName) },
-                    { "sm_nameto", nodeName }
-                };
-                var result = HttpRequest.Send(url, "post", null, header);
-                bool success = result.Key == System.Net.HttpStatusCode.OK;
-                if (success)
-                {
-                    _repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == nodeName, x => new ServerNodeEntity
+                case 1:
                     {
-                        AccessSecret = result.Value,
-                        LastUpdateTime = DateTime.Now,
-                        Status = 1//连接成功更新为空闲状态
-                    });
-                    _unitOfWork.Commit();
-                }
-                else
-                {
-                    Log.LogHelper.Warn($"{nodeName}连接异常[{result.Key.GetHashCode()}]：{result.Value}");
-                }
-                return success;
-            }
-            else
-            {
-                Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
-                var result = HttpRequest.Send(url, "post", null, header);
-                return result.Key == System.Net.HttpStatusCode.OK;
+                        if (node.Status != 0) return false;
+                        var result = await _serverClient.Connect();
+                        if (result.success)
+                        {
+                            _repositoryFactory.ServerNodes.UpdateBy(x => x.NodeName == nodeName, x => new ServerNodeEntity
+                            {
+                                AccessSecret = result.content,
+                                LastUpdateTime = DateTime.Now,
+                                Status = 1//连接成功更新为空闲状态
+                            });
+                            await _unitOfWork.CommitAsync();
+                        }
+                        else
+                        {
+                            Log.LogHelper.Warn($"{nodeName}连接异常：{result.content}");
+                        }
+                        return result.success;
+                    }
+                case 2:
+                    {
+                        if (node.Status != 2) return false;
+                        return await _serverClient.Shutdown();
+                    }
+                case 3:
+                    {
+                        if (node.Status != 1) return false;
+                        return await _serverClient.StartUp();
+                    }
+                default: return false;
             }
         }
 
@@ -212,32 +218,6 @@ namespace Hos.ScheduleMaster.Core.Services
         }
 
         /// <summary>
-        /// 遍历所有worker并执行操作
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <param name="router"></param>
-        /// <param name="verb"></param>
-        /// <returns></returns>
-        public bool WorkersTraverseAction(Guid sid, string router, string verb = "post")
-        {
-            var nodeList = GetAvaliableWorkerForSchedule(sid);
-            if (nodeList.Any())
-            {
-                Dictionary<string, string> param = new Dictionary<string, string>();
-                if (sid != Guid.Empty)
-                {
-                    //param.Add("sid", sid.ToString());
-                }
-                var result = nodeList.AsParallel().Select(n =>
-                {
-                    return WorkerRequest(n, router, verb, param);
-                }).ToArray();
-                return result.All(x => x == true);
-            }
-            throw new InvalidOperationException("running worker not found.");
-        }
-
-        /// <summary>
         /// 根据权重比例选择一个worker
         /// </summary>
         /// <param name="list"></param>
@@ -266,31 +246,6 @@ namespace Hos.ScheduleMaster.Core.Services
             return selectedNode;
         }
 
-        /// <summary>
-        /// 向worker发送请求
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="router"></param>
-        /// <param name="method"></param>
-        /// <param name="param"></param>
-        /// <returns></returns>
-        public bool WorkerRequest(ServerNodeEntity node, string router, string method, Dictionary<string, string> param)
-        {
-            if (node == null)
-            {
-                Log.LogHelper.Warn($"没有可以发送请求的目标节点。");
-                return false;
-            }
-            Dictionary<string, string> header = new Dictionary<string, string> { { "sm_secret", node.AccessSecret } };
-            string url = $"{node.AccessProtocol}://{node.Host}/{router}";
-            var result = HttpRequest.Send(url, method, param, header);
-            var success = result.Key == HttpStatusCode.OK;
-            if (!success)
-            {
-                Log.LogHelper.Warn($"响应码：{result.Key.GetHashCode()}，请求地址：{url}，响应消息：{result.Value}");
-            }
-            return success;
-        }
 
         /// <summary>
         /// worker健康检查
@@ -306,38 +261,48 @@ namespace Hos.ScheduleMaster.Core.Services
             int allowMaxFailed = ConfigurationCache.GetField<int>("System_WorkerUnHealthTimes");
             if (allowMaxFailed <= 0) allowMaxFailed = 3;
             //遍历处理
-            workers.ForEach((w) =>
+            workers.ForEach(async (w) =>
             {
-                //初始化计数器
-                ConfigurationCache.WorkerUnHealthCounter.TryAdd(w.NodeName, 0);
-                //获取已失败次数
-                int failedCount = ConfigurationCache.WorkerUnHealthCounter[w.NodeName];
-                var success = WorkerRequest(w, "health", "get", null);
-                if (!success)
+                using (var scope = new Core.ScopeDbContext())
                 {
-                    System.Threading.Interlocked.Increment(ref failedCount);
-                }
-                if (failedCount >= allowMaxFailed)
-                {
-                    w.Status = 0;//标记下线，实际上可能存在因为网络抖动等原因导致检查失败但worker进程还在运行的情况
-                    w.LastUpdateTime = DateTime.Now;
-                    _repositoryFactory.ServerNodes.Update(w);
-                    //释放该节点占据的锁
-                    _repositoryFactory.ScheduleLocks.UpdateBy(
-                        x => x.LockedNode == w.NodeName && x.Status == 1
-                        , x => new ScheduleLockEntity
+                    var db = scope.GetDbContext();
+                    _serverClient.Server = w;
+                    //初始化计数器
+                    ConfigurationCache.WorkerUnHealthCounter.TryAdd(w.NodeName, 0);
+                    var success = await _serverClient.HealthCheck();
+                    if (success)
+                    {
+                        w.LastUpdateTime = DateTime.Now;
+                        db.ServerNodes.Update(w);
+                        await db.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        //获取已失败次数
+                        int failedCount = ConfigurationCache.WorkerUnHealthCounter[w.NodeName];
+                        System.Threading.Interlocked.Increment(ref failedCount);
+                        if (failedCount >= allowMaxFailed)
                         {
-                            Status = 0,
-                            LockedNode = null,
-                            LockedTime = null
-                        });
-                    _unitOfWork.Commit();
-                    //重置计数器
-                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = 0;
-                }
-                else
-                {
-                    ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = failedCount;
+                            w.Status = 0;//标记下线，实际上可能存在因为网络抖动等原因导致检查失败但worker进程还在运行的情况
+                            db.ServerNodes.Update(w);
+                            //释放该节点占据的锁
+                            var locks = db.ScheduleLocks.Where(x => x.LockedNode == w.NodeName && x.Status == 1).ToList();
+                            locks.ForEach(x =>
+                            {
+                                x.Status = 0;
+                                x.LockedNode = null;
+                                x.LockedTime = null;
+                            });
+                            db.ScheduleLocks.UpdateRange(locks);
+                            await db.SaveChangesAsync();
+                            //重置计数器
+                            ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = 0;
+                        }
+                        else
+                        {
+                            ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = failedCount;
+                        }
+                    }
                 }
             });
         }

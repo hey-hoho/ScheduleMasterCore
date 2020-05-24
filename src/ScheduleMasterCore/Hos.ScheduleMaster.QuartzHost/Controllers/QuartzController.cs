@@ -24,7 +24,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Start([FromQuery]Guid sid)
+        public async Task<IActionResult> Start([FromForm]Guid sid)
         {
             bool success = await QuartzManager.StartWithRetry(sid);
             if (success) return Ok();
@@ -33,7 +33,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Stop([FromQuery]Guid sid)
+        public async Task<IActionResult> Stop([FromForm]Guid sid)
         {
             bool success = await QuartzManager.Stop(sid);
             if (success) return Ok();
@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Pause([FromQuery]Guid sid)
+        public async Task<IActionResult> Pause([FromForm]Guid sid)
         {
             bool success = await QuartzManager.Pause(sid);
             if (success) return Ok();
@@ -49,7 +49,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Resume([FromQuery]Guid sid)
+        public async Task<IActionResult> Resume([FromForm]Guid sid)
         {
             bool success = await QuartzManager.Resume(sid);
             if (success) return Ok();
@@ -57,7 +57,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RunOnce([FromQuery]Guid sid)
+        public async Task<IActionResult> RunOnce([FromForm]Guid sid)
         {
             bool success = await QuartzManager.RunOnce(sid);
             if (success) return Ok();

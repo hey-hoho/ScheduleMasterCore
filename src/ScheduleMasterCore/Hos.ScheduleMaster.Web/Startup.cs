@@ -3,6 +3,7 @@ using System.Linq;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.Core.Repository;
+using Hos.ScheduleMaster.Core.Services.RemoteCaller;
 using Hos.ScheduleMaster.Web.Extension;
 using Hos.ScheduleMaster.Web.Filters;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,8 +33,6 @@ namespace Hos.ScheduleMaster.Web
             services.AddMemoryCache();
             services.AddOptions();
             services.AddHttpContextAccessor();
-            //services.AddControllersWithViews();
-            //services.AddControllers();
             services.AddHosControllers(this);
             services.AddMvc(options =>
             {
@@ -44,15 +43,9 @@ namespace Hos.ScheduleMaster.Web
                 option.JsonSerializerOptions.PropertyNamingPolicy = null;
                 option.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
             });
-            //    .AddNewtonsoftJson(option =>
-            //{
-            //    ////忽略循环引用
-            //    option.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
-            //    //不使用驼峰样式的key
-            //    option.SerializerSettings.ContractResolver = new DefaultContractResolver();
-            //    //设置时间格式
-            //    option.SerializerSettings.DateFormatString = "yyyy-MM-dd HH:mm:ss";
-            //});
+
+            services.AddHttpClient("workercaller", options => { options.Timeout = TimeSpan.FromSeconds(30); });
+
             //配置authorrize
             services.AddAuthentication(b =>
             {
@@ -65,8 +58,7 @@ namespace Hos.ScheduleMaster.Web
                 b.Cookie.Name = "msc_auth_name";
                 b.Cookie.Path = "/";
                 b.Cookie.HttpOnly = true;
-                //b.Cookie.Expiration = new TimeSpan(2, 0, 0);
-                b.ExpireTimeSpan = new TimeSpan(2, 0, 0);
+                b.ExpireTimeSpan = TimeSpan.FromHours(5);
             });
             //EF数据库上下文
             services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));

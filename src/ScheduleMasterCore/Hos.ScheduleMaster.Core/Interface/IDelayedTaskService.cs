@@ -4,6 +4,7 @@ using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Interface
 {
@@ -30,27 +31,27 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="entity"></param>
         /// <param name="executors"></param>
         /// <returns></returns>
-        ServiceResponseMessage Add(ScheduleDelayedEntity entity,List<string> executors);
+        Task<ServiceResponseMessage> Add(ScheduleDelayedEntity entity,List<string> executors);
 
         /// <summary>
         /// 启动任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Start(Guid sid);
+        Task<ServiceResponseMessage> Start(Guid sid);
 
         /// <summary>
         /// 立即执行延时任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Execute(Guid sid);
+        Task<ServiceResponseMessage> Execute(Guid sid);
 
         /// <summary>
         /// 作废任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Stop(Guid sid);
+        Task<ServiceResponseMessage> Stop(Guid sid);
     }
 }

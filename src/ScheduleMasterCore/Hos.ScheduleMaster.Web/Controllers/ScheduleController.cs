@@ -136,7 +136,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="task"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Create(ScheduleInfo task)
+        public async Task<ActionResult> Create(ScheduleInfo task)
         {
             if (!ModelState.IsValid)
             {
@@ -179,7 +179,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             {
                 if (task.RunNow)
                 {
-                    var start = _scheduleService.Start(main);
+                    var start = await _scheduleService.Start(main);
                     return this.JsonNet(true, "任务创建成功！启动状态为：" + (start.Status == ResultStatus.Success ? "成功" : "失败"), Url.Action("Index"));
                 }
                 return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
@@ -240,10 +240,10 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Start([FromQuery]Guid id)
+        public async Task<ActionResult> Start([FromQuery]Guid id)
         {
             var task = _scheduleService.QueryById(id);
-            var result = _scheduleService.Start(task);
+            var result = await _scheduleService.Start(task);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -253,9 +253,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Pause([FromQuery]Guid id)
+        public async Task<ActionResult> Pause([FromQuery]Guid id)
         {
-            var result = _scheduleService.Pause(id);
+            var result = await _scheduleService.Pause(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -265,9 +265,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult RunOnce([FromQuery]Guid id)
+        public async Task<ActionResult> RunOnce([FromQuery]Guid id)
         {
-            var result = _scheduleService.RunOnce(id);
+            var result = await _scheduleService.RunOnce(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -277,9 +277,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Resume([FromQuery]Guid id)
+        public async Task<ActionResult> Resume([FromQuery]Guid id)
         {
-            var result = _scheduleService.Resume(id);
+            var result = await _scheduleService.Resume(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -289,9 +289,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Stop([FromQuery]Guid id)
+        public async Task<ActionResult> Stop([FromQuery]Guid id)
         {
-            var result = _scheduleService.Stop(id);
+            var result = await _scheduleService.Stop(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 

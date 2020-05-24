@@ -28,7 +28,7 @@ namespace Hos.ScheduleMaster.Web.AppStart
         {
             using (var scope = ConfigurationCache.RootServiceProvider.CreateScope())
             {
-                Core.Services.NodeService service = new Core.Services.NodeService();
+                Core.Interface.INodeService service = scope.ServiceProvider.GetService<Core.Interface.INodeService>();
                 AutowiredServiceProvider provider = new AutowiredServiceProvider();
                 provider.PropertyActivate(service, scope.ServiceProvider);
                 service.WorkerHealthCheck();

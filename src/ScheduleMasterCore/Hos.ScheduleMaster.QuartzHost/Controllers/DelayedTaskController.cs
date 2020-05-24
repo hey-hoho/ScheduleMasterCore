@@ -27,7 +27,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Insert([FromQuery]Guid sid)
+        public async Task<IActionResult> Insert([FromForm]Guid sid)
         {
             bool success = await DelayPlanManager.InsertById(sid);
             if (success) return Ok();
@@ -36,7 +36,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
 
 
         [HttpPost]
-        public IActionResult Remove([FromQuery]Guid sid)
+        public IActionResult Remove([FromForm]Guid sid)
         {
             bool success = DelayPlanManager.Remove(sid.ToString());
             if (success) return Ok();
@@ -44,7 +44,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Execute([FromServices]SmDbContext db, [FromServices]IHttpClientFactory clientFactory, [FromQuery]Guid sid)
+        public async Task<IActionResult> Execute([FromServices]SmDbContext db, [FromServices]IHttpClientFactory clientFactory, [FromForm]Guid sid)
         {
             var entity = await db.ScheduleDelayeds.FirstOrDefaultAsync(x => x.Id == sid);
             if (entity != null)

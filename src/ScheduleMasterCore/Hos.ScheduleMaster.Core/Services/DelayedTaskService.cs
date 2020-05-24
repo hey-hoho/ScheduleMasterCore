@@ -2,6 +2,7 @@
 using Hos.ScheduleMaster.Core.Dto;
 using Hos.ScheduleMaster.Core.Interface;
 using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.Core.Services.RemoteCaller;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,6 +10,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
@@ -17,6 +19,9 @@ namespace Hos.ScheduleMaster.Core.Services
     {
         [Autowired]
         public INodeService _nodeService { get; set; }
+
+        [Autowired]
+        public WorkerDispatcher _workerDispatcher { get; set; }
 
         /// <summary>
         /// 查询任务列表
@@ -79,7 +84,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="entity"></param>
         /// <param name="executors"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Add(ScheduleDelayedEntity entity, List<string> executors)
+        public async Task<ServiceResponseMessage> Add(ScheduleDelayedEntity entity, List<string> executors)
         {
             if (executors == null || !executors.Any())
             {
@@ -105,10 +110,10 @@ namespace Hos.ScheduleMaster.Core.Services
             }));
 
             //事务提交
-            if (_unitOfWork.Commit() > 0)
+            if (await _unitOfWork.CommitAsync() > 0)
             {
                 //任务持久化成功后分发给worker，进入就绪状态
-                return Start(entity.Id);
+                return await Start(entity.Id);
             }
             return ServiceResult(ResultStatus.Failed, "数据保存失败!");
         }
@@ -118,10 +123,10 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Start(Guid sid)
+        public async Task<ServiceResponseMessage> Start(Guid sid)
         {
             //启动任务
-            bool success = _nodeService.WorkersTraverseAction(sid, "api/delayedtask/insert?sid=" + sid);
+            bool success = await _workerDispatcher.DelayedTaskStart(sid);
             if (success)
             {
                 //启动成功后更新任务状态为就绪
@@ -129,7 +134,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 {
                     Status = (int)ScheduleDelayStatus.Ready//就绪状态
                 });
-                if (_unitOfWork.Commit() > 0)
+                if (await _unitOfWork.CommitAsync() > 0)
                 {
                     return ServiceResult(ResultStatus.Success, "任务启动成功!", sid);
                 }
@@ -137,7 +142,7 @@ namespace Hos.ScheduleMaster.Core.Services
             }
             else
             {
-                _nodeService.WorkersTraverseAction(sid, "api/delayedtask/remove?sid=" + sid);
+                await _workerDispatcher.DelayedTaskRemove(sid);
                 return ServiceResult(ResultStatus.Failed, "任务启动失败!", sid);
             }
         }
@@ -147,11 +152,9 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Execute(Guid sid)
+        public async Task<ServiceResponseMessage> Execute(Guid sid)
         {
-            ServerNodeEntity worker = _nodeService.GetAvaliableWorkerByPriority(sid).FirstOrDefault();
-            Dictionary<string, string> param = new Dictionary<string, string> { { "sid", sid.ToString() } };
-            bool success = _nodeService.WorkerRequest(worker, "api/delayedtask/execute?sid=" + sid, "post", param);
+            bool success = await _workerDispatcher.DelayedTaskExecute(sid);
             if (success)
             {
                 return ServiceResult(ResultStatus.Success, "任务运行成功!");
@@ -167,7 +170,7 @@ namespace Hos.ScheduleMaster.Core.Services
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        public ServiceResponseMessage Stop(Guid sid)
+        public async Task<ServiceResponseMessage> Stop(Guid sid)
         {
             var task = QueryById(sid);
             if (task != null && task.Status < (int)ScheduleDelayStatus.Successed)
@@ -175,7 +178,7 @@ namespace Hos.ScheduleMaster.Core.Services
                 bool success = _nodeService.GetAvaliableWorkerForSchedule(sid).Any();
                 if (success)
                 {
-                    success = _nodeService.WorkersTraverseAction(task.Id, "api/delayedtask/remove?sid=" + sid);
+                    success = await _workerDispatcher.DelayedTaskRemove(sid);
                 }
                 else
                 {
@@ -188,7 +191,7 @@ namespace Hos.ScheduleMaster.Core.Services
                     {
                         Status = (int)ScheduleDelayStatus.Deleted
                     });
-                    if (_unitOfWork.Commit() > 0)
+                    if (await _unitOfWork.CommitAsync() > 0)
                     {
                         return ServiceResult(ResultStatus.Success, "任务已作废!");
                     }

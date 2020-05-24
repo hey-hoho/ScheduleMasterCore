@@ -4,6 +4,7 @@ using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Interface
 {
@@ -110,35 +111,35 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        ServiceResponseMessage Start(ScheduleEntity task);
+        Task<ServiceResponseMessage> Start(ScheduleEntity task);
 
         /// <summary>
         /// 暂停一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Pause(Guid sid);
+        Task<ServiceResponseMessage> Pause(Guid sid);
 
         /// <summary>
         /// 恢复一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Resume(Guid sid);
+        Task<ServiceResponseMessage> Resume(Guid sid);
 
         /// <summary>
         /// 执行一次任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage RunOnce(Guid sid);
+        Task<ServiceResponseMessage> RunOnce(Guid sid);
 
         /// <summary>
         /// 停止一个任务
         /// </summary>
         /// <param name="sid"></param>
         /// <returns></returns>
-        ServiceResponseMessage Stop(Guid sid);
+        Task<ServiceResponseMessage> Stop(Guid sid);
 
         /// <summary>
         /// 删除一个任务
@@ -177,18 +178,5 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <returns></returns>
         bool UpdateRunTrace(Guid traceId, double timeSpan, ScheduleRunResult result);
 
-        /// <summary>
-        /// 创建一个延时任务
-        /// </summary>
-        /// <param name="entity"></param>
-        /// <returns></returns>
-        ServiceResponseMessage AddDelayed(ScheduleDelayedEntity entity);
-
-        /// <summary>
-        /// 立即执行延时任务
-        /// </summary>
-        /// <param name="sid"></param>
-        /// <returns></returns>
-        ServiceResponseMessage ExecuteDelayed(Guid sid);
     }
 }

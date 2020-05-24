@@ -358,7 +358,19 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 listener.OnSuccess += StartedEvent;
                 _scheduler.ListenerManager.AddJobListener(listener, KeyMatcher<JobKey>.KeyEquals(new JobKey(jobKey)));
 
-                await _scheduler.ScheduleJob(job, GetTrigger(schedule.Main), schedule.CancellationTokenSource.Token);
+                ITrigger trigger = GetTrigger(schedule.Main);
+                await _scheduler.ScheduleJob(job, trigger, schedule.CancellationTokenSource.Token);
+
+                using (var scope = new Core.ScopeDbContext())
+                {
+                    var db = scope.GetDbContext();
+                    var task = db.Schedules.FirstOrDefault(x => x.Id == schedule.Main.Id);
+                    if (task != null)
+                    {
+                        task.NextRunTime = TimeZoneInfo.ConvertTimeFromUtc(trigger.GetNextFireTimeUtc().Value.UtcDateTime, TimeZoneInfo.Local);
+                        await db.SaveChangesAsync();
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -407,10 +419,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     CronExpressionString = model.CronExpression,
                     Name = model.Title,
                     Key = new TriggerKey(jobKey),
-                    Description = model.Remark
+                    Description = model.Remark,
+                    MisfireInstruction = MisfireInstruction.CronTrigger.DoNothing
                 };
                 if (model.StartDate.HasValue)
                 {
+                    if (model.StartDate.Value < DateTime.Now) model.StartDate = DateTime.Now;
                     trigger.StartTimeUtc = TimeZoneInfo.ConvertTimeToUtc(model.StartDate.Value);
                 }
                 if (model.EndDate.HasValue)

@@ -24,7 +24,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
         /// <param name="task"></param>
         /// <returns></returns>
         [HttpPost]
-        public ServiceResponseMessage Create([FromForm]ScheduleDelayedInfo task)
+        public async Task<ServiceResponseMessage> Create([FromForm]ScheduleDelayedInfo task)
         {
             if (!ModelState.IsValid)
             {
@@ -33,7 +33,7 @@ namespace Hos.ScheduleMaster.Web.ApiControllers
             ScheduleDelayedEntity entity = ObjectMapper<ScheduleDelayedInfo, ScheduleDelayedEntity>.Convert(task);
             entity.Status = (int)ScheduleDelayStatus.Created;
             entity.CreateUserName = CurrentUserName;
-            var result = _taskService.Add(entity, task.Executors);
+            var result = await _taskService.Add(entity, task.Executors);
             return result;
         }
     }

@@ -81,7 +81,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Create(ScheduleDelayedInfo task)
+        public async Task<ActionResult> Create(ScheduleDelayedInfo task)
         {
             if (!ModelState.IsValid)
             {
@@ -90,7 +90,7 @@ namespace Hos.ScheduleMaster.Web.Controllers
             ScheduleDelayedEntity entity = ObjectMapper<ScheduleDelayedInfo, ScheduleDelayedEntity>.Convert(task);
             entity.Status = (int)ScheduleDelayStatus.Created;
             entity.CreateUserName = CurrentAdmin.UserName;
-            var result = _taskService.Add(entity, task.Executors);
+            var result = await _taskService.Add(entity, task.Executors);
             if (result.Status == ResultStatus.Success)
             {
                 return this.JsonNet(true, "任务创建成功！", Url.Action("Index"));
@@ -119,9 +119,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Execute([FromQuery]Guid id)
+        public async Task<ActionResult> Execute([FromQuery]Guid id)
         {
-            var result = _taskService.Execute(id);
+            var result = await _taskService.Execute(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -131,9 +131,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Start([FromQuery]Guid id)
+        public async Task<ActionResult> Start([FromQuery]Guid id)
         {
-            var result = _taskService.Start(id);
+            var result = await _taskService.Start(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
 
@@ -143,9 +143,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpPost]
-        public ActionResult Stop([FromQuery]Guid id)
+        public async Task<ActionResult> Stop([FromQuery]Guid id)
         {
-            var result = _taskService.Stop(id);
+            var result = await _taskService.Stop(id);
             return this.JsonNet(result.Status == ResultStatus.Success, result.Message);
         }
     }
