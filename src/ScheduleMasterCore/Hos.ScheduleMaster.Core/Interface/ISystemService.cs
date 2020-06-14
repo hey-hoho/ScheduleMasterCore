@@ -3,6 +3,7 @@ using Hos.ScheduleMaster.Core.Models;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Interface
 {
@@ -37,7 +38,7 @@ namespace Hos.ScheduleMaster.Core.Interface
         /// <param name="startdate"></param>
         /// <param name="enddate"></param>
         /// <returns></returns>
-        int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate);
+        Task<int> DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate);
 
     }
 }

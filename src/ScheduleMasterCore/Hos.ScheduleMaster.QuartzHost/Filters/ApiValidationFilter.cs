@@ -25,7 +25,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
             }
             var secret = context.HttpContext.Request.Headers["sm_secret"].FirstOrDefault();
             //LogHelper.Info($"w:{Common.QuartzManager.AccessSecret} m:{secret}");
-            if (!Common.QuartzManager.AccessSecret.Equals(secret))
+            if (string.Compare(Common.QuartzManager.AccessSecret, secret, StringComparison.CurrentCultureIgnoreCase) != 0)
             {
                 context.Result = new UnauthorizedObjectResult($"w:{Common.QuartzManager.AccessSecret} m:{secret}");
             }

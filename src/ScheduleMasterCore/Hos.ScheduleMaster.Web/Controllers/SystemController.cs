@@ -275,9 +275,9 @@ namespace Hos.ScheduleMaster.Web.Controllers
         /// <param name="enddate"></param>
         /// <returns></returns>
         [HttpPost, AjaxRequestOnly]
-        public ActionResult ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
+        public async Task<ActionResult> ClearLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
-            var result = _systemService.DeleteLog(sid, category, startdate, enddate);
+            var result = await _systemService.DeleteLog(sid, category, startdate, enddate);
             if (result > 0)
             {
                 return this.JsonNet(true, $"清理成功！本次清理【{result}】条");

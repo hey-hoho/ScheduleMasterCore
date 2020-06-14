@@ -1,11 +1,13 @@
 ﻿using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Interface;
 using Hos.ScheduleMaster.Core.Models;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Services
 {
@@ -60,27 +62,39 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <param name="startdate"></param>
         /// <param name="enddate"></param>
         /// <returns></returns>
-        public int DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
+        public async Task<int> DeleteLog(Guid? sid, int? category, DateTime? startdate, DateTime? enddate)
         {
             IQueryable<SystemLogEntity> query = _repositoryFactory.SystemLogs.Table;
+            StringBuilder sqlBulder = new StringBuilder("delete from systemlogs where 1=1 ");
             if (sid.HasValue)
             {
                 query = query.Where(x => x.ScheduleId == sid.Value);
+                sqlBulder.Append($"and scheduleid='{sid.Value}' ");
             }
             if (category.HasValue)
             {
                 query = query.Where(x => x.Category == category.Value);
+                sqlBulder.Append($"and category={category.Value} ");
             }
             if (startdate.HasValue)
             {
                 query = query.Where(x => x.CreateTime >= startdate.Value);
+                sqlBulder.Append($"and createtime>='{startdate.Value.ToString("yyyy-MM-dd")}' ");
             }
             if (enddate.HasValue)
             {
                 query = query.Where(x => x.CreateTime < enddate.Value);
+                sqlBulder.Append($"and createtime<'{enddate.Value.ToString("yyyy-MM-dd")}' ");
             }
-            _repositoryFactory.SystemLogs.DeleteBy(query);
-            return _unitOfWork.Commit();
+            int rows = await query.CountAsync();
+            _ = Task.Run(() =>
+            {
+                using (var scope = new Core.ScopeDbContext())
+                {
+                    scope.GetDbContext().Database.ExecuteSqlRaw(sqlBulder.ToString());
+                }
+            });
+            return rows;
         }
 
     }

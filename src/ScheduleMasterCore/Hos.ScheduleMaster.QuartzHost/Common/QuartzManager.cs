@@ -378,7 +378,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             }
             LogHelper.Info($"任务[{schedule.Main.Title}]启动成功！", schedule.Main.Id);
 
-            _ = Task.Run(() =>
+            _ = Task.Run(async () =>
               {
                   while (true)
                   {
@@ -399,7 +399,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                       }
                       else
                       {
-                          Thread.Sleep(3000);
+                          await Task.Delay(3000);
                       }
                   }
               });
