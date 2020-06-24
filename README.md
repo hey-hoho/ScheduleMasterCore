@@ -8,6 +8,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core
 ![Nuget](https://img.shields.io/nuget/dt/ScheduleMaster)
 ![PowerShell Gallery](https://img.shields.io/powershellgallery/p/DNS.1.1.1.1)
 ![GitHub last commit](https://img.shields.io/github/last-commit/hey-hoho/ScheduleMasterCore)
+![.NET Core](https://github.com/hey-hoho/ScheduleMasterCore/workflows/.NET%20Core/badge.svg)
 
 
 ## 主要特性
@@ -59,6 +60,8 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 打开项目Hos.ScheduleMaster.Web根目录下的`appsettings.json`文件，先修改Mysql数据库连接字符串以保证数据库正常访问，再找到`NodeSetting`节点，修改`IP`字段为master将要部署的ip地址（master端口为30000不用修改），在项目上右击选择发布...，发布到本地文件夹。
 
 打开项目Hos.ScheduleMaster.QuartzHost根目录下的`appsettings.json`文件，同样先修改Mysql连接字符串，再找到`NodeSetting`节点，设置worker的名称`IdentityName`，修改`IP`字段为将要部署的ip地址，`Port`字段为要监听的地址（推荐为30001），在项目上右击选择发布...，发布到本地文件夹。如果要新增worker，按同样方式配置`IdentityName、IP、Port`即可，worker在启动后会把自己的信息注入到数据库中，在master中可以看到。
+
+> 快速发布小贴士：windows平台下用powershell执行脚本`publish.ps1`快速发布到`d:/sm-publish`目录，linux平台下执行脚本`sh publish.sh`快速发布到`/home/sm-publish`目录。
 
 其他发布方式亦可。下面以运行2个worker节点为例：
 
