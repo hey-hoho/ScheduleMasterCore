@@ -11,6 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.QuartzHost.HosSchedule;
+using Hos.ScheduleMaster.Core.Common;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -23,7 +24,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
     public abstract class RootJob : IJob
     {
         Guid _sid;
-        SmDbContext _db;
+        RunTracer _tracer;
         string node = ConfigurationCache.NodeSetting.IdentityName;
 
         public async Task Execute(IJobExecutionContext context)
@@ -32,7 +33,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
             using (var scope = new ScopeDbContext())
             {
-                _db = scope.GetDbContext();
+                _tracer = scope.GetService<RunTracer>();
                 var locker = scope.GetService<HosLock.IHosLock>();
                 if (locker.TryGetLock(context.JobDetail.Key.Name))
                 {
@@ -50,8 +51,8 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             IJobDetail job = context.JobDetail;
             if (job.JobDataMap["instance"] is IHosSchedule instance)
             {
-                Guid traceId = await CreateRunTrace();
-                Stopwatch stopwatch = new Stopwatch();
+                Guid traceId = Guid.NewGuid();
+
                 TaskContext tctx = new TaskContext(instance.RunnableInstance);
                 tctx.Node = node;
                 tctx.TraceId = traceId;
@@ -62,26 +63,26 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 }
                 try
                 {
-                    stopwatch.Restart();
+                    await _tracer.Begin(traceId, context.JobDetail.Key.Name);
+
                     //执行
                     OnExecuting(tctx);
-                    stopwatch.Stop();
-                    //更新执行结果
-                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Success);
-                    LogHelper.Info($"任务[{instance.Main.Title}]运行成功！用时{Math.Round(stopwatch.Elapsed.TotalMilliseconds, 3).ToString()}ms", _sid, traceId);
+
+                    double elapsed = await _tracer.Complete(ScheduleRunResult.Success);
+
+                    LogHelper.Info($"任务[{instance.Main.Title}]运行成功！用时{elapsed.ToString()}ms", _sid, traceId);
                     //保存运行结果用于子任务触发
                     context.Result = tctx.Result;
                 }
                 catch (RunConflictException conflict)
                 {
-                    stopwatch.Stop();
-                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Conflict);
+                    await _tracer.Complete(ScheduleRunResult.Conflict);
                     throw conflict;
                 }
                 catch (Exception e)
                 {
-                    stopwatch.Stop();
-                    await UpdateRunTrace(traceId, Math.Round(stopwatch.Elapsed.TotalSeconds, 3), ScheduleRunResult.Failed);
+                    await _tracer.Complete(ScheduleRunResult.Failed);
+
                     LogHelper.Error($"任务\"{instance.Main.Title}\"运行失败！", e, _sid, traceId);
                     //这里抛出的异常会在JobListener的JobWasExecuted事件中接住
                     //如果吃掉异常会导致程序误以为本次任务执行成功
@@ -98,26 +99,5 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
 
         public abstract void OnExecuted(TaskContext context);
 
-        private async Task<Guid> CreateRunTrace()
-        {
-            ScheduleTraceEntity entity = new ScheduleTraceEntity();
-            entity.TraceId = Guid.NewGuid();
-            entity.ScheduleId = _sid;
-            entity.Node = node;
-            entity.StartTime = DateTime.Now;
-            entity.Result = (int)ScheduleRunResult.Null;
-            _db.ScheduleTraces.Add(entity);
-            if (await _db.SaveChangesAsync() > 0)
-            {
-                return entity.TraceId;
-            }
-            return Guid.Empty;
-        }
-
-        private async Task UpdateRunTrace(Guid traceId, double elapsed, ScheduleRunResult result)
-        {
-            if (traceId == Guid.Empty) return;
-            await _db.Database.ExecuteSqlRawAsync($"update scheduletraces set result={(int)result},elapsedtime={elapsed},endtime=now() where traceid='{traceId}'");
-        }
     }
 }

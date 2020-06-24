@@ -154,12 +154,20 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public int QueryTraceCount(int? status)
         {
-            var query = _repositoryFactory.ScheduleTraces.Where(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty);
-            if (status.HasValue)
+            var query = _repositoryFactory.TraceStatisticss.TableNoTracking;
+            if (!status.HasValue)
             {
-                query = query.Where(x => x.Result == status.Value);
+                return query.Sum(x => x.Success + x.Fail + x.Other);
             }
-            return query.Count();
+            else if (status.Value == 1)
+            {
+                return query.Sum(x => x.Success);
+            }
+            else if (status.Value == 2)
+            {
+                return query.Sum(x => x.Fail);
+            }
+            return 0;
         }
 
         /// <summary>
@@ -169,19 +177,27 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public IEnumerable<KeyValuePair<long, int>> QueryTraceWeeklyReport(int? status)
         {
-            var query = _repositoryFactory.ScheduleTraces.WhereNoTracking(x => x.ScheduleId != null && x.ScheduleId != Guid.Empty && x.StartTime >= DateTime.Now.AddDays(-9));
-            if (status.HasValue)
-            {
-                query = query.Where(x => x.Result == status.Value);
-            }
-            var list = query.GroupBy(x => x.StartTime.Date).Select(x => new KeyValuePair<long, int>(x.Key.ToTimeStamp(), x.Count())).ToList();
+            Dictionary<long, int> result = new Dictionary<long, int>();
 
+            long start = DateTime.Today.AddDays(-9).ToTimeStamp();
+            var query = _repositoryFactory.TraceStatisticss.WhereNoTracking(x => x.DateStamp >= start);
+            if (!status.HasValue)
+            {
+                result = query.ToDictionary(x => x.DateStamp, x => x.Success + x.Fail + x.Other);
+            }
+            else if (status.Value == 1)
+            {
+                result = query.ToDictionary(x => x.DateStamp, x => x.Success);
+            }
+            else if (status.Value == 2)
+            {
+                result = query.ToDictionary(x => x.DateStamp, x => x.Fail);
+            }
             for (int i = 9; i >= 0; i--)
             {
                 long day = DateTime.Today.AddDays(-i).ToTimeStamp();
                 int cnt = 0;
-                var dl = list.Any(x => x.Key == day);
-                if (list.Any(x => x.Key == day)) cnt = list.FirstOrDefault(x => x.Key == day).Value;
+                result.TryGetValue(day, out cnt);
                 yield return new KeyValuePair<long, int>(day, cnt);
             }
         }
@@ -590,7 +606,9 @@ namespace Hos.ScheduleMaster.Core.Services
         /// <returns></returns>
         public ListPager<ScheduleTraceEntity> QueryTracePager(ListPager<ScheduleTraceEntity> pager)
         {
-            return _repositoryFactory.ScheduleTraces.WherePager(pager, m => m.TraceId != null, m => m.StartTime, false);
+            _repositoryFactory.ScheduleTraces.WherePager(pager, m => m.TraceId != null, m => m.StartTime, false, false);
+            pager.Total = 150;
+            return pager;
         }
 
         /// <summary>

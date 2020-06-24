@@ -21,10 +21,6 @@ namespace Hos.ScheduleMaster.Web.Filters
 
         public void OnException(ExceptionContext context)
         {
-            if (context.Exception is UserFriendlyException)
-            {
-
-            }
             LogHelper.Error(context.HttpContext.Request.Path, context.Exception);
             if (context.HttpContext.Request.IsAjaxRequest())
             {

@@ -4,10 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using RestSharp;
 using Hos.ScheduleMaster.QuartzHost.Common;
 using Hos.ScheduleMaster.Core;
 using System.Threading;
+using System.Net.Http;
 
 namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 {
@@ -23,7 +23,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         public void CreateRunnableInstance(ScheduleContext context)
         {
-            RunnableInstance = new HttpTask() { HttpOption = context.HttpOption };
+            RunnableInstance = new HttpTask(context.HttpOption);
         }
 
         public Type GetQuartzJobType()
@@ -39,75 +39,92 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
     }
     public class HttpTask : TaskBase
     {
-        public ScheduleHttpOptionEntity HttpOption { get; set; }
+        private readonly ScheduleHttpOptionEntity _option;
+
+        private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
+
+        private readonly Dictionary<string, object> _headers;
+
+        //private readonly HttpClient httpClient;
+
+
+        public HttpTask(ScheduleHttpOptionEntity httpOption)
+        {
+            if (httpOption != null)
+            {
+                _option = httpOption;
+
+                //httpClient = new HttpClient();
+
+                _headers = HosScheduleFactory.ConvertParamsJson(httpOption.Headers);
+
+                int config = ConfigurationCache.GetField<int>("Http_RequestTimeout");
+                if (config > 0)
+                {
+                    _timeout = TimeSpan.FromSeconds(config);
+                }
+
+
+
+                string requestBody = string.Empty;
+                string url = httpOption.RequestUrl;
+                if (httpOption.ContentType == "application/json")
+                {
+                    requestBody = httpOption.Body.Replace("\r\n", "");
+                }
+                else if (httpOption.ContentType == "application/x-www-form-urlencoded")
+                {
+                    var formData = HosScheduleFactory.ConvertParamsJson(httpOption.Body);
+                    requestBody = string.Join('&', formData.Select(x => $"{x.Key}={System.Net.WebUtility.UrlEncode(x.Value.ToString())}"));
+                    if (httpOption.Method.ToLower() == "get" && formData.Count > 0)
+                    {
+                        url = $"{httpOption.RequestUrl}?{requestBody}";
+                    }
+                }
+                _option.RequestUrl = url;
+                _option.Body = requestBody;
+            }
+        }
+
 
         public override void Run(TaskContext context)
         {
-            if (HttpOption == null) return;
-            context.WriteLog($"即将请求：{HttpOption.RequestUrl}");
+            if (_option == null) return;
+            context.WriteLog($"即将请求：{_option.RequestUrl}");
 
-            var response = DoRequest();
-            if (response == null)
-            {
-                throw new Exception($"无响应：{HttpOption.RequestUrl}");
-            }
-            if (response.IsSuccessful)
-            {
-                context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.ContentType.Contains("text/html") ? "html文档" : response.Content)}");
-            }
-            else
-            {
-                throw response.ErrorException;
-            }
+            DoRequest(context).Wait(CancellationToken);
+
         }
 
-        private IRestResponse DoRequest()
+        private async Task DoRequest(TaskContext context)
         {
-            var client = new RestClient(HttpOption.RequestUrl);
-            var request = new RestRequest(GetRestSharpMethod(HttpOption.Method));
-            var headers = HosScheduleFactory.ConvertParamsJson(HttpOption.Headers);
-            foreach (var item in headers)
+            using (var scope = new ScopeDbContext())
             {
-                request.AddHeader(item.Key, item.Value.ToString());
-            }
-            request.AddHeader("content-type", HttpOption.ContentType);
-            request.Timeout = 10000;
-            int config = ConfigurationCache.GetField<int>("Http_RequestTimeout");
-            if (config > 0)
-            {
-                request.Timeout = config * 1000;
-            }
-            string requestBody = string.Empty;
-            if (HttpOption.ContentType == "application/json")
-            {
-                requestBody = HttpOption.Body.Replace("\r\n", "");
-            }
-            else if (HttpOption.ContentType == "application/x-www-form-urlencoded")
-            {
-                var formData = HosScheduleFactory.ConvertParamsJson(HttpOption.Body);
-                requestBody = string.Join('&', formData.Select(x => $"{x.Key}={System.Net.WebUtility.UrlEncode(x.Value.ToString())}"));
-                if (request.Method == Method.GET && formData.Count > 0)
+                var httpClient = scope.GetService<IHttpClientFactory>().CreateClient();
+
+                foreach (var item in _headers)
                 {
-                    client.BaseUrl = new Uri($"{HttpOption.RequestUrl}?{requestBody}");
+                    httpClient.DefaultRequestHeaders.Add(item.Key, item.Value.ToString());
                 }
+
+                httpClient.Timeout = _timeout;
+
+                var httpRequest = new HttpRequestMessage
+                {
+                    Content = new StringContent(_option.Body, System.Text.Encoding.UTF8, _option.ContentType),
+                    Method = new HttpMethod(_option.Method),
+                    RequestUri = new Uri(_option.RequestUrl)
+                };
+
+                var response = await httpClient.SendAsync(httpRequest, CancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    context.WriteLog($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.Content.Headers.GetValues("content-type").Any(x => x.Contains("text/html")) ? "html文档" : await response.Content.ReadAsStringAsync())}");
+                }
+                response.Dispose();
             }
-            if (request.Method != Method.GET)
-            {
-                request.AddParameter(HttpOption.ContentType, requestBody, ParameterType.RequestBody);
-            }
-            IRestResponse response = client.Execute(request);
-            return response;
+
         }
 
-        private Method GetRestSharpMethod(string method)
-        {
-            switch (method.ToUpper())
-            {
-                case "POST": return Method.POST;
-                case "PUT": return Method.PUT;
-                case "DELETE": return Method.DELETE;
-            }
-            return Method.GET;
-        }
     }
 }

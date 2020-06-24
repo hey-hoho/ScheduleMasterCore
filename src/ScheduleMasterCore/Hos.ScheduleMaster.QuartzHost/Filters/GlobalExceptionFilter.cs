@@ -20,10 +20,6 @@ namespace Hos.ScheduleMaster.QuartzHost.Filters
 
         public void OnException(ExceptionContext context)
         {
-            if (context.Exception is UserFriendlyException)
-            {
-
-            }
             LogHelper.Error(context.HttpContext.Request.Path, context.Exception);
             context.Result = new StatusCodeResult((int)System.Net.HttpStatusCode.ServiceUnavailable);
             context.ExceptionHandled = true;

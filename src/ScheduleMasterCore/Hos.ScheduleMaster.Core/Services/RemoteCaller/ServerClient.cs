@@ -24,7 +24,7 @@ namespace Hos.ScheduleMaster.Core.Services.RemoteCaller
         {
             if (_server == null)
             {
-                throw new ArgumentException("没有可以发送请求的目标节点。");
+                throw new ArgumentException("no target worker that can send the request.");
             }
             HttpClient client = _httpClientFactory.CreateClient("workercaller");
             client.DefaultRequestHeaders.Add("sm_secret", _server.AccessSecret);

@@ -214,8 +214,13 @@ namespace Hos.ScheduleMaster.Core.Repository
             }
         }
 
-        public ListPager<TModel> WherePager<TOrderKey>(ListPager<TModel> pager,
-            Expression<Func<TModel, bool>> where, Expression<Func<TModel, TOrderKey>> orderBy, bool isAsc = true)
+        public ListPager<TModel> WherePager<TOrderKey>(
+            ListPager<TModel> pager,
+            Expression<Func<TModel, bool>> where,
+            Expression<Func<TModel, TOrderKey>> orderBy,
+            bool isAsc = true,
+            bool queryTotalCount = true
+            )
         {
             var query = Where(where);
             if (pager.Filters != null)
@@ -227,7 +232,7 @@ namespace Hos.ScheduleMaster.Core.Repository
             }
             var orderList = isAsc ? query.OrderBy(orderBy) : query.OrderByDescending(orderBy);
             pager.Rows = orderList.Skip(pager.SkipCount).Take(pager.PageSize).AsNoTracking().ToList();
-            pager.Total = orderList.Count();
+            if (queryTotalCount) pager.Total = orderList.Count();
             return pager;
         }
 

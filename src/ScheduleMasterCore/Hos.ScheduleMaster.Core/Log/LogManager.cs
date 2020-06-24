@@ -1,11 +1,9 @@
 ﻿
 using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Models;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.Core.Log
@@ -22,15 +20,22 @@ namespace Hos.ScheduleMaster.Core.Log
                 using (var scope = new ScopeDbContext())
                 {
                     var db = scope.GetDbContext();
+                    db.ChangeTracker.AutoDetectChangesEnabled = false;
                     while (true)
                     {
                         Queue.Read((item, index) =>
                         {
                             item.Node = ConfigurationCache.NodeSetting?.IdentityName;
-                            ///item.CreateTime = DateTime.Now;
                             db.SystemLogs.Add(item);
                         });
-                        db.SaveChanges();
+                        if (db.ChangeTracker.HasChanges())
+                        {
+                            db.SaveChanges();
+                        }
+                        foreach (var item in db.ChangeTracker.Entries())
+                        {
+                            item.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                        }
                         System.Threading.Thread.Sleep(5000);
                     }
                 }

@@ -84,11 +84,11 @@ namespace Hos.ScheduleMaster.Core.Common
                 {
                     break;
                 }
-                cnt++;
                 T item;
                 if (_outQueue.TryDequeue(out item))
                 {
                     action(item, cnt);
+                    cnt++;
                 }
             }
         }

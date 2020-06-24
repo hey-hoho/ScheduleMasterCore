@@ -275,6 +275,7 @@ namespace Hos.ScheduleMaster.Core.Services
                         w.LastUpdateTime = DateTime.Now;
                         db.ServerNodes.Update(w);
                         await db.SaveChangesAsync();
+                        ConfigurationCache.WorkerUnHealthCounter[w.NodeName] = 0;
                     }
                     else
                     {

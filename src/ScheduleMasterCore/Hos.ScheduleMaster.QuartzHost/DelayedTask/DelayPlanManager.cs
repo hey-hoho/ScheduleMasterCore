@@ -121,33 +121,28 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
             Guid sid = Guid.Parse(plan.Key);
             Guid traceId = Guid.NewGuid();
 
-            string insertTraceSql = "insert into scheduletraces values('{0}','{1}','{2}',now(),'0001-01-01',0,0)";
-            string updateTraceSql = "update scheduletraces set result={0},elapsedtime={1},endtime=now() where traceid='{2}'";
             using (var scope = new ScopeDbContext())
             {
                 var db = scope.GetDbContext();
-
-                //创建一条trace
-                await db.Database.ExecuteSqlRawAsync(string.Format(insertTraceSql, traceId.ToString(), plan.Key, ConfigurationCache.NodeSetting.IdentityName));
+                var tracer = scope.GetService<Common.RunTracer>();
 
                 var entity = await db.ScheduleDelayeds.FirstOrDefaultAsync(x => x.Id == sid);
                 if (entity == null)
                 {
                     LogHelper.Info($"不存在的任务ID。", sid, traceId);
-                    await db.Database.ExecuteSqlRawAsync(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, "0", traceId.ToString()));
                     return;
                 }
 
                 entity.ExecuteTime = DateTime.Now;
                 Exception failedException = null;
 
-                Stopwatch stopwatch = new Stopwatch();
                 try
                 {
-                    stopwatch.Restart();
+                    //创建一条trace
+                    await tracer.Begin(traceId, plan.Key);
 
                     var httpClient = scope.GetService<IHttpClientFactory>().CreateClient();
-                    plan.NotifyBody=plan.NotifyBody.Replace("\r\n", "");
+                    plan.NotifyBody = plan.NotifyBody.Replace("\r\n", "");
                     HttpContent reqContent = new StringContent(plan.NotifyBody, System.Text.Encoding.UTF8, "application/json");
                     if (plan.NotifyDataType == "application/x-www-form-urlencoded")
                     {
@@ -158,13 +153,13 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                     LogHelper.Info($"即将请求：{entity.NotifyUrl}", sid, traceId);
                     var response = await httpClient.PostAsync(plan.NotifyUrl, reqContent);
                     var content = await response.Content.ReadAsStringAsync();
-                    stopwatch.Stop();
+
                     LogHelper.Info($"请求结束，响应码：{response.StatusCode.GetHashCode().ToString()}，响应内容：{(response.Content.Headers.GetValues("Content-Type").Any(x => x.Contains("text/html")) ? "html文档" : content)}", sid, traceId);
 
                     if (response.IsSuccessStatusCode && content.Contains("success"))
                     {
-                        string elapsed = Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString();
-                        db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Success, elapsed, traceId.ToString()));
+                        await tracer.Complete(ScheduleRunResult.Success);
+
                         //更新结果字段
                         entity.FinishTime = DateTime.Now;
                         entity.Status = (int)ScheduleDelayStatus.Successed;
@@ -178,14 +173,13 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
                 }
                 catch (Exception ex)
                 {
-                    stopwatch.Stop();
                     failedException = ex;
                 }
                 // 对异常进行处理
                 if (failedException != null)
                 {
-                    //更新日志
-                    db.Database.ExecuteSqlRaw(string.Format(updateTraceSql, (int)ScheduleRunResult.Failed, Math.Round(stopwatch.Elapsed.TotalSeconds, 3).ToString(), traceId.ToString()));
+                    //更新trace
+                    await tracer.Complete(ScheduleRunResult.Failed);
                     //失败重试策略
                     int maxRetry = ConfigurationCache.GetField<int>("DelayTask_RetryTimes");
                     if (entity.FailedRetrys < (maxRetry > 0 ? maxRetry : 3))

@@ -44,6 +44,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             );
             services.AddTransient<HosLock.IHosLock, HosLock.DatabaseLock>();
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
+            services.AddScoped<Common.RunTracer>();
 
             services.AddHostedService<AppStart.AppLifetimeHostedService>();
             services.AddHostedService<AppStart.ConfigurationRefreshService>();
