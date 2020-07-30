@@ -56,21 +56,20 @@ namespace Hos.ScheduleMaster.Core.Models
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
-            var dbProvider = ConfigurationHelper.Config["ConnectionStrings:provider"];
-
-            FixColumnsDataType<ScheduleDelayedEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleExecutorEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleHttpOptionEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleKeeperEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleLockEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleReferenceEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ScheduleTraceEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<ServerNodeEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<SystemConfigEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<SystemLogEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<SystemUserEntity>(modelBuilder, dbProvider);
-            FixColumnsDataType<TraceStatisticsEntity>(modelBuilder, dbProvider);
+           
+            FixColumnsDataType<ScheduleDelayedEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleExecutorEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleHttpOptionEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleKeeperEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleLockEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleReferenceEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ScheduleTraceEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<ServerNodeEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<SystemConfigEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<SystemLogEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<SystemUserEntity>(modelBuilder, DbProvider);
+            FixColumnsDataType<TraceStatisticsEntity>(modelBuilder, DbProvider);
 
             //创建索引
             modelBuilder.Entity<ScheduleTraceEntity>().HasIndex(p => p.ScheduleId).HasName("scheduletraces_scheduleid_index");
@@ -123,6 +122,21 @@ namespace Hos.ScheduleMaster.Core.Models
                         }
                     });
                 }
+            }
+        }
+
+        /// <summary>
+        /// 获取数据库当前时间函数
+        /// </summary>
+        public string GetDbNowDateTime
+        {
+            get 
+            {
+                if (DbProvider == "sqlserver")
+                {
+                    return "getdate()";
+                }
+                return "now()";
             }
         }
 	}

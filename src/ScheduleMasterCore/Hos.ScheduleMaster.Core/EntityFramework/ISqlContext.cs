@@ -13,6 +13,13 @@ namespace Hos.ScheduleMaster.Core.Models
 
     public class SqlContext : DbContext, ISqlContext
     {
+        public string DbProvider { get; private set; }
+
+        public SqlContext()
+        {
+            DbProvider = ConfigurationHelper.Config["ConnectionStrings:provider"] ?? "mysql";
+        }
+
         public void InitTables()
         {
             this.Database.EnsureCreated();
@@ -22,9 +29,8 @@ namespace Hos.ScheduleMaster.Core.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            var dbProvider = ConfigurationHelper.Config["ConnectionStrings:provider"];
             var conn = ConfigurationHelper.Config["ConnectionStrings:conn"];
-            switch (dbProvider)
+            switch (DbProvider)
             {
                 case "sqlserver":
                     optionsBuilder.UseSqlServer(conn);
@@ -36,6 +42,7 @@ namespace Hos.ScheduleMaster.Core.Models
                     optionsBuilder.UseNpgsql(conn);
                     break;
                 default:
+                    DbProvider = "mysql";
                     optionsBuilder.UseMySql(conn);
                     break;
             }
