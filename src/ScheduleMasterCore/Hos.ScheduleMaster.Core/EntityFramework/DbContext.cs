@@ -12,51 +12,118 @@ using Hos.ScheduleMaster.Core.Repository;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using Hos.ScheduleMaster.Core.EntityFramework;
+using System.Reflection;
+using System.ComponentModel.DataAnnotations.Schema;
+using Hos.ScheduleMaster.Core.Common;
+using Org.BouncyCastle.Math.EC.Rfc7748;
 
 namespace Hos.ScheduleMaster.Core.Models
 {
-    public class SmDbContext : DbContext
-    {
-		public SmDbContext(DbContextOptions<SmDbContext> option) : base(option)
-        {
-        }
+	public class SmDbContext : SqlContext
+	{
 
-		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        public virtual DbSet<ScheduleDelayedEntity> ScheduleDelayeds { get; set; }
+
+        public virtual DbSet<ScheduleEntity> Schedules { get; set; }
+
+        public virtual DbSet<ScheduleExecutorEntity> ScheduleExecutors { get; set; }
+
+        public virtual DbSet<ScheduleHttpOptionEntity> ScheduleHttpOptions { get; set; }
+
+        public virtual DbSet<ScheduleKeeperEntity> ScheduleKeepers { get; set; }
+
+        public virtual DbSet<ScheduleLockEntity> ScheduleLocks { get; set; }
+
+        public virtual DbSet<ScheduleReferenceEntity> ScheduleReferences { get; set; }
+
+        public virtual DbSet<ScheduleTraceEntity> ScheduleTraces { get; set; }
+
+        public virtual DbSet<ServerNodeEntity> ServerNodes { get; set; }
+
+        public virtual DbSet<SystemConfigEntity> SystemConfigs { get; set; }
+
+        public virtual DbSet<SystemLogEntity> SystemLogs { get; set; }
+
+        public virtual DbSet<SystemUserEntity> SystemUsers { get; set; }
+
+        public virtual DbSet<TraceStatisticsEntity> TraceStatisticss { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
 			base.OnConfiguring(optionsBuilder);
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-            base.OnModelCreating(modelBuilder);		
-			//初始化数据
+			base.OnModelCreating(modelBuilder);
+            var dbProvider = ConfigurationHelper.Config["ConnectionStrings:provider"];
+
+            FixColumnsDataType<ScheduleDelayedEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleExecutorEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleHttpOptionEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleKeeperEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleLockEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleReferenceEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ScheduleTraceEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<ServerNodeEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<SystemConfigEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<SystemLogEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<SystemUserEntity>(modelBuilder, dbProvider);
+            FixColumnsDataType<TraceStatisticsEntity>(modelBuilder, dbProvider);
+
+            //创建索引
+            modelBuilder.Entity<ScheduleTraceEntity>().HasIndex(p => p.ScheduleId).HasName("scheduletraces_scheduleid_index");
+            modelBuilder.Entity<ScheduleTraceEntity>().HasIndex(p => p.StartTime).HasName("scheduletraces_starttime_index");
+            modelBuilder.Entity<ScheduleTraceEntity>().HasIndex(p => p.Result).HasName("scheduletraces_result_index");
+
+            modelBuilder.Entity<SystemLogEntity>().HasIndex(p => p.TraceId).HasName("systemlogs_traceid_index");
+            modelBuilder.Entity<SystemLogEntity>().HasIndex(p => p.CreateTime).HasName("systemlogs_createtime_index");
+
+            modelBuilder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.CreateTime).HasName("scheduledelayeds_createtime_index");
+            modelBuilder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.ContentKey).HasName("scheduledelayeds_contentkey_index");
+
+            //初始化数据
             modelBuilder.SeedData();
 		}
-			public virtual DbSet<ScheduleDelayedEntity> ScheduleDelayeds { get; set; }
 
-		public virtual DbSet<ScheduleEntity> Schedules { get; set; }
+        /// <summary>
+        /// 修复字段跟数据库字段对应关系，因为不同的数据库有些差异
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="modelBuilder"></param>
+        /// <param name="dbProvider"></param>
+        private void FixColumnsDataType<T>(ModelBuilder modelBuilder, string dbProvider) where T : class
+        {
+            var props = typeof(T).GetProperties();
+            foreach (var item in props)
+            {
+                if (item.PropertyType == typeof(string))
+                {
+                    modelBuilder.Entity<T>(builer =>
+                    {
+                        var att = item.GetCustomAttributes().FirstOrDefault(att => att.GetType() == typeof(ColumnAttribute));
+                        if (att != null)
+                        {
+                            var columnAtt = att as ColumnAttribute;
+                            var type = columnAtt.TypeName;
+                            if (!string.IsNullOrEmpty(type))
+                            {
 
-		public virtual DbSet<ScheduleExecutorEntity> ScheduleExecutors { get; set; }
-
-		public virtual DbSet<ScheduleHttpOptionEntity> ScheduleHttpOptions { get; set; }
-
-		public virtual DbSet<ScheduleKeeperEntity> ScheduleKeepers { get; set; }
-
-		public virtual DbSet<ScheduleLockEntity> ScheduleLocks { get; set; }
-
-		public virtual DbSet<ScheduleReferenceEntity> ScheduleReferences { get; set; }
-
-		public virtual DbSet<ScheduleTraceEntity> ScheduleTraces { get; set; }
-
-		public virtual DbSet<ServerNodeEntity> ServerNodes { get; set; }
-
-		public virtual DbSet<SystemConfigEntity> SystemConfigs { get; set; }
-
-		public virtual DbSet<SystemLogEntity> SystemLogs { get; set; }
-
-		public virtual DbSet<SystemUserEntity> SystemUsers { get; set; }
-
-		public virtual DbSet<TraceStatisticsEntity> TraceStatisticss { get; set; }
-
-	    }
+                                if (dbProvider == "mysql")
+                                {
+                                    builer.Property(item.Name).HasColumnType(type.Replace("varchar(max)", "longtext"));
+                                }
+                                if (dbProvider == "npgsql")
+                                {
+                                    //npgsql没有nvarcahr
+                                    builer.Property(item.Name).HasColumnType(type.Replace("varchar(max)", "text"));
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+        }
+	}
 }

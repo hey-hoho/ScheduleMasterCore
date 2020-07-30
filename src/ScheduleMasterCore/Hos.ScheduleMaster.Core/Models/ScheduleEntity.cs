@@ -20,14 +20,14 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 任务id
         /// </summary>
         [Key]
-        [Column("id")]
+        [Column("id", TypeName = "varchar(36)")]
         public Guid Id { get; set; }
 
         /// <summary>
         /// 任务名称
         /// </summary>
         [Required, MaxLength(100)]
-        [Column("title")]
+        [Column("title", TypeName = "varchar(100)")]
         public string Title { get; set; }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 任务描述
         /// </summary>
         [MaxLength(500)]
-        [Column("remark")]
+        [Column("remark", TypeName = "varchar(500)")]
         public string Remark { get; set; }
 
         /// <summary>
@@ -55,27 +55,27 @@ namespace Hos.ScheduleMaster.Core.Models
         /// cron表达式
         /// </summary>
         [MaxLength(50)]
-        [Column("cronexpression")]
+        [Column("cronexpression", TypeName = "varchar(50)")]
         public string CronExpression { get; set; }
 
         /// <summary>
         /// 任务所在程序集
         /// </summary>
         [MaxLength(200)]
-        [Column("assemblyname")]
+        [Column("assemblyname", TypeName = "varchar(200)")]
         public string AssemblyName { get; set; }
 
         /// <summary>
         /// 任务的类型
         /// </summary>
         [MaxLength(200)]
-        [Column("classname")]
+        [Column("classname", TypeName = "varchar(200)")]
         public string ClassName { get; set; }
 
         /// <summary>
         /// 自定义参数（json格式）
         /// </summary>
-        [Column("customparamsjson")]
+        [Column("customparamsjson", TypeName = "varchar(max)")]
         public string CustomParamsJson { get; set; }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 创建人账号
         /// </summary>
-        [Column("createusername")]
+        [Column("createusername", TypeName = "varchar(50)")]
         [MaxLength(50)]
         public string CreateUserName { get; set; }
 

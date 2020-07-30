@@ -15,23 +15,23 @@ namespace Hos.ScheduleMaster.Core.Models
         public int Id { get; set; }
 
         [Required, MaxLength(50)]
-        [Column("username")]
+        [Column("username", TypeName = "varchar(50)")]
         public string UserName { get; set; }
 
         [Required, MaxLength(50)]
-        [Column("password")]
+        [Column("password", TypeName = "varchar(50)")]
         public string Password { get; set; }
 
         [Required, MaxLength(50)]
-        [Column("realname")]
+        [Column("realname", TypeName = "varchar(50)")]
         public string RealName { get; set; }
 
         [MaxLength(15)]
-        [Column("phone")]
+        [Column("phone", TypeName = "varchar(15)")]
         public string Phone { get; set; }
 
         [MaxLength(500), EmailAddress(ErrorMessage = "邮箱格式错误")]
-        [Column("email")]
+        [Column("email", TypeName = "varchar(500)")]
         public string Email { get; set; }
 
         [Required]

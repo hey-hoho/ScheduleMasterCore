@@ -11,16 +11,16 @@ namespace Hos.ScheduleMaster.Core.Models
     public class ScheduleTraceEntity : IEntity
     {
         [Key]
-        [Column("traceid")]
+        [Column("traceid", TypeName = "varchar(36)")]
         public Guid TraceId { get; set; }
 
-        [Column("scheduleid")]
+        [Column("scheduleid", TypeName = "varchar(36)")]
         public Guid ScheduleId { get; set; }
 
         /// <summary>
         /// 所在节点
         /// </summary>
-        [Column("node")]
+        [Column("node", TypeName = "varchar(100)")]
         [MaxLength(100)]
         public string Node { get; set; }
 
