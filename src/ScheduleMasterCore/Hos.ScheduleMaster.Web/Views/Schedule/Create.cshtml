@@ -591,8 +591,8 @@
                 }
                 data.CustomParamsJson = JSON.stringify(getTemplateData("params-list"));
                 data.Keepers = [];
-                var keppers = $("#form5").getFormData().Keepers;
-                if (keppers) data.Keepers = keppers.split(',');
+                var keepers = $("#form5").getFormData().Keepers;
+                if (keepers) data.Keepers = keepers;
                 data.Nexts = $('#nexts-list').nestable('serialize').map(obj => { return obj.id; });
                 hos.ui.util.postJson("@(Model==null?"/Schedule/Create":"/Schedule/Edit")", data);
             });

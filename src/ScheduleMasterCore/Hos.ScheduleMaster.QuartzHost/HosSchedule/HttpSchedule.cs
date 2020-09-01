@@ -43,9 +43,9 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
         private readonly TimeSpan _timeout = TimeSpan.FromSeconds(10);
 
-        private readonly Dictionary<string, object> _headers;
+        private const string HEADER_TIMEOUT = "sm-timeout";
 
-        //private readonly HttpClient httpClient;
+        private readonly Dictionary<string, object> _headers;
 
 
         public HttpTask(ScheduleHttpOptionEntity httpOption)
@@ -54,23 +54,26 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
             {
                 _option = httpOption;
 
-                //httpClient = new HttpClient();
-
                 _headers = HosScheduleFactory.ConvertParamsJson(httpOption.Headers);
 
-                int config = ConfigurationCache.GetField<int>("Http_RequestTimeout");
-                if (config > 0)
+                if (_headers.ContainsKey(HEADER_TIMEOUT) && int.TryParse(_headers[HEADER_TIMEOUT].ToString(), out int result) && result > 0)
                 {
-                    _timeout = TimeSpan.FromSeconds(config);
+                    _timeout = TimeSpan.FromSeconds(result);
                 }
-
-
+                else
+                {
+                    int config = ConfigurationCache.GetField<int>("Http_RequestTimeout");
+                    if (config > 0)
+                    {
+                        _timeout = TimeSpan.FromSeconds(config);
+                    }
+                }
 
                 string requestBody = string.Empty;
                 string url = httpOption.RequestUrl;
                 if (httpOption.ContentType == "application/json")
                 {
-                    requestBody = httpOption.Body.Replace("\r\n", "");
+                    requestBody = httpOption.Body?.Replace("\r\n", "");
                 }
                 else if (httpOption.ContentType == "application/x-www-form-urlencoded")
                 {
@@ -111,7 +114,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosSchedule
 
                 var httpRequest = new HttpRequestMessage
                 {
-                    Content = new StringContent(_option.Body, System.Text.Encoding.UTF8, _option.ContentType),
+                    Content = new StringContent(_option.Body ?? string.Empty, System.Text.Encoding.UTF8, _option.ContentType),
                     Method = new HttpMethod(_option.Method),
                     RequestUri = new Uri(_option.RequestUrl)
                 };

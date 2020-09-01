@@ -73,9 +73,13 @@
                 btn.appendTo("#mySmModal-func");
             })
             $("body").append("</div></div></div></div></div>");
-            $('#mySmModal').modal('show').on('hidden.bs.modal', function () {
-                $('#mySmModal').remove();
-            });
+            $('#mySmModal').modal('show')
+                .on('shown.bs.modal', function () {
+                    $('#mySmModal-func button:last').focus();
+                })
+                .on('hidden.bs.modal', function () {
+                    $('#mySmModal').remove();
+                });
         }
     }
 
