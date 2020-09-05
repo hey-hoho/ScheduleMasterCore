@@ -127,6 +127,7 @@ create table servernodes
 	lastupdatetime datetime(6) null,
 	status int not null,
 	priority int not null
+	maxconcurrency int not null
 )
 ;
 

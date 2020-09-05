@@ -72,5 +72,11 @@ namespace Hos.ScheduleMaster.Core.Models
         /// </summary>
         [Column("priority")]
         public int Priority { get; set; }
+
+        /// <summary>
+        /// 当节点类型为worker时，Quartz最大并发执行数量
+        /// </summary>
+        [Column("maxconcurrency")]
+        public int MaxConcurrency { get; set; }
     }
 }

@@ -32,8 +32,8 @@ namespace Hos.ScheduleMaster.Core
         /// <param name="configuration"></param>
         public static void SetNode(IConfiguration configuration)
         {
-            NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>(); ;
-            //var ev = Environment.GetEnvironmentVariables();
+            NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>(); 
+
             string identity = AppCommandResolver.GetCommandLineArgsValue("identity");
             if (!string.IsNullOrEmpty(identity))
             {
@@ -59,6 +59,11 @@ namespace Hos.ScheduleMaster.Core
             {
                 NodeSetting.Priority = Convert.ToInt32(priority);
             }
+            string maxConcurrency = AppCommandResolver.GetCommandLineArgsValue("maxc");
+            if (!string.IsNullOrEmpty(maxConcurrency))
+            {
+                NodeSetting.MaxConcurrency = Convert.ToInt32(maxConcurrency);
+            }
             NodeSetting.MachineName = Environment.MachineName;
         }
 
@@ -77,6 +82,7 @@ namespace Hos.ScheduleMaster.Core
             NodeSetting.Port = Convert.ToInt32(model.Host.Split(':')[1]);
             NodeSetting.Priority = model.Priority;
             NodeSetting.MachineName = model.MachineName;
+            NodeSetting.MaxConcurrency = model.MaxConcurrency;
         }
 
         public static void Reload()
@@ -204,5 +210,7 @@ namespace Hos.ScheduleMaster.Core
         public int Port { get; set; }
 
         public int Priority { get; set; }
+
+        public int MaxConcurrency { get; set; }
     }
 }

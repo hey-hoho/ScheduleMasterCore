@@ -48,11 +48,12 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                 {
                     NameValueCollection properties = new NameValueCollection();
                     properties["quartz.scheduler.instanceName"] = "Hos.ScheduleMaster";
-                    //3.0版本已经不支持SimpleThreadPool了，直接使用CLR的线程池。
-                    //详情见https://www.quartz-scheduler.net/documentation/quartz-3.x/migration-guide.html
-                    //properties["quartz.threadPool.type"] = "Quartz.Simpl.SimpleThreadPool, Quartz";
-                    //properties["quartz.threadPool.threadCount"] = "50";
-                    //properties["quartz.threadPool.threadPriority"] = "Normal";
+                    int maxConcurrency = ConfigurationCache.NodeSetting.MaxConcurrency;
+                    if (maxConcurrency > 0)
+                    {
+                        properties["quartz.threadPool.maxConcurrency"] = maxConcurrency.ToString();
+                    }
+
                     ISchedulerFactory factory = new StdSchedulerFactory(properties);
                     _scheduler = await factory.GetScheduler();
                 }
@@ -99,6 +100,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
                     node.AccessProtocol = setting.Protocol;
                     node.Host = $"{setting.IP}:{setting.Port}";
                     node.Priority = setting.Priority;
+                    node.MaxConcurrency = setting.MaxConcurrency;
                     node.Status = 2;
                     node.AccessSecret = secret;
                     if (isCreate) db.ServerNodes.Add(node);

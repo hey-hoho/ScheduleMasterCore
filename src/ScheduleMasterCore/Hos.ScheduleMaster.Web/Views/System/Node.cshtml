@@ -32,7 +32,14 @@
             url: '/System/QueryNodePager',
             columns: [
                 { field: 'NodeName', title: '节点名称', align: 'center', width: '10' },
-                { field: 'NodeType', title: '节点类型', align: 'center', width: '8' },
+                {
+                    field: 'NodeType', title: '节点类型', align: 'center', width: '8', formatter: function (value, row, index) {
+                        if (value == "master") {
+                            return '<span class="badge badge-primary">' + value+'</span >';
+                        }
+                        return value;
+                    }
+                },
                 { field: 'MachineName', title: '主机名', align: 'center', width: '8' },
                 { field: 'AccessProtocol', title: '访问协议', align: 'center', width: '8' },
                 { field: 'Host', title: '主机地址', width: '15' },
@@ -47,7 +54,8 @@
                         return dict[value];
                     }
                 },
-                { field: 'Priority', title: '权重', align: 'center', width: '8' },
+                { field: 'Priority', title: '权重', align: 'center', width: '5' },
+                { field: 'MaxConcurrency', title: '任务并发量', align: 'center', width: '10' },
                 {
                     title: '操作', field: 'id', align: 'center', formatter: function (value, row, index) {
                         var s = '<a href="/System/NodeEdit?name=' + row.NodeName + '" class="btn btn-xs">编辑</a>  ';

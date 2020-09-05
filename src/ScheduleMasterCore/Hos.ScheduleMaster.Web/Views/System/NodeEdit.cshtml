@@ -32,27 +32,6 @@
                     </div>
                     @Html.HiddenFor(x => x.NodeType)
                 }
-                @*<div class="form-group">
-            <label for="" class="col-sm-2 control-label no-padding-right">节点类型</label>
-            <div class="col-sm-6">
-                <div class="col-lg-4 col-sm-4 col-xs-4 no-padding-left">
-                    <div class="radio">
-                        <label class="no-padding-left">
-                            <input name="NodeType" type="radio" value="master" class="colored-blue" @((Model == null || Model.NodeType == "master") ? "checked=''" : "")>
-                            <span class="text"> master</span>
-                        </label>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-4 col-xs-4">
-                    <div class="radio">
-                        <label class="no-padding-left">
-                            <input name="NodeType" type="radio" value="worker" class="colored-blue" @((Model != null && Model.NodeType == "worker") ? "checked=''" : "")>
-                            <span class="text"> worker</span>
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>*@
                 <div class="form-group">
                     <label for="" class="col-sm-2 control-label no-padding-right">主机名</label>
                     <div class="col-sm-6">
@@ -76,6 +55,13 @@
                     <label for="" class="col-sm-2 control-label no-padding-right">权重</label>
                     <div class="col-sm-6">
                         @Html.TextBoxFor(x => x.Priority, new { @class = "form-control", type = "number", max = "1000", min = "0" })
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="" class="col-sm-2 control-label no-padding-right">任务并发量</label>
+                    <div class="col-sm-6">
+                        @Html.TextBoxFor(x => x.Priority, new { @class = "form-control", type = "number", max = "200", min = "0", value = "20" })
+                        <p class="help-block">当节点类型是worker时，能同时执行任务的最大数量</p>
                     </div>
                 </div>
                 <div class="form-group">
