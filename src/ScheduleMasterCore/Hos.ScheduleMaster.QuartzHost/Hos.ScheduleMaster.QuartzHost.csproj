@@ -11,8 +11,7 @@
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.0.0" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
-    <PackageReference Include="Quartz" Version="3.0.7" />
-    <PackageReference Include="RestSharp" Version="106.10.0" />
+    <PackageReference Include="Quartz" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>

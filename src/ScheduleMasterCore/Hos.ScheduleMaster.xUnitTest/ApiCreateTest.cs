@@ -48,20 +48,21 @@ namespace Hos.ScheduleMaster.xUnitTest
             HttpClient client = new HttpClient();
             client.DefaultRequestHeaders.Add("ms_auth_user", "admin");
             client.DefaultRequestHeaders.Add("ms_auth_secret", SecurityHelper.MD5($"admin96e79218965eb72c92a549dd5a330112admin"));
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 100; i++)
             {
                 List<KeyValuePair<string, string>> args = new List<KeyValuePair<string, string>>();
                 args.Add(new KeyValuePair<string, string>("MetaType", "2"));
                 args.Add(new KeyValuePair<string, string>("RunLoop", "true"));
-                args.Add(new KeyValuePair<string, string>("CronExpression", "22 0/8 * * * ?"));
+                args.Add(new KeyValuePair<string, string>("CronExpression", "0/5 * * * * ?"));
                 args.Add(new KeyValuePair<string, string>("Remark", "By Xunit Tester Created"));
                 args.Add(new KeyValuePair<string, string>("StartDate", DateTime.Today.ToString("yyyy-MM-dd HH:mm:ss")));
                 args.Add(new KeyValuePair<string, string>("Title", $"Http接口测试任务-{i}"));
-                args.Add(new KeyValuePair<string, string>("HttpRequestUrl", "http://localhost:56655/api/1.0/value/jsonpost"));
-                args.Add(new KeyValuePair<string, string>("HttpMethod", "POST"));
+                args.Add(new KeyValuePair<string, string>("HttpRequestUrl", "https://www.baidu.com"));
+                args.Add(new KeyValuePair<string, string>("HttpMethod", "GET"));
                 args.Add(new KeyValuePair<string, string>("HttpContentType", "application/json"));
                 args.Add(new KeyValuePair<string, string>("HttpHeaders", "[]"));
-                args.Add(new KeyValuePair<string, string>("HttpBody", "{ \"Posts\": [{ \"PostId\": 666, \"Title\": \"tester\", \"Content\":\"testtesttest\" }], \"BlogId\": 111, \"Url\":\"qweqrrttryrtyrtrtrt\" }"));
+                args.Add(new KeyValuePair<string, string>("HttpBody", ""));
+                args.Add(new KeyValuePair<string, string>("RunNow", "true"));
                 HttpContent reqContent = new FormUrlEncodedContent(args);
                 var response = await client.PostAsync("http://localhost:30000/api/Task/Create", reqContent);
                 var content = await response.Content.ReadAsStringAsync();
