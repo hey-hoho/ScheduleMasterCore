@@ -10,6 +10,8 @@ namespace Hos.ScheduleMaster.Core
     {
         public const string PluginPathPrefix = "\\wwwroot\\plugins";
 
+        public static DbConnector DbConnector { get; set; }
+
         public static NodeSetting NodeSetting { get; private set; }
 
         public static IServiceProvider RootServiceProvider { get; set; }
@@ -212,5 +214,19 @@ namespace Hos.ScheduleMaster.Core
         public int Priority { get; set; }
 
         public int MaxConcurrency { get; set; }
+    }
+
+    public class DbConnector
+    {
+        public DbProvider Provider { get; set; }
+
+        public string ConnectionString { get; set; }
+    }
+
+    public enum DbProvider
+    {
+        MySQL,
+        SQLServer,
+        PostgreSQL
     }
 }

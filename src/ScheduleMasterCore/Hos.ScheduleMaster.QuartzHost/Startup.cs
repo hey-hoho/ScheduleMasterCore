@@ -39,9 +39,7 @@ namespace Hos.ScheduleMaster.QuartzHost
             services.AddHealthChecks();
             services.AddHttpClient();
 
-            services.AddDbContextPool<SmDbContext>(option =>
-            option.UseMySql(Configuration.GetConnectionString("MysqlConnection"))
-            );
+            services.AddScheduleMasterDb(Configuration);
             services.AddTransient<HosLock.IHosLock, HosLock.DatabaseLock>();
             services.AddTransient<Core.Interface.IScheduleService, Core.Services.ScheduleService>();
             services.AddScoped<Common.RunTracer>();

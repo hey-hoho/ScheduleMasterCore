@@ -55,13 +55,13 @@ namespace Hos.ScheduleMaster.Web
             }).AddCookie(b =>
             {
                 b.LoginPath = "/login";
-                b.Cookie.Name = "msc_auth_name";
+                b.Cookie.Name = "smc_auth_name";
                 b.Cookie.Path = "/";
                 b.Cookie.HttpOnly = true;
                 b.ExpireTimeSpan = TimeSpan.FromHours(5);
             });
-            //EF数据库上下文
-            services.AddDbContext<SmDbContext>(option => option.UseMySql(Configuration.GetConnectionString("MysqlConnection")));
+
+            services.AddScheduleMasterDb(Configuration);
 
             //注入Uow依赖
             services.AddScoped<IUnitOfWork, UnitOfWork<SmDbContext>>();

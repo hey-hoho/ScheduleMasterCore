@@ -33,7 +33,7 @@ namespace Hos.ScheduleMaster.QuartzHost.HosLock
         public bool TryGetLock(string key)
         {
             _key = key;
-            _isLocked = _dbContext.Database.ExecuteSqlRaw($"update schedulelocks set status=1,lockedtime=now(),lockednode='{ConfigurationCache.NodeSetting.IdentityName}' where scheduleid='{key}' and status=0") > 0;
+            _isLocked = _dbContext.Database.ExecuteSqlRaw($"update schedulelocks set status=1,lockedtime={_dbContext.GetDbNowDateTime},lockednode='{ConfigurationCache.NodeSetting.IdentityName}' where scheduleid='{key}' and status=0") > 0;
             return _isLocked;
         }
     }

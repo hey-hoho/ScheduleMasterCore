@@ -44,8 +44,8 @@ namespace Hos.ScheduleMaster.Core
 
         public override void Dispose()
         {
-            dbContext.Dispose();
             base.Dispose();
+            dbContext.Dispose();
         }
     }
 }

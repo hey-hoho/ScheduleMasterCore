@@ -21,7 +21,6 @@ namespace Hos.ScheduleMaster.QuartzHost
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
-                    //webBuilder.UseUrls("http://*:30001");//改成使用命令启动时指定url
                 });
     }
 }
