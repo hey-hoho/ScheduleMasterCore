@@ -10,19 +10,19 @@ namespace Hos.ScheduleMaster.Core.Models
     public class SystemConfigEntity : IEntity
     {
         [Key, MaxLength(50)]
-        [Column("key", TypeName = "nvarchar(50)")]
+        [Column("key")]
         public string Key { get; set; }
 
         [Required, MaxLength(50)]
-        [Column("group", TypeName = "nvarchar(50)")]
+        [Column("group")]
         public string Group { get; set; }
 
         [Required, MaxLength(100)]
-        [Column("name", TypeName = "nvarchar(100)")]
+        [Column("name")]
         public string Name { get; set; }
 
         [MaxLength(1000)]
-        [Column("value", TypeName = "nvarchar(1000)")]
+        [Column("value")]
         public string Value { get; set; }
 
         [Column("sort")]
@@ -32,7 +32,7 @@ namespace Hos.ScheduleMaster.Core.Models
         public bool IsReuired { get; set; }
 
         [MaxLength(500)]
-        [Column("remark", TypeName = "nvarchar(500)")]
+        [Column("remark")]
         public string Remark { get; set; }
 
         [Column("createtime")]
@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Core.Models
         [Column("updatetime")]
         public DateTime? UpdateTime { get; set; }
 
-        [Column("updateusername", TypeName = "nvarchar(50)")]
+        [Column("updateusername")]
         [MaxLength(50)]
         public string UpdateUserName { get; set; }
     }

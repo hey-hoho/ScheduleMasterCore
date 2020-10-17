@@ -30,32 +30,32 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 日志内容
         /// </summary>
         [Required]
-        [Column("message", TypeName = "varchar(max)")]
+        [Column("message")]
         public string Message { get; set; }
 
         /// <summary>
         /// 堆栈信息
         /// </summary>
-        [Column("stacktrace", TypeName = "varchar(max)")]
+        [Column("stacktrace")]
         public string StackTrace { get; set; }
 
         /// <summary>
         /// 任务id
         /// </summary>
-        [Column("scheduleid", TypeName = "varchar(36)")]
+        [Column("scheduleid")]
         public Guid? ScheduleId { get; set; }
 
         /// <summary>
         /// 产生节点
         /// </summary>
-        [Column("node", TypeName = "nvarchar(100)")]
+        [Column("node")]
         [MaxLength(100)]
         public string Node { get; set; }
 
         /// <summary>
         /// 任务运行轨迹
         /// </summary>
-        [Column("traceid", TypeName = "varchar(36)")]
+        [Column("traceid")]
         public Guid? TraceId { get; set; }
 
         /// <summary>

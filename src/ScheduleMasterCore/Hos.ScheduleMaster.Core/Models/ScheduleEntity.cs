@@ -20,14 +20,14 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 任务id
         /// </summary>
         [Key]
-        [Column("id", TypeName = "varchar(36)")]
+        [Column("id")]
         public Guid Id { get; set; }
 
         /// <summary>
         /// 任务名称
         /// </summary>
         [Required, MaxLength(100)]
-        [Column("title", TypeName = "nvarchar(100)")]
+        [Column("title")]
         public string Title { get; set; }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 任务描述
         /// </summary>
         [MaxLength(500)]
-        [Column("remark", TypeName = "nvarchar(500)")]
+        [Column("remark")]
         public string Remark { get; set; }
 
         /// <summary>
@@ -55,27 +55,27 @@ namespace Hos.ScheduleMaster.Core.Models
         /// cron表达式
         /// </summary>
         [MaxLength(50)]
-        [Column("cronexpression", TypeName = "nvarchar(50)")]
+        [Column("cronexpression")]
         public string CronExpression { get; set; }
 
         /// <summary>
         /// 任务所在程序集
         /// </summary>
         [MaxLength(200)]
-        [Column("assemblyname", TypeName = "nvarchar(200)")]
+        [Column("assemblyname")]
         public string AssemblyName { get; set; }
 
         /// <summary>
         /// 任务的类型
         /// </summary>
         [MaxLength(200)]
-        [Column("classname", TypeName = "nvarchar(200)")]
+        [Column("classname")]
         public string ClassName { get; set; }
 
         /// <summary>
         /// 自定义参数（json格式）
         /// </summary>
-        [Column("customparamsjson", TypeName = "varchar(max)")]
+        [Column("customparamsjson")]
         public string CustomParamsJson { get; set; }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 创建人账号
         /// </summary>
-        [Column("createusername", TypeName = "nvarchar(50)")]
+        [Column("createusername")]
         [MaxLength(50)]
         public string CreateUserName { get; set; }
 

@@ -19,28 +19,28 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 任务id
         /// </summary>
         [Key]
-        [Column("id",TypeName = "varchar(36)")]
+        [Column("id")]
         public Guid Id { get; set; }
 
         /// <summary>
         /// 应用来源
         /// </summary>
         [Required, MaxLength(50)]
-        [Column("sourceapp", TypeName = "nvarchar(50)")]
+        [Column("sourceapp")]
         public string SourceApp { get; set; }
 
         /// <summary>
         /// 主题，用来标记分组
         /// </summary>
         [Required, MaxLength(100)]
-        [Column("topic", TypeName = "nvarchar(100)")]
+        [Column("topic")]
         public string Topic { get; set; }
 
         /// <summary>
         /// 关键字，方便任务跟踪
         /// </summary>
         [Required, MaxLength(100)]
-        [Column("contentkey", TypeName = "nvarchar(100)")]
+        [Column("contentkey")]
         public string ContentKey { get; set; }
 
         /// <summary>
@@ -67,7 +67,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 创建人用户名
         /// </summary>
         [MaxLength(50)]
-        [Column("createusername", TypeName = "nvarchar(50)")]
+        [Column("createusername")]
         public string CreateUserName { get; set; }
 
         /// <summary>
@@ -98,28 +98,28 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 备注
         /// </summary>
         [MaxLength(255)]
-        [Column("remark", TypeName = "nvarchar(255)")]
+        [Column("remark")]
         public string Remark { get; set; }
 
         /// <summary>
         /// 回调URL
         /// </summary>
         [Required, MaxLength(255)]
-        [Column("notifyurl", TypeName = "nvarchar(255)")]
+        [Column("notifyurl")]
         public string NotifyUrl { get; set; }
 
         /// <summary>
         /// 回调的数据格式
         /// </summary>
         [Required, MaxLength(50)]
-        [Column("notifydatatype", TypeName = "nvarchar(255)")]
+        [Column("notifydatatype")]
         public string NotifyDataType { get; set; }
 
         /// <summary>
         /// 回调参数
         /// </summary>
         [Required, MaxLength(1000)]
-        [Column("notifybody", TypeName = "nvarchar(1000)")]
+        [Column("notifybody")]
         public string NotifyBody { get; set; }
 
     }

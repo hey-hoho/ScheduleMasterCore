@@ -13,7 +13,7 @@ namespace Hos.ScheduleMaster.Core.Models
         [Column("id")]
         public int Id { get; set; }
 
-        [Column("scheduleid", TypeName = "varchar(36)")]
+        [Column("scheduleid")]
         public Guid ScheduleId { get; set; }
 
         [Column("userid")]

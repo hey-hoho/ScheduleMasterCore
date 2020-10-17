@@ -10,7 +10,7 @@ namespace Hos.ScheduleMaster.Core.Models
     public class ScheduleLockEntity : IEntity
     {
         [Key]
-        [Column("scheduleid", TypeName = "varchar(36)")]
+        [Column("scheduleid")]
         public Guid ScheduleId { get; set; }
 
         [Required]
@@ -20,7 +20,7 @@ namespace Hos.ScheduleMaster.Core.Models
         [Column("lockedtime")]
         public  DateTime? LockedTime { get; set; }
 
-        [Column("lockednode", TypeName = "nvarchar(100)")]
+        [Column("lockednode")]
         [MaxLength(100)]
         public string LockedNode { get; set; }
     }

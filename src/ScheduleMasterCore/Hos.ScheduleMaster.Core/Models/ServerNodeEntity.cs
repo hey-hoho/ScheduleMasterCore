@@ -14,21 +14,21 @@ namespace Hos.ScheduleMaster.Core.Models
         /// </summary>
         [Key]
         [MaxLength(100)]
-        [Column("nodename", TypeName = "nvarchar(100)")]
+        [Column("nodename")]
         public string NodeName { get; set; }
 
         /// <summary>
         /// 节点类型 master/worker
         /// </summary>
         [Required]
-        [Column("nodetype", TypeName = "nvarchar(20)")]
+        [Column("nodetype")]
         [MaxLength(20)]
         public string NodeType { get; set; }
 
         /// <summary>
         /// 所在机器
         /// </summary>
-        [Column("machinename", TypeName = "nvarchar(100)")]
+        [Column("machinename")]
         [MaxLength(100)]
         public string MachineName { get; set; }
 
@@ -36,7 +36,7 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 访问协议，http/https
         /// </summary>
         [Required]
-        [Column("accessprotocol", TypeName = "nvarchar(200)")]
+        [Column("accessprotocol")]
         [MaxLength(20)]
         public string AccessProtocol { get; set; }
 
@@ -44,14 +44,14 @@ namespace Hos.ScheduleMaster.Core.Models
         /// 节点主机(IP+端口)
         /// </summary>
         [Required]
-        [Column("host", TypeName = "nvarchar(100)")]
+        [Column("host")]
         [MaxLength(100)]
         public string Host { get; set; }
 
         /// <summary>
         /// 访问秘钥，每次节点激活时会更新，用来验证访问权限
         /// </summary>
-        [Column("accesssecret", TypeName = "nvarchar(50)")]
+        [Column("accesssecret")]
         [MaxLength(50)]
         public string AccessSecret { get; set; }
 

@@ -16,13 +16,13 @@ namespace Hos.ScheduleMaster.Core.Models
         /// <summary>
         /// 任务id
         /// </summary>
-        [Column("scheduleid", TypeName = "varchar(36)")]
+        [Column("scheduleid")]
         public Guid ScheduleId { get; set; }
 
         /// <summary>
         /// worker名称
         /// </summary>
-        [Column("workername", TypeName = "nvarchar(100)")]
+        [Column("workername")]
         [MaxLength(100)]
         public string WorkerName { get; set; }
     }

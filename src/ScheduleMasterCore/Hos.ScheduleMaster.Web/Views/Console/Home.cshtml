@@ -224,7 +224,7 @@
             hos.ui.util.getJson("@Url.Action("GetHomeSummary","Console")", null, function (result) {
                 $("#total_num").text(result.Data.task_total);
                 $("#running_num").text(result.Data.task_running);
-                var running_p = Math.round(result.Data.task_running * 100 / result.Data.task_total).toFixed(0);
+                var running_p = result.Data.task_total == 0 ? 0 : Math.round(result.Data.task_running * 100 / result.Data.task_total).toFixed(0);
                 $("#running_num_pie").attr("data-percent", running_p).find("span").text(running_p + "%");
                 $("#user_num").text(result.Data.user_total);
 
