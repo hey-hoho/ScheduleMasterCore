@@ -17,6 +17,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core
 - [x] 高可用支持，跨平台多节点部署。
 - [x] 数据安全性，不会出现多实例并发调度。
 - [x] 支持自定义参数设置；
+- [x] 支持.NET Core和.NET Framework（4.6.1+）；
 - [x] 支持自定义配置文件和热更新；
 - [x] 支持设置监护人，运行异常时邮件告警；
 - [x] 支持设置任务依赖，自动触发，共享任务结果；
@@ -34,7 +35,7 @@ ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core
 - [ ] 资源监控；
 - [x] 支持异常策略配置（失败重试、超时控制等）；
 - [ ] 接入redis缓存；
-- [ ] 多数据库类型支持；
+- [x] 多数据库类型支持；
 - [ ] 用户权限更加精细化；
 - [ ] 报表统计完善；
 
@@ -51,9 +52,9 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 
 ## 如何使用
 
-> 使用前请准备好所需环境：`Visual Studio 2019`、`.NET Core3.1 SDK`、`Mysql 5.7`、`Centos(可选)`、`Docker(可选)`。
+> 使用前请准备好所需环境：`Visual Studio 2019`、`.NET Core3.1 SDK`、`Mysql 5.7(可选)`、`SQLServer(可选)`、`PostgreSQL(可选)`、`Centos(可选)`、`Docker(可选)`。
 
-下面以用**配置文件方式**启动为例做介绍，其他方式参考详细文档。
+下面以Mysql作为数据库，用**配置文件方式**启动为例做介绍，其他方式参考详细文档。
 
 下载源码到本地，然后用VS2019打开解决方案并编译通过。
 
