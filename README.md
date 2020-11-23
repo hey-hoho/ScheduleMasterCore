@@ -1,5 +1,5 @@
 
-![schedulemaster ](https://imgkr.cn-bj.ufileos.com/3e2e493c-8813-4f4a-8b42-0a4882929ccd.png)
+![schedulemaster](https://i.loli.net/2020/11/23/o34pijrvENnexkl.png)
 
 ScheduleMaster是一个开源的分布式任务调度系统，它基于.NET Core 3.1平台构建，支持跨平台多节点部署运行。
 
@@ -47,7 +47,7 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 <br />
 
 ## 系统架构图
-![Architecture ](https://imgkr.cn-bj.ufileos.com/9b61a8f3-fabf-4a87-ad60-1d25bf92fc12.png)
+![architecture.png](https://i.loli.net/2020/11/23/z2Tglw4EBxNhp3I.png)
 
 
 ## 如何使用
@@ -86,15 +86,17 @@ ASP.NET Core3.1、EntityFramework Core3.0、Mysql5.7、Quartz.Net、BeyondAdmin�
 <br />
 
 ## 效果图
-![ ](https://imgkr.cn-bj.ufileos.com/11abe3ce-5ffa-4275-9b34-582a0f202934.png)
+![image.png](https://i.loli.net/2020/11/23/GHgZONf3MADIX1x.png)
 
-![ ](https://imgkr.cn-bj.ufileos.com/c5331959-ca55-4377-9c27-9b3639a3d223.png)
+![image.png](https://i.loli.net/2020/11/23/rx9ncZX6Bhv75tH.png)
 
-![ ](https://imgkr.cn-bj.ufileos.com/b81930d6-e067-4086-ad1d-df69d9ff1623.png)
+![image.png](https://i.loli.net/2020/11/23/sFOyZQX8C31Pu7V.png)
 
-![ ](https://imgkr.cn-bj.ufileos.com/7acd35ed-b634-4ab8-a919-3a43a0f43f87.png)
+![image.png](https://i.loli.net/2020/11/23/A3HZ7kTQymL6tud.png)
 
-![ ](https://imgkr.cn-bj.ufileos.com/d0f48272-ab36-45d9-a093-f14a5bd2d7d1.png)
+![image.png](https://i.loli.net/2020/11/23/vjYHG3KLtFiWEmO.png)
+
+![image.png](https://i.loli.net/2020/11/23/MAEt1Hdeyz3NOXl.png)
 
 <br />
 
@@ -120,5 +122,5 @@ QQ群：824535095
 
 金额请随意，赞赏请备注~
 
-![ ](https://imgkr.cn-bj.ufileos.com/a755bba0-0601-4a2b-9078-2466016faaa3.png)
-![ ](https://imgkr.cn-bj.ufileos.com/cdb08098-5fd5-4518-aacb-bf5c310a07cc.png)
+![wechat.png](https://i.loli.net/2020/11/23/WparTedYnwqMsDL.png)
+![alipay.png](https://i.loli.net/2020/11/23/xCQFJsGRY4dWina.png)
