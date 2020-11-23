@@ -122,5 +122,5 @@ QQ群：824535095
 
 金额请随意，赞赏请备注~
 
-![wechat.png](https://i.loli.net/2020/11/23/WparTedYnwqMsDL.png)
-![alipay.png](https://i.loli.net/2020/11/23/xCQFJsGRY4dWina.png)
+![wechat.png](https://i.loli.net/2020/11/23/sfiVUxcbzX3CvO1.png)
+![alipay.png](https://i.loli.net/2020/11/23/3Lzrm6QURgnJVsA.png)
