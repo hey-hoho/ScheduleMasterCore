@@ -1,25 +1,15 @@
 ﻿
+using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Log;
+using Hos.ScheduleMaster.Core.Models;
+using Hos.ScheduleMaster.QuartzHost.HosSchedule;
+using Microsoft.EntityFrameworkCore;
 using Quartz;
 using Quartz.Impl;
 using Quartz.Impl.Matchers;
 using Quartz.Impl.Triggers;
-using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Linq;
-using Hos.ScheduleMaster.Core.Models;
-using System.Threading.Tasks;
-using System.Threading;
-using Hos.ScheduleMaster.Core.Common;
-using Hos.ScheduleMaster.Core;
-using Hos.ScheduleMaster.Core.Dto;
-using System.IO.Compression;
-using System.Net;
-using System.IO;
-using Microsoft.Extensions.DependencyInjection;
-using Hos.ScheduleMaster.QuartzHost.HosSchedule;
-using Microsoft.EntityFrameworkCore;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {

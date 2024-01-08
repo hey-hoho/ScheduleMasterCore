@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Hos.ScheduleMaster.QuartzHost.Common;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
+﻿using Hos.ScheduleMaster.Core.Log;
 using Hos.ScheduleMaster.Core.Models;
-using Hos.ScheduleMaster.Core.Log;
-using Microsoft.AspNetCore.Authorization;
-using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.QuartzHost.DelayedTask;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Net.Http;
 
 namespace Hos.ScheduleMaster.QuartzHost.Controllers
 {

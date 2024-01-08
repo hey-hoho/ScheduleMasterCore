@@ -2,11 +2,7 @@
 using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {

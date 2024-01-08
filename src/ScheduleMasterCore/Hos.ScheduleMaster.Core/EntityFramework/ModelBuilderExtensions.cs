@@ -1,12 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Models;
-using Hos.ScheduleMaster.Core.Common;
-using System.Reflection;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
+using System.Reflection;
 
 namespace Hos.ScheduleMaster.Core.EntityFramework
 {
@@ -149,7 +145,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                 );
             return builder;
         }
-        
+
         /// <summary>
         /// 应用数据库
         /// </summary>
@@ -158,19 +154,21 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
         public static DbContextOptionsBuilder UseDatabase(this DbContextOptionsBuilder builder)
         {
             var conn = ConfigurationCache.DbConnector.ConnectionString;
+            var ver = ConfigurationCache.DbConnector.Version;
             switch (ConfigurationCache.DbConnector.Provider)
             {
                 case DbProvider.SQLServer:
                     builder.UseSqlServer(conn);
                     break;
-                case DbProvider.MySQL:
-                    builder.UseMySql(conn);
-                    break;
                 case DbProvider.PostgreSQL:
                     builder.UseNpgsql(conn);
                     break;
+                case DbProvider.Oracle:
+                    builder.UseOracle(conn, b => b.UseOracleSQLCompatibility(ver)); ;
+                    break;
+                case DbProvider.MySQL:
                 default:
-                    builder.UseMySql(conn);
+                    builder.UseMySql(conn, new MySqlServerVersion(ver));
                     break;
             }
             return builder;
@@ -207,6 +205,10 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                                 {
                                     builer.Property(item.Name).HasColumnType(type.Replace("varchar(max)", "text"));
                                 }
+                                if (dbProvider == DbProvider.Oracle)
+                                {
+                                    builer.Property(item.Name).HasColumnType(type.Replace("varchar(max)", "clob"));
+                                }
                             }
                         }
                     });
@@ -222,15 +224,15 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
         /// <returns></returns>
         public static ModelBuilder CreateIndexes(this ModelBuilder builder)
         {
-            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.ScheduleId).HasName("scheduletraces_scheduleid_index");
-            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.StartTime).HasName("scheduletraces_starttime_index");
-            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.Result).HasName("scheduletraces_result_index");
+            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.ScheduleId).HasDatabaseName("scheduletraces_scheduleid_index");
+            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.StartTime).HasDatabaseName("scheduletraces_starttime_index");
+            builder.Entity<ScheduleTraceEntity>().HasIndex(p => p.Result).HasDatabaseName("scheduletraces_result_index");
 
-            builder.Entity<SystemLogEntity>().HasIndex(p => p.TraceId).HasName("systemlogs_traceid_index");
-            builder.Entity<SystemLogEntity>().HasIndex(p => p.CreateTime).HasName("systemlogs_createtime_index");
+            builder.Entity<SystemLogEntity>().HasIndex(p => p.TraceId).HasDatabaseName("systemlogs_traceid_index");
+            builder.Entity<SystemLogEntity>().HasIndex(p => p.CreateTime).HasDatabaseName("systemlogs_createtime_index");
 
-            builder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.CreateTime).HasName("scheduledelayeds_createtime_index");
-            builder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.ContentKey).HasName("scheduledelayeds_contentkey_index");
+            builder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.CreateTime).HasDatabaseName("scheduledelayeds_createtime_index");
+            builder.Entity<ScheduleDelayedEntity>().HasIndex(p => p.ContentKey).HasDatabaseName("scheduledelayeds_contentkey_index");
 
             return builder;
         }

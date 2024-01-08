@@ -3,12 +3,6 @@ using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Log;
 using Hos.ScheduleMaster.Core.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
 {
@@ -70,7 +64,7 @@ namespace Hos.ScheduleMaster.QuartzHost.DelayedTask
         private static bool InsertByEntity(ScheduleDelayedEntity entity)
         {
             bool success = false;
-            NotifyPlan plan = new NotifyPlan()
+            var plan = new NotifyPlan()
             {
                 Key = entity.Id.ToString(),
                 NotifyUrl = entity.NotifyUrl,

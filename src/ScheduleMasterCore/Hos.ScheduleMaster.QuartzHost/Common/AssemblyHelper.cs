@@ -1,14 +1,7 @@
 ﻿using Hos.ScheduleMaster.Base;
 using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Common;
-using Hos.ScheduleMaster.Core.Log;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.Loader;
-using System.Web;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
