@@ -2,10 +2,6 @@
 using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.QuartzHost.Common;
 using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.AppStart
 {

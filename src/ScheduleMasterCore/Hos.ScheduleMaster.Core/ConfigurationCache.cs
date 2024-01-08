@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Hos.ScheduleMaster.Core
 {
@@ -227,6 +224,7 @@ namespace Hos.ScheduleMaster.Core
     {
         MySQL,
         SQLServer,
-        PostgreSQL
+        PostgreSQL,
+        Oracle
     }
 }

@@ -1,10 +1,5 @@
 ﻿using FluentScheduler;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Hos.ScheduleMaster.Core;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Hos.ScheduleMaster.Web.AppStart
 {
@@ -28,8 +23,8 @@ namespace Hos.ScheduleMaster.Web.AppStart
         {
             using (var scope = ConfigurationCache.RootServiceProvider.CreateScope())
             {
-                Core.Interface.INodeService service = scope.ServiceProvider.GetService<Core.Interface.INodeService>();
-                AutowiredServiceProvider provider = new AutowiredServiceProvider();
+                var service = scope.ServiceProvider.GetService<Core.Interface.INodeService>();
+                var provider = new AutowiredServiceProvider();
                 provider.PropertyActivate(service, scope.ServiceProvider);
                 service.WorkerHealthCheck();
             }

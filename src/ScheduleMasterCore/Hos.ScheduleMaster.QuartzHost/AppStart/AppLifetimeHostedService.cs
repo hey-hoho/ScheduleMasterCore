@@ -1,13 +1,5 @@
 ﻿using Hos.ScheduleMaster.Core;
 using Hos.ScheduleMaster.Core.Common;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Hos.ScheduleMaster.QuartzHost.AppStart
 {

@@ -1,11 +1,6 @@
 ﻿using Hos.ScheduleMaster.Core;
-using Hos.ScheduleMaster.Core.Common;
 using Hos.ScheduleMaster.Core.Models;
 using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

@@ -1,29 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>ScheduleMaster</PackageId>
-    <Authors>HOHO</Authors>
-    <Product>ScheduleMaster</Product>
-    <Description>ScheduleMaster task entry.</Description>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>2.2.0</Version>
-    <RepositoryUrl>https://github.com/hey-hoho/ScheduleMasterCore</RepositoryUrl>
-    <RepositoryType>github</RepositoryType>
-    <PackageIconUrl>https://imgkr.cn-bj.ufileos.com/1dac6c35-4511-46b0-88d1-95e43c7a4b0c.png</PackageIconUrl>
-    <PackageTags>netcore, schedule, quartz, task</PackageTags>
-    <PackageProjectUrl>https://github.com/hey-hoho/ScheduleMasterCore</PackageProjectUrl>
-    <AssemblyVersion>2.2.0.0</AssemblyVersion>
-    <FileVersion>2.2.0.0</FileVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>disable</Nullable>
+		<PackageId>ScheduleMaster</PackageId>
+		<Authors>HOHO</Authors>
+		<Product>ScheduleMaster</Product>
+		<Description>ScheduleMaster task entry.</Description>
+		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Version>2.2.0</Version>
+		<RepositoryUrl>https://github.com/hey-hoho/ScheduleMasterCore</RepositoryUrl>
+		<RepositoryType>github</RepositoryType>
+		<PackageIconUrl>https://imgkr.cn-bj.ufileos.com/1dac6c35-4511-46b0-88d1-95e43c7a4b0c.png</PackageIconUrl>
+		<PackageTags>netcore, schedule, quartz, task</PackageTags>
+		<PackageProjectUrl>https://github.com/hey-hoho/ScheduleMasterCore</PackageProjectUrl>
+		<AssemblyVersion>2.2.0.0</AssemblyVersion>
+		<FileVersion>2.2.0.0</FileVersion>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Folder Include="Utility\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Utility\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.6" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.6" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="8.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
+	</ItemGroup>
 
 </Project>

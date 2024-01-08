@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Hos.ScheduleMaster.Core.Models;
+﻿using Hos.ScheduleMaster.Core.Models;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Hos.ScheduleMaster.Core

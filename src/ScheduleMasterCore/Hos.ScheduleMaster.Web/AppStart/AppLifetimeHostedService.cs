@@ -61,8 +61,8 @@ namespace Hos.ScheduleMaster.Web.AppStart
             //任务恢复
             using (var scope = _serviceProvider.CreateScope())
             {
-                Core.Services.ScheduleService service = new Core.Services.ScheduleService();
-                AutowiredServiceProvider provider = new AutowiredServiceProvider();
+                var service = new Core.Services.ScheduleService();
+                var provider = new AutowiredServiceProvider();
                 provider.PropertyActivate(service, scope.ServiceProvider);
                 service.RunningRecovery();
             }

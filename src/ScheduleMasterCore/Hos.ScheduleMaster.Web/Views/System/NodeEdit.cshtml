@@ -60,7 +60,7 @@
                 <div class="form-group">
                     <label for="" class="col-sm-2 control-label no-padding-right">任务并发量</label>
                     <div class="col-sm-6">
-                        @Html.TextBoxFor(x => x.MaxConcurrency, new { @class = "form-control", type = "number", max = "200", min = "0", value = "20" })
+                        @Html.TextBoxFor(x => x.Priority, new { @class = "form-control", type = "number", max = "200", min = "0", value = "20" })
                         <p class="help-block">当节点类型是worker时，能同时执行任务的最大数量</p>
                     </div>
                 </div>

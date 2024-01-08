@@ -1,17 +1,10 @@
 ﻿
 using Hos.ScheduleMaster.Base;
-using Hos.ScheduleMaster.Core.Log;
-using Quartz;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Hos.ScheduleMaster.Core.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
 using Hos.ScheduleMaster.Core;
+using Hos.ScheduleMaster.Core.Log;
+using Hos.ScheduleMaster.Core.Models;
 using Hos.ScheduleMaster.QuartzHost.HosSchedule;
-using Hos.ScheduleMaster.Core.Common;
+using Quartz;
 
 namespace Hos.ScheduleMaster.QuartzHost.Common
 {
@@ -53,7 +46,7 @@ namespace Hos.ScheduleMaster.QuartzHost.Common
             {
                 Guid traceId = Guid.NewGuid();
 
-                TaskContext tctx = new TaskContext(instance.RunnableInstance);
+                var tctx = new TaskContext(instance.RunnableInstance);
                 tctx.Node = node;
                 tctx.TraceId = traceId;
                 tctx.ParamsDict = instance.CustomParams;
