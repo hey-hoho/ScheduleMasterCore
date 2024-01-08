@@ -31,7 +31,7 @@ namespace Hos.ScheduleMaster.Core
         /// <param name="configuration"></param>
         public static void SetNode(IConfiguration configuration)
         {
-            NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>(); 
+            NodeSetting = configuration.GetSection("NodeSetting").Get<NodeSetting>();
 
             string identity = AppCommandResolver.GetCommandLineArgsValue("identity");
             if (!string.IsNullOrEmpty(identity))
@@ -218,6 +218,11 @@ namespace Hos.ScheduleMaster.Core
         public DbProvider Provider { get; set; }
 
         public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// 数据库版本
+        /// </summary>
+        public string Version { get; set; }
     }
 
     public enum DbProvider

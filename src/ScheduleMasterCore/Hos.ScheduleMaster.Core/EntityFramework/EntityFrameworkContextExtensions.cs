@@ -11,7 +11,8 @@ namespace Microsoft.Extensions.DependencyInjection
             ConfigurationCache.DbConnector = new DbConnector
             {
                 Provider = (DbProvider)Enum.Parse(typeof(DbProvider), configuration["DbConnector:Provider"] ?? "mysql", true),
-                ConnectionString = configuration["DbConnector:ConnectionString"]
+                ConnectionString = configuration["DbConnector:ConnectionString"],
+                Version = configuration["DbConnector:Version"],
             };
 
             services.AddDbContext<SmDbContext>();

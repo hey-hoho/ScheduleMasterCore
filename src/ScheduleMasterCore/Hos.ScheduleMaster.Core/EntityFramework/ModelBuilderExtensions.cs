@@ -154,6 +154,7 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
         public static DbContextOptionsBuilder UseDatabase(this DbContextOptionsBuilder builder)
         {
             var conn = ConfigurationCache.DbConnector.ConnectionString;
+            var ver = ConfigurationCache.DbConnector.Version;
             switch (ConfigurationCache.DbConnector.Provider)
             {
                 case DbProvider.SQLServer:
@@ -163,11 +164,11 @@ namespace Hos.ScheduleMaster.Core.EntityFramework
                     builder.UseNpgsql(conn);
                     break;
                 case DbProvider.Oracle:
-                    builder.UseOracle(conn, b => b.UseOracleSQLCompatibility("11")); ;
+                    builder.UseOracle(conn, b => b.UseOracleSQLCompatibility(ver)); ;
                     break;
                 case DbProvider.MySQL:
                 default:
-                    builder.UseMySql(conn, new MySqlServerVersion("8.0"));
+                    builder.UseMySql(conn, new MySqlServerVersion(ver));
                     break;
             }
             return builder;
